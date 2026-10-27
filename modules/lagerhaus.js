@@ -1,0 +1,1 @@
+export default Object.freeze({id:'lagerhaus',name:'Lagerhaus',subtitle:'Bestände & Gegenstände',description:'Eigenständiger Bereich für dein privates Lager, Gegenstände und Bestände.',icon:'lagerhaus.png',features:['Lagerorte und Artikel','Bestände und Kategorien','3D-Lageransicht (später)']});

@@ -1,0 +1,1 @@
+export default Object.freeze({id:'familienplaner',name:'Familienplaner',subtitle:'Termine & Organisation',description:'Eigenständiger Bereich für Termine, gemeinsame Pläne und Familienorganisation.',icon:'familienplaner.png',features:['Familientermine (später)','Aufgaben und Listen (später)','Schule und Lernen (später)']});

@@ -1,0 +1,1 @@
+export default Object.freeze({id:'hausservice',name:'M.R Hausservice',subtitle:'Kunden & Gewerbe',description:'Separates Gewerbemodul – klar getrennt von privaten Bereichen.',icon:'hausservice.png',features:['Kunden und Arbeiten (später)','Lager und Geräte (später)','Finanzen (später)']});
