@@ -186,6 +186,7 @@
 .lager-shelf-link{display:inline-block;margin-top:7px;color:#ffdb92;text-decoration:underline;text-underline-offset:3px;font-size:12px}.lager-shelf-manage{display:inline-flex;min-height:44px;align-items:center;margin-top:14px;text-decoration:none}
 .lager-unassigned h2{font-size:18px;color:#ffcf82}.lager-quick-assign{margin-top:16px;border-top:1px solid #4d7383;padding-top:8px}.lager-quick-assign h3{font-size:14px}.lager-quick-assign label{display:block;font-size:12px;margin:8px 0;color:#b9d1db}.lager-quick-assign input,.lager-quick-assign select{display:block;width:100%;min-height:46px;border:1px solid #6d8996;border-radius:11px;background:#0e202c;color:white;padding:9px;font-size:14px;margin-top:5px}
 @media(max-width:410px){.lager-stage-buttons{width:100%;gap:5px}.lager-stage-buttons button{flex:1;min-width:39px;padding:9px 7px;font-size:11px}.lager-shelf-head{flex-wrap:wrap}}
+
 /* H01–H04 – isolated room gestures, enlarged shelf, consumable units */
 .lager-stage,.lager-stage-viewport,.lager-stage-viewport>.lager-room-svg{touch-action:none;overscroll-behavior:contain}
 .lager-stage-viewport{user-select:none;-webkit-user-select:none}
@@ -258,3 +259,30 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
  .lager-shelf-modal #lagerCloseShelf{padding:8px;min-width:44px}
  .lager-shelf-modal #lagerCloseShelf span:last-child{display:none}
 }
+
+/* L13 – category manager and small-screen inventory filters */
+.lager-l13-toolbar,.lager-l13-manager{border:1px solid rgba(134,161,187,.32);border-radius:18px;background:linear-gradient(140deg,rgba(19,37,52,.97),rgba(12,22,32,.96));padding:16px;margin:16px 0;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.lager-l13-toolhead,.lager-l13-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lager-l13-title h3{margin:0;min-width:0}
+.lager-l13-filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.lager-l13-toolbar label,.lager-l13-manager label{display:flex;flex-direction:column;gap:6px;font-size:.87rem}
+.lager-l13-toolbar input:not([type=checkbox]),.lager-l13-toolbar select,.lager-l13-manager input:not([type=checkbox]),.lager-l13-manager select{box-sizing:border-box;width:100%;min-width:0;background:#0b1824;color:#eef5fb;border:1px solid #456077;border-radius:10px;min-height:43px;padding:8px 10px}
+.lager-l13-select,.lager-item-favorite-form{display:flex!important;flex-direction:row!important;align-items:center!important;gap:9px!important;margin:10px 0;font-size:.88rem}
+.lager-l13-select input,.lager-item-favorite-form input{width:20px;height:20px;accent-color:#e9ba54;flex-shrink:0}
+.lager-l13-bulk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 0 0;border-top:1px solid #3a4c5b}
+.lager-l13-bulk select{flex:1 1 190px;width:auto!important}
+.lager-l13-bulk button{min-height:43px}
+.lager-l13-starters{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.lager-l13-manager form{border-top:1px solid #3b4e60;padding-top:12px}
+.lager-l13-category-list{display:grid;gap:7px;margin-top:16px}
+.lager-l13-category-list article{display:flex;gap:9px;align-items:center;padding:10px 9px;border-radius:11px;background:#0c1925;border-left:4px solid var(--category-accent,#64748b);flex-wrap:wrap}
+.lager-l13-category-list article>div{flex:1 1 110px;min-width:0}
+.lager-l13-category-list small{display:block;color:#a8bac7;margin-top:3px;overflow-wrap:anywhere}
+.lager-l13-category-icon{font-size:1.6rem}
+.lager-favorite-toggle{border:1px solid #6b5b3b;color:#d7c19a;background:#1e2630;border-radius:11px;min-width:45px;min-height:45px;font-size:1.65rem;cursor:pointer}
+.lager-favorite-toggle.is-favorite{color:#f1c64d;background:#41361f}
+.lager-l13-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.lager-l13-tags span{border:1px solid #3d7287;border-radius:18px;padding:4px 9px;background:#163747;color:#c7e9f3;font-size:.8rem}
+@media(max-width:520px){.lager-l13-filter-grid{grid-template-columns:1fr}.lager-l13-toolhead{align-items:flex-start;flex-wrap:wrap}.lager-l13-manager,.lager-l13-toolbar{padding:12px}.lager-l13-bulk button{flex:1 1 40%}.lager-l13-category-list article button{flex:0 1 auto}}
+
+.lager-l13-category-badge{border-left:3px solid var(--category-accent,#64748b);padding-left:7px!important}
