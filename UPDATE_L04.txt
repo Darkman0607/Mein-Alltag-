@@ -1,0 +1,19 @@
+MEIN ALLTAG · LAGERHAUS L04 · BETA V0.4.0 · 27.10.2026
+
+L04 Lagerhierarchie und Fachkennungen
+
+1. Lagerbereiche anlegen, umbenennen, leere Bereiche löschen; Lagerraum einem Bereich zuordnen oder verschieben.
+2. Bestehende Räume/Möbel beim ersten Start sicher in die Hierarchie übernehmen (gleiche IDs, gleiche IndexedDB / rooms.v1).
+3. Für Lagerbereiche, Räume, Möbel und Fächer eindeutige, unveränderliche Kennungen B-/R-/M-/F-xxxx vergeben.
+4. In jedem Möbel einzelne Fächer, Schubladen, Boxen und Stellplätze anlegen, benennen und entfernen; Standardaufteilung passend zum Möbelmodell.
+5. Fächer in ein anderes Möbel (auch anderer Raum) verschieben, einschließlich kompletter ID/Kennung/Metadaten; Möbel mitsamt Fächern in andere Räume verschieben.
+6. Raum mit belegter Fachstruktur und Möbel mit vorhandenen Fächern gegen versehentliches Löschen abgesichert.
+7. Alle zugehörigen Daten in einer IndexedDB-Transaktion je Update persistiert. Andere Module und ihre Datenspeicher unverändert.
+
+Tests:
+PASS: Node 22 Versions-, Manifest-, Cache-/Assets-/JS-Syntaxprüfung; 15 Möbelmodelle, Platzierungslogik.
+PASS: Hierarchiemigration aus L03, Code-Eindeutigkeit, Umbenennen, Relokation mit exakt gleichen Datensätzen, serialisierter Neustart.
+OFFEN: Android-Finger-/Browser-Realtest. Lokale Chromium-Website-Navigation durch Systemrichtlinie blockiert (ERR_BLOCKED_BY_ADMINISTRATOR).
+
+Daten: Kein Löschen der Browserdaten, keine Migration auf eine neue Datenbankkennung.
+Nächstes Update L05: Artikelkarten mit Kategorie/Typ, Mengen/Einheiten, Zustand und Standort.

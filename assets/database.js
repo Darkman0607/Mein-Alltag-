@@ -44,6 +44,19 @@ export async function setModuleValue(store,key,value) {
     tx.onabort=()=>reject(tx.error || new Error('Speichern abgebrochen'));
   });
 }
+/** Persist several values in a single IndexedDB transaction (L04 hierarchy). */
+export async function setModuleValues(store,entries) {
+  assertStore(store);
+  const db=await openDatabase();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(store,'readwrite');
+    const objectStore=tx.objectStore(store);
+    for(const [key,value] of entries)objectStore.put(value,key);
+    tx.oncomplete=()=>resolve(true);
+    tx.onerror=()=>reject(tx.error||new Error('Datenbankfehler'));
+    tx.onabort=()=>reject(tx.error||new Error('Speichern abgebrochen'));
+  });
+}
 export async function getStoreNames() {
   const db=await openDatabase();
   return [...db.objectStoreNames];

@@ -1,4 +1,4 @@
-# Mein Alltag – Beta V0.3.1
+# Mein Alltag – Beta V0.4.0
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -78,3 +78,12 @@ Browser-End-to-End-Test lokal durch Umgebungsrichtlinie blockiert; echter Androi
 - Service-Worker-Cache auf `mein-alltag-v0-3-1` gesetzt; lokaler IndexedDB-Speicher bleibt unverändert.
 - In **Mehr → Auf Updates prüfen** kann die veröffentlichte Version ohne Cache abgefragt werden.
 - Nach Upload auf GitHub Pages muss der neue Service-Worker installiert bzw. das Updatebanner bestätigt werden.
+
+## Lagerhaus L04 – V0.4.0 (27.10.2026)
+- Neue Lagerbereichsebene: Bereich → Raum → Möbel → Fach/Schublade/Box.
+- Stabile automatisch vergebene Kennungen und Übernahme vorhandener Raum-/Möbel-IDs.
+- Räume zwischen Lagerbereichen verschieben; Möbel zwischen Räumen verschieben; Fächer zwischen Möbeln verschieben, ohne ID/Kennung zu verlieren.
+- Standardfächer passend zu 15 Möbelmodellen, einzelne Fächer anlegen/umbenennen/entfernen.
+- IndexedDB `mein-alltag-v0` und Schema `1` bleiben bestehen; beide Lagerhaus-Keys werden gemeinsam in einer Transaktion geschrieben.
+- Code- und Migrationstests bestanden. Browser-E2E lokal blockiert; echte Android-Tests offen.
+- Neue Version: `0.4.0` in App, `sw.js`, `version.json`; Offline-Shell umfasst `lagerhaus-hierarchy.js`.

@@ -53,3 +53,15 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - [x] Auf GitHub main alle Release-Dateien veröffentlicht und über GitHub-Dateiabruf kontrolliert.
 - [ ] GitHub Pages im Android-Browser tatsächlich live kontrolliert.
 - [ ] Auf Android mit der bereits installierten App Updatebanner testen; lokale Räume und Lagerobjekte prüfen.
+
+
+## L04 V0.4.0 – Lagerhierarchie (27.10.2026)
+- [x] Node-Unit-Prüfung: alte Räume und Möbel erhalten IDs, automatisch eindeutige stabile Kennungen.
+- [x] Node-Unit-Prüfung: Lagerbereich, Raum, Möbel, Fach – Pfad bleibt bei Umbenennung aktuell.
+- [x] Node-Unit-Prüfung: Fach in anderes Möbel (raumübergreifend) ohne Änderung der ID, Kennung oder Metadaten.
+- [x] Node-Unit-Prüfung: Speicher-Snapshot/Reload, Standardfächer, ungültiges Ziel abgelehnt.
+- [x] Syntax aller JS-Dateien, Cache-Liste, Manifest, Versionsgleichheit, 15 Modelle bestanden.
+- [x] Gleiche IndexedDB-Kennung und -Schemaversion; Transaktions-Schnittstelle für zwei Lagerhaus-Werte hinzugefügt.
+- [ ] Echter Browser-E2E-Test: lokales Chromium `ERR_BLOCKED_BY_ADMINISTRATOR`.
+- [ ] Android: Bereiche anlegen, Fach umbenennen, Möbel/Fächer zwischen Räumen bewegen und nach Neustart prüfen.
+- [ ] App offline aktualisieren und gespeicherte V0.3.1-Daten am Gerät kontrollieren.
