@@ -1,0 +1,14 @@
+L04 – Beta 0.4.0 – Lagerhierarchie und Fachkennungen – 27.10.2026
+
+[x] Bereiche – anlegen, umbenennen, leer löschen
+[x] Hierarchie: Bereich → Raum → Möbel → Fach / Schublade / Box
+[x] Stabile eindeutige Codes B/R/M/F und bestehende Raum-/Möbel-IDs aus V0.3.1 migriert
+[x] Fachvorlagen passend zu Modellart; manuelles Hinzufügen/Umbenennen
+[x] Umzug von Fächern und Möbeln ohne Neuanlage der IDs oder Verlust der Fachdaten
+[x] Bestehender IndexedDB-Name/-Version bleibt unverändert; zwei Lagerhaus-Datensätze atomar gesichert
+[x] Node 22 Tests, Syntax, Versionen, SW-Cache und Assets bestanden
+[x] Nach Veröffentlichung GitHub main: 7d287f3636e24ddb9f86ce3ee3d0241708ff2b92; Versions-/Quelldateien nachgelesen
+[ ] Chromium Browser-E2E vor Ort: durch ERR_BLOCKED_BY_ADMINISTRATOR gesperrt
+[ ] Android Hardware-Finger- und Offline-Test (vom Nutzer auszuführen)
+
+Hinweis: Browserdaten nicht löschen; 'Neue Version verfügbar' antippen. Geänderte Stammdaten bleiben im bestehenden lokalen Lagerhaus-Speicher gespeichert.

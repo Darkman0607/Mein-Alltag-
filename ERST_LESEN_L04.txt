@@ -1,0 +1,12 @@
+MEIN ALLTAG – BETA V0.4.0 / LAGERHAUS L04
+
+Lagerbereiche, eindeutige Kennungen für Räume/Möbel/Fächer, Standardfächer, Verschieben zwischen Räumen und Möbeln ohne IDs zu ändern.
+
+GitHub main wurde aktualisiert. Falls die App noch V0.3.1 anzeigt:
+1. App vollständig schließen und erneut öffnen.
+2. Auf 'Neue Version verfügbar' → Aktualisieren tippen.
+3. Unter 'Mehr' → 'Auf Updates prüfen' Versionsstand kontrollieren.
+4. Browserdaten keinesfalls löschen: Sie enthalten deine Lagerräume und Fachdaten.
+
+Word-Datei mit Häkchen: bauhaus.docx (zusätzlich in DOKUMENTATION/).
+Einschränkung: Browserautomation in der Testumgebung gesperrt; reale Bedienung und Offline-Betrieb auf Android muss noch geprüft werden.
