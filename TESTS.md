@@ -44,11 +44,12 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - [x] ZIP-Vollständigkeit und Dokumentation kontrolliert.
 - [ ] Browser-E2E (Chromium: `ERR_BLOCKED_BY_ADMINISTRATOR`).
 - [ ] Realer Finger-Test und Offline-Retest auf Android.
-- [ ] GitHub-Veröffentlichung: `main` noch auf 0.1.0, L03 nicht veröffentlicht.
+- [x] GitHub-Veröffentlichung: L02/L03 + Hotfix V0.3.1 auf `main`, Commit `143207b22814587631650d793cce9d30fed01f1c`.
 
 ## L03-HF01 V0.3.1 – Versionsabgleich
 - [x] App-Versionskonstante / Cache / version.json stimmen überein.
 - [x] Updatesuche fragt serverseitige version.json mit Cache-Bypass ab.
 - [x] Keine Änderung von DB_NAME oder DB_VERSION; vorhandene Daten bleiben in derselben Datenbank.
-- [ ] Auf GitHub main alle Release-Dateien veröffentlicht und GitHub Pages live kontrolliert.
+- [x] Auf GitHub main alle Release-Dateien veröffentlicht und über GitHub-Dateiabruf kontrolliert.
+- [ ] GitHub Pages im Android-Browser tatsächlich live kontrolliert.
 - [ ] Auf Android mit der bereits installierten App Updatebanner testen; lokale Räume und Lagerobjekte prüfen.
