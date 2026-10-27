@@ -140,3 +140,9 @@ Alle Bilder bleiben lokal in IndexedDB; die ZIP archiviert **keine** persönlich
 - Frühere Kategorien-&-Tags-Roadmap L12 wurde nach Nutzerwunsch verschoben, siehe bauhaus.docx.
 - Datenschema und bestehende IDs bleiben unverändert; kein Import/Export oder automatischer Datenabgleich.
 - Tests: Modell- und Regressionsprüfungen bestanden; interaktive End-to-End-Navigation in lokalem Chromium durch ERR_BLOCKED_BY_ADMINISTRATOR verhindert.
+## L12-HF01 V0.12.1 – Lagerhaus-Hotfix (27.10.2026)
+- Touch-Pinch betrifft nur die 3D-Skizze; Regal per Tippen in der Übersicht direkt vergrößern.
+- Echte Artikel/Fachpositionen, kein erfundener Bestand. Nicht eingeräumte Artikel bleiben sichtbar.
+- Paarverbrauch bei Handschuhen (1 Paar = 2 Stück), volle/angebrochene Packungen, reale Restmengen.
+- Ohne Datenbankmigration; bestehende Daten und IDs bleiben bestehen.
+- Node-Regressionen bestanden; echter Android-Test offen.

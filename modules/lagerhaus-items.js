@@ -40,6 +40,7 @@ export function validateItem(values,rooms,areas){
  const locationId=clean(values.locationId,100);
  if(!resolveItemLocation(locationId,rooms,areas).valid)throw new Error('Ausgewählter Lagerort existiert nicht mehr.');
  return {name,category,type,condition,unit,quantity:Math.round(amount*1000)/1000,locationId,minimumStock,packSize,
+   pairCounting:['auto','yes','no'].includes(values.pairCounting)?values.pairCounting:'auto',
    brand:clean(values.brand,80),articleNumber:clean(values.articleNumber,80),note:clean(values.note,2000),
    properties:normalizeProperties(type,values.properties)};
 }

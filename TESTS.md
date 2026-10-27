@@ -125,3 +125,8 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - PASS: `node --check` aller produktiven JS-Dateien.
 - OFFEN: volle lokale Browsernavigation: `net::ERR_BLOCKED_BY_ADMINISTRATOR` bei `http://127.0.0.1:8765/`.
 - OFFEN: realer Android-Chrome-Test für Pinch-Zoom, Vollbild, Touch-Auswahl, Lagerorte und Offline-Verhalten; Benutzerdaten liegen nur auf dem jeweiligen Gerät.
+## L12-HF01 V0.12.1 (27.10.2026)
+- [x] Lokale Node-Regressionssuite L04–L12-HF01 und Syntaxprüfungen PASS.
+- [x] Paar/Stück-Umrechnung, Gebinde mit Restmengen, Zuordnungsschutz und Cache geprüft.
+- [ ] Chrome-End-to-End (gesperrt: ERR_BLOCKED_BY_ADMINISTRATOR).
+- [ ] Echtes Android-Touch-/Offline-/Update-Testing.

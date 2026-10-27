@@ -7,7 +7,7 @@ import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
 
-export const APP_VERSION='0.12.0';
+export const APP_VERSION='0.12.1';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -19,7 +19,7 @@ const icon=m=>`./assets/icons/${m.icon}`;
 function hashRoute(){
   const part=(location.hash || '#/home').replace(/^#\/?/,'').split('/').filter(Boolean);
   if(part[0]==='lagerhaus' && part[1]==='items') return {page:'lagerartikel',roomId:part[2]?decodeURIComponent(part[2]):''};
-  if(part[0]==='lagerhaus' && part[1]==='room' && part[2]) return {page:'lagerraum',roomId:decodeURIComponent(part[2])};
+  if(part[0]==='lagerhaus' && part[1]==='room' && part[2]) return {page:'lagerraum',roomId:decodeURIComponent(part[2]),shelfId:part[3]==='shelf'&&part[4]?decodeURIComponent(part[4]):''};
   if(part[0]==='module' && byId[part[1]]) return {page:'module',id:part[1]};
   if(['home','calendar','search','more'].includes(part[0])) return {page:part[0]};
   return {page:'home'};
@@ -100,7 +100,7 @@ function bindView(route){
    if(route.id==='lagerhaus') mountLagerhaus();
    else { document.getElementById('saveNote')?.addEventListener('click',()=>saveNote(route.id)); loadNote(route.id); }
  }
- if(route.page==='lagerraum') mountLagerraum(route.roomId);
+ if(route.page==='lagerraum') mountLagerraum(route.roomId,route.shelfId);
  if(route.page==='lagerartikel') mountLagerartikel(route.roomId);
  if(route.page==='calendar'){
    document.getElementById('prevMonth').addEventListener('click',()=>{calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()-1,1);render();});

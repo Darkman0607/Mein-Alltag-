@@ -4,6 +4,7 @@ import {ITEM_KEY,assertNodeHasNoItems,assertLocationsRetained} from './lagerhaus
 import {MOVEMENT_KEY} from './lagerhaus-stock.js';
 import {fachCards,matchFach,fachBooking} from './lagerhaus-fach.js';
 import {shelfLines,roomUnassigned,shelfPackagesSvg,formatAmount} from './lagerhaus-shelf.js';
+import {pairEligible,pairsLabel} from './lagerhaus-consumption.js';
 import {readPhotoIndex,coverPhoto} from './lagerhaus-photos.js';
 import {stockPositions,bookStock} from './lagerhaus-stock.js';
 import {locationChoices} from './lagerhaus-items.js';
@@ -192,8 +193,8 @@ export function roomSvg(room,small=false){const empty=!room?.furniture?.length;c
  let entries=baseRoom.furniture||[];const itemContent=entries.slice().sort((f,g)=>((Number(f.x)||0)+(Number(f.z)||0))-((Number(g.x)||0)+(Number(g.z)||0))).map(f=>furnitureSvg(f,small)).join('');
  return `<svg class="lager-room-svg ${small?'is-preview':''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 315" role="img" aria-label="Schematische dreidimensionale Raumansicht"><defs><linearGradient id="floorShade" x2="1" y2="1"><stop stop-color="#253b4a"/><stop offset="1" stop-color="#344958"/></linearGradient></defs>${rear}${side}${floor}${gridEnabled?lines:''}${itemContent}${empty&&!small?`<text x="214" y="254" text-anchor="middle" font-size="15" fill="#c3d1d9">Noch keine Möbel – unten hinzufügen</text>`:''}<text x="220" y="302" text-anchor="middle" font-size="11" fill="#b6c6d0">Schematische 3D-Ansicht · nicht maßstabsgetreu</text></svg>`;
 }
-function roomCard(room){return `<a class="lager-room-card" href="${roomLink(room.id)}" aria-label="${esc(room.name)} öffnen"><div class="lager-room-illustration">${roomSvg(room,true)}</div><div class="lager-room-card-caption"><div><strong>${esc(room.name)}</strong><small>${esc(room.code||'')} · ${esc(TYPES[room.type]||TYPES.sonstiges)} · ${esc(fmtSize(room))}</small></div><span aria-hidden="true">›</span></div></a>`;}
-function header(title,desc){return `<div class="lager-heading"><span class="eyebrow">Mein Alltag · Lagerhaus / Update 12</span><h1>${esc(title)}</h1><p>${esc(desc)}</p></div>`;}
+function roomCard(room){return `<a class="lager-room-card" data-room-preview="${esc(room.id)}" href="${roomLink(room.id)}" aria-label="${esc(room.name)} öffnen"><div class="lager-room-illustration">${roomSvg(room,true)}</div><div class="lager-room-card-caption"><div><strong>${esc(room.name)}</strong><small>${esc(room.code||'')} · ${esc(TYPES[room.type]||TYPES.sonstiges)} · ${esc(fmtSize(room))}</small></div><span aria-hidden="true">›</span></div></a>`;}
+function header(title,desc){return `<div class="lager-heading"><span class="eyebrow">Mein Alltag · Lagerhaus / Hotfix 12.1</span><h1>${esc(title)}</h1><p>${esc(desc)}</p></div>`;}
 const options=(list,current)=>list.map(([v,label])=>`<option value="${esc(v)}" ${v===current?'selected':''}>${esc(label)}</option>`).join('');
 function createForm(room){const dims=room?.dimensions||[];const tpl=room?.preset||'ohne';return `<form id="lagerRoomForm" class="lager-form"><h2>${room?'Raum bearbeiten':'Neuen Raum erstellen'}</h2><label for="lagerName">Raumname *</label><input id="lagerName" name="name" required maxlength="55" value="${esc(room?.name||'')}" placeholder="z. B. Meine Garage" autocomplete="off"/><label for="lagerAreaSelect">Lagerbereich</label><select id="lagerAreaSelect" name="areaId">${options(areas.map(a=>[a.id,`${a.name} (${a.code})`]),room?.areaId||areas[0]?.id)}</select><label for="lagerType">Raumtyp</label><select id="lagerType" name="type">${options(Object.entries(TYPES),room?.type||'garage')}</select><label for="lagerPreset">Raumgröße</label><select id="lagerPreset" name="preset">${options([['ohne','Ohne Maße starten'],['klein','Klein – 3 × 2,5 × 2,4 m'],['mittel','Mittel – 5 × 4 × 2,5 m'],['gross','Groß – 8 × 5 × 2,8 m'],['eigen','Eigene Maße eingeben']],tpl)}</select><div id="lagerDimensions" class="lager-dims" ${tpl==='ohne'?'hidden':''}><label>Länge (m)<input name="length" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" value="${dims[0]??''}" /></label><label>Breite (m)<input name="width" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" value="${dims[1]??''}"/></label><label>Höhe (m)<input name="height" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" value="${dims[2]??''}"/></label></div><p class="lager-hint">Die 3D-Ansicht ist vorerst schematisch; Maße dienen der Dokumentation.</p><div class="lager-actions"><button type="submit" class="primary-button">${room?'Änderungen speichern':'Raum speichern'}</button><button class="secondary-button" type="button" id="lagerCancel">Abbrechen</button></div></form>`;}
 export function renderLagerhaus(){return `${header('Meine Lagerbereiche','Bereiche, Räume, Möbel, Fächer und eigene Artikel – dauerhaft gekennzeichnet.')}<div class="lager-toolbar"><button id="lagerCreate" class="primary-button" type="button">+ Lagerraum erstellen</button><a href="#/lagerhaus/items" class="secondary-button lager-article-link">▣ Artikel verwalten</a></div><form class="lager-area-form" id="lagerAreaForm"><label for="lagerAreaName">Neuen Lagerbereich anlegen</label><div class="lager-area-add"><input id="lagerAreaName" maxlength="55" required placeholder="z. B. Werkstatt, Dachboden"/><button class="secondary-button" type="submit">+ Bereich</button></div></form><div class="lager-status" id="lagerStatus" role="status" aria-live="polite">Lagerbereiche werden geladen …</div><div id="lagerHomeContent"></div>`;}
@@ -207,6 +208,13 @@ function drawHome(){
  }).join('');
  container.innerHTML=(formVisible?createForm(selectedRoom):'')+`<div class="lager-stat-row"><div><strong>${areas.length}</strong><span>Bereiche</span></div><div><strong>${rooms.length}</strong><span>Räume</span></div><div><strong>${rooms.reduce((a,r)=>a+(r.furniture?.length||0),0)}</strong><span>Möbel</span></div></div>${groups}`;
  if(formVisible)bindForm(container,selectedRoom);
+ container.querySelectorAll('[data-room-preview]').forEach(card=>{
+  // In the overview a short tap on a SPECIFIC shelf opens its enlarged detail directly.
+  const open=e=>{const target=e.target.closest?.('[data-furniture]');if(!target)return;
+   e.preventDefault();e.stopPropagation();location.hash=`${roomLink(card.dataset.roomPreview)}/shelf/${encodeURIComponent(target.dataset.furniture)}`;};
+  card.addEventListener('click',open);
+  card.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest?.('[data-furniture]'))open(e);});
+ });
  container.querySelectorAll('[data-area-rename]').forEach(b=>b.addEventListener('click',async()=>{
   const area=areas.find(a=>a.id===b.dataset.areaRename);if(!area)return;
   const name=prompt('Neuer Name für den Lagerbereich:',area.name);
@@ -267,11 +275,12 @@ function shelfInventoryPanel(room){
  if(!f)return '';
  const entries=shelfLines(f,itemRecords),facs=f.compartments||[];
  const groups=[{id:f.id,name:'Direkt im Möbel'},...facs.map(c=>({id:c.id,name:`${c.code} · ${c.name}`}))];
- return `<section id="lagerShelfPanel" class="lager-shelf-panel" aria-label="Inhalt des ausgewählten Regals">
- <div class="lager-shelf-head"><div><span class="eyebrow">REGAL-INVENTAR</span><h2>${esc(f.name||FURNITURE[f.type]?.name||'Lagermöbel')}</h2><small>${esc(f.code||'')} · ${entries.length} Artikelpositionen</small></div><button type="button" id="lagerCloseShelf" class="secondary-button">Schließen ✕</button></div>
- ${entries.length?groups.map(g=>{const lines=entries.filter(x=>x.locationId===g.id);return lines.length?`<div class="lager-shelf-group"><h3>${esc(g.name)}</h3>${lines.map(x=>`<article class="lager-shelf-line">${inventoryThumbnail(x.itemId)}<div><strong>${esc(x.name)}</strong><small>${esc(x.code||'')} · ${esc(formatAmount(x.quantity))} ${esc(x.unit)}</small>${x.detail.full||x.detail.open?`<small>${x.detail.full} voll · ${x.detail.open} angebrochen${x.detail.containers.some(c=>c.opened)?` · Rest: ${x.detail.containers.filter(c=>c.opened).map(c=>esc(formatAmount(c.remaining))).join(' + ')} ${esc(x.unit)}`:''}</small>`:''}<a href="#/lagerhaus/items/${encodeURIComponent(room.id)}" class="lager-shelf-link">Bestand / Packungen verwalten</a></div></article>`).join('')}</div>`:'';}).join(''):'<p class="lager-hint">Noch kein Artikel diesem Möbel oder seinen Fächern zugeordnet. Vorhandene Artikel sind möglicherweise nur im Raum erfasst.</p>'}
- <a class="secondary-button lager-shelf-manage" href="#/lagerhaus/items/${encodeURIComponent(room.id)}">▣ Artikel und Lagerorte verwalten</a>
- </section>`;
+ const pairText=x=>{const record=itemRecords.find(i=>i.id===x.itemId);return pairEligible(record)?` · ${esc(pairsLabel(x.quantity))}`:'';};
+ const oneLine=x=>`<article class="lager-shelf-line">${inventoryThumbnail(x.itemId)}<div><strong>${esc(x.name)}</strong><small>${esc(x.code||'')} · ${esc(formatAmount(x.quantity))} ${esc(x.unit)}${pairText(x)}</small>${x.detail.full||x.detail.open?`<small>Packungen: ${x.detail.full} voll · ${x.detail.open} angebrochen${x.detail.containers.some(c=>c.opened)?` · Angebrochener Rest: ${x.detail.containers.filter(c=>c.opened).map(c=>esc(formatAmount(c.remaining))).join(' + ')} ${esc(x.unit)}`:''}</small>`:''}<a href="#/lagerhaus/items/${encodeURIComponent(room.id)}" class="lager-shelf-link">Packungen / Verbrauch verwalten</a></div></article>`;
+ const tierGroups=groups.filter(g=>g.id!==f.id);
+ const visualGroups=tierGroups.length?[...tierGroups,...(entries.some(x=>x.locationId===f.id)?[groups[0]]:[])]:[{id:f.id,name:'Regalfläche'}];
+ const focus=`<div class="lager-focus-3d" aria-label="Vergrößertes Regal mit Fächern und realen Artikeln"><div class="lager-focus-top">${esc(f.name||'Regal')}</div><div class="lager-focus-rack">${visualGroups.map((g,index)=>{const direct=entries.filter(x=>x.locationId===g.id||(g.id===f.id&&x.locationId===f.id));return `<div class="lager-focus-tier"><div class="lager-focus-objects">${direct.length?direct.slice(0,8).map(x=>`<div class="lager-focus-box" title="${esc(x.name)}: ${esc(formatAmount(x.quantity))} ${esc(x.unit)}"><b>▣</b><span>${esc(x.name)}</span><small>${esc(formatAmount(x.quantity))} ${esc(x.unit)}${pairText(x)}</small></div>`).join(''):'<span class="lager-focus-empty">Noch frei</span>'}</div><div class="lager-focus-plank"><span>${esc(g.name)}</span></div></div>`;}).join('')}</div></div>`;
+ return `<section id="lagerShelfPanel" class="lager-shelf-panel lager-shelf-modal" role="dialog" aria-modal="true" aria-label="Regal vergrößert: ${esc(f.name||'Regal')}" tabindex="-1"><div class="lager-shelf-inner"><div class="lager-shelf-head"><div><span class="eyebrow">3D-REGAL · DETAILANSICHT</span><h2>${esc(f.name||FURNITURE[f.type]?.name||'Lagermöbel')}</h2><small>${esc(f.code||'')} · ${entries.length} Artikelpositionen</small></div><button type="button" id="lagerCloseShelf" class="secondary-button">✕ Schließen</button></div>${focus}<h3>Artikel im Regal</h3>${entries.length?groups.map(g=>{const lines=entries.filter(x=>x.locationId===g.id);return lines.length?`<div class="lager-shelf-group"><h3>${esc(g.name)}</h3>${lines.map(oneLine).join('')}</div>`:'';}).join(''):'<p class="lager-hint">In diesem Regal ist noch kein Artikel hinterlegt. Artikel im Raum werden NICHT automatisch einem Regal zugeordnet.</p>'}${roomUnassigned(room,itemRecords).length?`<p class="lager-hint">📦 ${roomUnassigned(room,itemRecords).length} Artikelposition(en) liegen noch direkt im Raum. Unterhalb der 3D-Skizze kannst du sie dem gewünschten Fach zuordnen.</p>`:''}<a class="secondary-button lager-shelf-manage" href="#/lagerhaus/items/${encodeURIComponent(room.id)}">▣ Artikel und Lagerorte verwalten</a></div></section>`;
 }
 function unassignedPanel(room){
  const entries=roomUnassigned(room,itemRecords);
@@ -285,27 +294,60 @@ function unassignedPanel(room){
 }
 function roomDetails(room){
  const modelCount=furnitureModelCount();
- return `${header(room.name,`${areas.find(a=>a.id===room.areaId)?.name||DEFAULT_AREA_NAME} / ${room.code} · ${TYPES[room.type]||'Lagerraum'} · ${fmtSize(room)}`)}<div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Alle Räume</a><a href="#/lagerhaus/items/${encodeURIComponent(room.id)}" class="secondary-button lager-article-link">▣ Artikel erfassen</a><button class="secondary-button" type="button" id="lagerEditRoom">Raum bearbeiten</button></div><div class="lager-stage ${stageFull?'lager-stage--fullscreen':''}" id="lagerStage" style="--lager-zoom:${stageZoom};--lager-offset-x:${stageOffsetX}px;--lager-offset-y:${stageOffsetY}px"><div class="lager-stage-viewport">${roomSvg(room)}</div></div><div class="lager-stage-tools"><span>Regal antippen: Inhalt · Ziehen: bewegen · Zwei Finger: zoomen</span><div class="lager-stage-buttons"><button type="button" class="secondary-button" id="lagerZoomOut" aria-label="3D-Ansicht verkleinern">−</button><button type="button" class="secondary-button" id="lagerZoomIn" aria-label="3D-Ansicht vergrößern">+</button><button type="button" class="secondary-button" id="lagerZoomReset" aria-label="Zoom zurücksetzen">1:1</button><button type="button" class="secondary-button" id="lagerFullScreen" aria-pressed="${stageFull}">${stageFull?'✕ Schließen':'⛶ Vollbild'}</button><button type="button" class="secondary-button" id="lagerToggleGrid" aria-pressed="${gridEnabled}">${gridEnabled?'▦ Raster an':'▢ Raster aus'}</button><button type="button" class="secondary-button" id="lagerUndo" ${undoByRoom.get(room.id)?.length?'':'disabled'}>↶ Rückgängig</button></div></div><p id="lagerDragStatus" class="lager-drag-status" role="status" aria-live="polite">Positionierung im 3D-Grundriss · Kollisionen werden verhindert</p>${shelfInventoryPanel(room)}${unassignedPanel(room)}<div class="lager-chooser"><h2>Möbelbibliothek · ${modelCount} Modelle</h2><label for="lagerFurnitureCategory">Kategorie</label><select id="lagerFurnitureCategory">${Object.entries(FURNITURE_CATEGORIES).map(([key,label])=>`<option value="${key}">${esc(label)}</option>`).join('')}</select><label for="lagerFurnitureSelect">Vorgefertigtes Modell</label><select id="lagerFurnitureSelect">${options(FURNITURE_OPTIONS,'regal')}</select><div class="lager-variant-grid"><label for="lagerFurnitureSize">Größe<select id="lagerFurnitureSize">${selectionOptions(FURNITURE_SIZES,'standard')}</select></label><label for="lagerFurnitureMaterial">Material<select id="lagerFurnitureMaterial">${selectionOptions(FURNITURE_MATERIALS,'stahl')}</select></label></div><label for="lagerFurnitureName">Name (optional)</label><input id="lagerFurnitureName" maxlength="55" placeholder="z. B. Regal für Maschinen"/><div class="lager-catalog-info" id="lagerCatalogInfo" aria-live="polite"></div><button id="lagerAddFurniture" class="primary-button" type="button">+ Möbel im Raum platzieren</button><p class="lager-hint">Jedes Möbel wird separat gespeichert. Mehrere Exemplare desselben Modells sind möglich.</p></div>${fachExplorer(room)}${furniturePanel(room)}${compartmentPanel(room)}<div class="lager-room-footer"><p>15 vorgefertigte Möbelmodelle. Eigene Möbel frei konstruieren und erweiterte 3D-Steuerung folgen erst in den letzten Updates. Artikelkarten und Bestandsbuchungen mit mehreren Lagerorten sind über „Meine Artikel“ verfügbar.</p><button type="button" id="lagerDeleteRoom" class="secondary-button lager-delete">Diesen Raum löschen</button></div><p class="lager-status" id="lagerStatus" role="status" aria-live="polite">${esc(message)}</p>`;
+ return `${header(room.name,`${areas.find(a=>a.id===room.areaId)?.name||DEFAULT_AREA_NAME} / ${room.code} · ${TYPES[room.type]||'Lagerraum'} · ${fmtSize(room)}`)}<div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Alle Räume</a><a href="#/lagerhaus/items/${encodeURIComponent(room.id)}" class="secondary-button lager-article-link">▣ Artikel erfassen</a><button class="secondary-button" type="button" id="lagerEditRoom">Raum bearbeiten</button></div><div class="lager-stage ${stageFull?'lager-stage--fullscreen':''}" id="lagerStage" style="--lager-zoom:${stageZoom};--lager-offset-x:${stageOffsetX}px;--lager-offset-y:${stageOffsetY}px"><div class="lager-stage-viewport">${roomSvg(room)}</div></div><div class="lager-stage-tools"><span>Regal antippen: große Regalansicht · Freie Fläche ziehen: Skizze verschieben · Zwei Finger: NUR Skizze zoomen</span><div class="lager-stage-buttons"><button type="button" class="secondary-button" id="lagerZoomOut" aria-label="3D-Ansicht verkleinern">−</button><button type="button" class="secondary-button" id="lagerZoomIn" aria-label="3D-Ansicht vergrößern">+</button><button type="button" class="secondary-button" id="lagerZoomReset" aria-label="Zoom zurücksetzen">1:1</button><button type="button" class="secondary-button" id="lagerFullScreen" aria-pressed="${stageFull}">${stageFull?'✕ Schließen':'⛶ Vollbild'}</button><button type="button" class="secondary-button" id="lagerToggleGrid" aria-pressed="${gridEnabled}">${gridEnabled?'▦ Raster an':'▢ Raster aus'}</button><button type="button" class="secondary-button" id="lagerUndo" ${undoByRoom.get(room.id)?.length?'':'disabled'}>↶ Rückgängig</button></div></div><p id="lagerDragStatus" class="lager-drag-status" role="status" aria-live="polite">Positionierung im 3D-Grundriss · Kollisionen werden verhindert</p>${shelfInventoryPanel(room)}${unassignedPanel(room)}<div class="lager-chooser"><h2>Möbelbibliothek · ${modelCount} Modelle</h2><label for="lagerFurnitureCategory">Kategorie</label><select id="lagerFurnitureCategory">${Object.entries(FURNITURE_CATEGORIES).map(([key,label])=>`<option value="${key}">${esc(label)}</option>`).join('')}</select><label for="lagerFurnitureSelect">Vorgefertigtes Modell</label><select id="lagerFurnitureSelect">${options(FURNITURE_OPTIONS,'regal')}</select><div class="lager-variant-grid"><label for="lagerFurnitureSize">Größe<select id="lagerFurnitureSize">${selectionOptions(FURNITURE_SIZES,'standard')}</select></label><label for="lagerFurnitureMaterial">Material<select id="lagerFurnitureMaterial">${selectionOptions(FURNITURE_MATERIALS,'stahl')}</select></label></div><label for="lagerFurnitureName">Name (optional)</label><input id="lagerFurnitureName" maxlength="55" placeholder="z. B. Regal für Maschinen"/><div class="lager-catalog-info" id="lagerCatalogInfo" aria-live="polite"></div><button id="lagerAddFurniture" class="primary-button" type="button">+ Möbel im Raum platzieren</button><p class="lager-hint">Jedes Möbel wird separat gespeichert. Mehrere Exemplare desselben Modells sind möglich.</p></div>${fachExplorer(room)}${furniturePanel(room)}${compartmentPanel(room)}<div class="lager-room-footer"><p>15 vorgefertigte Möbelmodelle. Eigene Möbel frei konstruieren und erweiterte 3D-Steuerung folgen erst in den letzten Updates. Artikelkarten und Bestandsbuchungen mit mehreren Lagerorten sind über „Meine Artikel“ verfügbar.</p><button type="button" id="lagerDeleteRoom" class="secondary-button lager-delete">Diesen Raum löschen</button></div><p class="lager-status" id="lagerStatus" role="status" aria-live="polite">${esc(message)}</p>`;
 }
 
 async function saveRoomItem(roomId,fn){try{await mutate(data=>{const room=data.find(x=>x.id===roomId);if(!room)throw new Error('Raum nicht gefunden.');const before=JSON.stringify(room.furniture||[]);fn(room);if(JSON.stringify(room.furniture||[])!==before)putUndo(roomId,before);room.updatedAt=new Date().toISOString();});const room=rooms.find(x=>x.id===roomId);if(room&&document.getElementById('lagerRoomContent')){renderRoom(room);setStatus('Änderung gespeichert.');}}catch(err){setStatus('Speichern fehlgeschlagen: '+err.message);}}
 function renderRoom(room){const el=document.getElementById('lagerRoomContent');if(!el)return;el.innerHTML=roomDetails(room);const stage=el.querySelector('#lagerStage');
  const viewport=stage.querySelector('.lager-stage-viewport');
  const syncView=()=>{stage.style.setProperty('--lager-zoom',String(stageZoom));stage.style.setProperty('--lager-offset-x',stageOffsetX+'px');stage.style.setProperty('--lager-offset-y',stageOffsetY+'px');};
- const zoomBy=d=>{stageZoom=Math.max(1,Math.min(2.7,Math.round((stageZoom+d)*100)/100));syncView();};
+ const zoomBy=d=>{stageZoom=Math.max(1,Math.min(3.8,Math.round((stageZoom+d)*100)/100));syncView();};
  el.querySelector('#lagerZoomIn')?.addEventListener('click',()=>zoomBy(.2));
  el.querySelector('#lagerZoomOut')?.addEventListener('click',()=>zoomBy(-.2));
  el.querySelector('#lagerZoomReset')?.addEventListener('click',()=>{stageZoom=1;stageOffsetX=0;stageOffsetY=0;syncView();});
  el.querySelector('#lagerFullScreen')?.addEventListener('click',()=>{stageFull=!stageFull;renderRoom(room);});
  el.querySelector('#lagerCloseShelf')?.addEventListener('click',()=>{inventoryFurniture=null;renderRoom(room);});
- const trackedTouches=new Map();let pinch=null;
+ const shelfModal=el.querySelector('#lagerShelfPanel');
+ shelfModal?.focus({preventScroll:true});
+ shelfModal?.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();inventoryFurniture=null;renderRoom(room);} });
+ const trackedTouches=new Map();let pinch=null,pan=null,drag=null,pinchUsed=false;
  const distance=()=>{const [a,b]=[...trackedTouches.values()];return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0;};
- stage.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'){trackedTouches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(trackedTouches.size===2){pinch={distance:distance(),zoom:stageZoom};drag=null;}}},true);
- stage.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&trackedTouches.has(e.pointerId)){trackedTouches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&trackedTouches.size>=2){e.preventDefault();stageZoom=Math.max(1,Math.min(2.7,pinch.zoom*distance()/Math.max(1,pinch.distance)));syncView();}}},true);
- const releaseTouch=e=>{trackedTouches.delete(e.pointerId);if(trackedTouches.size<2)pinch=null;};
- stage.addEventListener('pointerup',releaseTouch,true);stage.addEventListener('pointercancel',releaseTouch,true);
+ // Native page pinch/scroll is disabled ONLY over the 3D stage, not over the app.
+ stage.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+ stage.addEventListener('pointerdown',e=>{
+  if(e.pointerType!=='touch')return;
+  if(trackedTouches.size===0)pinchUsed=false;
+  trackedTouches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(trackedTouches.size>=2){
+   pinch={distance:distance(),zoom:stageZoom};drag=null;pan=null;pinchUsed=true;
+  }else if(!e.target.closest?.('[data-furniture],[data-compartment-id]')){
+   pan={pointerId:e.pointerId,x:e.clientX,y:e.clientY,offsetX:stageOffsetX,offsetY:stageOffsetY};
+  }
+ },true);
+ stage.addEventListener('pointermove',e=>{
+  if(e.pointerType!=='touch'||!trackedTouches.has(e.pointerId))return;
+  trackedTouches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&trackedTouches.size>=2){
+   e.preventDefault();stageZoom=Math.max(1,Math.min(3.8,pinch.zoom*distance()/Math.max(1,pinch.distance)));
+   syncView();return;
+  }
+  if(pan&&pan.pointerId===e.pointerId&&!pinchUsed){
+   e.preventDefault();
+   const limitX=Math.max(0,stage.clientWidth*(stageZoom-1)/2+35);
+   const limitY=Math.max(0,stage.clientHeight*(stageZoom-1)/2+35);
+   stageOffsetX=Math.max(-limitX,Math.min(limitX,pan.offsetX+e.clientX-pan.x));
+   stageOffsetY=Math.max(-limitY,Math.min(limitY,pan.offsetY+e.clientY-pan.y));syncView();
+  }
+ },true);
+ const releaseTouch=e=>{
+  if(e.pointerType!=='touch')return;
+  trackedTouches.delete(e.pointerId);
+  if(pan?.pointerId===e.pointerId)pan=null;
+  if(trackedTouches.size<2)pinch=null;
+ };
+ stage.addEventListener('pointerup',releaseTouch,true);
+ stage.addEventListener('pointercancel',releaseTouch,true);
  const dragMessage=el.querySelector('#lagerDragStatus');
- let drag=null;
  const chooseFach=id=>{
   const c=fachCards([room],itemRecords).find(c=>c.id===id);if(!c)return;
   selected=c.furnitureId;selectedCompartment=id;renderRoom(room);
@@ -358,7 +400,7 @@ function renderRoom(room){const el=document.getElementById('lagerRoomContent');i
  stage.addEventListener('keydown',e=>{const c=e.target.closest?.('[data-compartment-id]');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopImmediatePropagation();chooseFach(c.dataset.compartmentId);}},true);
  stage.addEventListener('pointerdown',e=>{
   if(e.button!==0&&e.pointerType==='mouse')return;
-  if(e.target.closest?.('[data-compartment-id]')||pinch||trackedTouches.size>=2)return;
+  if(e.target.closest?.('[data-compartment-id]')||pinch||pinchUsed||trackedTouches.size>=2)return;
   const g=identify(e);if(!g)return;
   const item=room.furniture?.find(f=>f.id===g.dataset.furniture);if(!item)return;
   selected=item.id;
@@ -402,7 +444,7 @@ function renderRoom(room){const el=document.getElementById('lagerRoomContent');i
  };
  stage.addEventListener('pointerup',finish);
  stage.addEventListener('pointercancel',e=>{if(drag&&drag.pointerId===e.pointerId){drag=null;renderRoom(room);}});
- stage.addEventListener('click',e=>{if(e.detail===0||pinch)return;const g=identify(e);if(!g)return;selected=g.dataset.furniture;inventoryFurniture=selected;renderRoom(room);document.getElementById('lagerShelfPanel')?.scrollIntoView({behavior:'smooth',block:'nearest'});});
+ stage.addEventListener('click',e=>{if(e.detail===0||pinch||pinchUsed)return;const g=identify(e);if(!g)return;selected=g.dataset.furniture;inventoryFurniture=selected;renderRoom(room);document.getElementById('lagerShelfPanel')?.scrollIntoView({behavior:'smooth',block:'nearest'});});
  stage.addEventListener('keydown',e=>{const g=identify(e);if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selected=g.dataset.furniture;inventoryFurniture=selected;renderRoom(room);}});
  // L04 compartment controls – all edits persisted together with the rooms array.
  el.querySelector('#lagerCompartmentForm')?.addEventListener('submit',async e=>{
@@ -473,4 +515,4 @@ function renderRoom(room){const el=document.getElementById('lagerRoomContent');i
  el.querySelector('#lagerEditRoom').addEventListener('click',()=>{editId=room.id;formVisible=true;location.hash='#/module/lagerhaus';});
  el.querySelector('#lagerDeleteRoom').addEventListener('click',async()=>{if(!confirm(`Raum „${room.name}“ mit allen darin platzierten Möbeln endgültig löschen?`))return;try{await mutate(data=>{const idx=data.findIndex(r=>r.id===room.id);if(idx<0)throw new Error('Raum nicht gefunden.');assertNodeHasNoItems(itemRecords,'room',data[idx]);if(data[idx].furniture?.some(f=>f.compartments?.length))throw new Error('Raum enthält Fächer. Möbel und Fächer zuerst verschieben.');data.splice(idx,1);});selected=null;location.hash='#/module/lagerhaus';}catch(err){setStatus('Löschen fehlgeschlagen: '+err.message);}});
 }
-export async function mountLagerraum(roomId){selected=null;selectedCompartment=null;inventoryFurniture=null;stageFull=false;stageZoom=1.17;stageOffsetX=0;stageOffsetY=0;fachQuery='';try{await loadState();if(!document.getElementById('lagerRoomContent'))return;const room=rooms.find(r=>r.id===roomId);if(!room){document.getElementById('lagerRoomContent').innerHTML=`${header('Raum nicht gefunden','Der Lagerraum wurde möglicherweise gelöscht.')}<a class="lager-text-link" href="#/module/lagerhaus">← Zur Raumübersicht</a>`;return;}renderRoom(room);}catch(err){const el=document.getElementById('lagerRoomContent');if(el)el.textContent='Lagerdaten nicht verfügbar: '+err.message;}}
+export async function mountLagerraum(roomId,shelfId=''){selected=null;selectedCompartment=null;inventoryFurniture=shelfId||null;stageFull=false;stageZoom=1.17;stageOffsetX=0;stageOffsetY=0;fachQuery='';try{await loadState();if(!document.getElementById('lagerRoomContent'))return;const room=rooms.find(r=>r.id===roomId);if(!room){document.getElementById('lagerRoomContent').innerHTML=`${header('Raum nicht gefunden','Der Lagerraum wurde möglicherweise gelöscht.')}<a class="lager-text-link" href="#/module/lagerhaus">← Zur Raumübersicht</a>`;return;}renderRoom(room);}catch(err){const el=document.getElementById('lagerRoomContent');if(el)el.textContent='Lagerdaten nicht verfügbar: '+err.message;}}

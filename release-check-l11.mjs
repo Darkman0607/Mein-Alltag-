@@ -50,8 +50,8 @@ const sw=fs.readFileSync('sw.js','utf8');
 const js=fs.readFileSync('assets/app.js','utf8');
 for(const token of ['lagerPhotoNewStage','lagerPhotoNewSeries','lagerPhotoNewTakenOn','lagerPhotoFilterCategory','lagerPhotoFilterStage','lagerPhotoFilterSearch','lagerPhotoSort','lagerCompareBefore','lagerCompareAfter','lagerCompareDialog','readPhotoBlob','comparisonPhotos','data-photo-download','data-photo-delete','resetPhotoSelection'])assert(ui.includes(token),token);
 for(const token of ['photoHistory','photoDate','comparisonPhotos','suggestedComparison','normalizeTakenOn','readPhotoIndex','mutateModuleValuesWithDeletes'])assert(logic.includes(token),token);
-assert(sw.includes('mein-alltag-v0-12-0'));assert(sw.includes('lagerhaus-photos.js'));
-assert(js.includes("APP_VERSION='0.12.0'"));assert.deepEqual(JSON.parse(fs.readFileSync('version.json','utf8')).build,'L12');
+assert(sw.includes('mein-alltag-v0-12-1'));assert(sw.includes('lagerhaus-photos.js'));
+assert(js.includes("APP_VERSION='0.12.1'"));assert.deepEqual(JSON.parse(fs.readFileSync('version.json','utf8')).build,'L12-HF01');
 // Original database keys are stable: upgrade without changing DB_VERSION or module isolation.
 const db=fs.readFileSync('assets/database.js','utf8');assert.match(db,/DB_VERSION = 1/);assert(db.includes("'lagerhaus','frauengesundheit','familienplaner','putzmanager','hausservice'"));
 console.log('PASS L11: chronology, legacy dates, phase/series mapping, filtering/sort/search, comparison isolation, cover replacement, deletion, metadata updates, validation, offline persistence contracts, version/cache/UI. Chrome/Android interactive testing remains open.');

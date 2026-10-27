@@ -1,0 +1,7 @@
+MEIN ALLTAG · LAGERHAUS · L12-HF01 · V0.12.1 · 27.10.2026
+H01: 3D-Zoom und Pan nur innerhalb des Zeichenfensters.
+H02: Regal direkt in der Raumübersicht tippen, große Detailansicht mit Fächern und echtem Inventar.
+H03: Nicht eingeräumte Artikel bleiben getrennt; keine automatische Zuordnung erfunden.
+H04: Handschuhe in Paaren oder Stück entnehmen; 1 Paar = 2 Stück, Packungsreste im Originalbestand.
+Tests: Node-Regression/Syntax PASS; Chromium und Android-Praxistests offen.
+Word-Checkliste bauhaus.docx befindet sich im vollständigen Hotfix-ZIP.
