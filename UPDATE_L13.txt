@@ -1,0 +1,32 @@
+MEIN ALLTAG · LAGERHAUS · L13 · V0.13.0 · 27.10.2026
+
+FUNKTIONEN
+- Frei verwaltbare Kategorien/Unterkategorien mit eindeutigen stabilen IDs, individuellen Symbolen und Farbauswahl.
+- Sechs Kategorie-Schnellvorlagen, Synonyme und Aliase; bestehende alte Freitext-Kategorien werden lokal übernommen.
+- Tags/Schlagwörter je Artikel, Favoriten-Stern, freie Suche, Typ-, Kategorie-, Unterkategorie-, Favoriten- und Schlagwortfilter.
+- Sortierung und Sammelbearbeitung der Kategorie mehrerer ausgewählter Artikel.
+- Kategorieumbenennung ohne Verlust der Zuordnung; Löschung belegter Kategorien/Kategorien mit Kindern geschützt.
+- Vorhandene Lagerartikel, Gebinde, Gerätezustände, Fotos und echte Mengen bleiben unverändert.
+
+VERSION / TECHNIK
+- APP_VERSION=0.13.0; version.json 0.13.0; sw.js Offlinecache mein-alltag-v0-13-0.
+- Neues Offline-Modul modules/lagerhaus-categories.js in Service-Worker-Assetliste.
+- Kein externes Benutzerkonto; Daten weiter nur lokal in IndexedDB. ZIP sichert keine persönlichen Bestandsdaten.
+
+TESTS
+PASS: node release-check-l13.mjs (Migration, Kategorien, Unterkategorien, Synonyme, Favoriten, Suche, Bulk, Bestandserhalt).
+PASS: 11 bereits vorhandene Node-Regressionen mit aktualisierter Versions-Erwartung; keine produktiven Altmodule entfernt.
+PASS: node --check für alle 19 produktiven JS-Dateien.
+PASS: GitHub main mit 0.13.0 veröffentlicht, Dateien nach Upload erneut abgerufen.
+OFFEN: vollständiger Browser-End-to-End-Test: lokale Chromium-Testnavigation ERR_BLOCKED_BY_ADMINISTRATOR.
+OFFEN: reale Android-/Offline-/Touchprüfung und Bestätigung der installierten GitHub Pages-Version.
+
+GITHUB
+https://github.com/Darkman0607/Mein-Alltag-/commit/db43a02366d8bd0e8f2ca0e11cb5ff13228f0344
+
+INSTALLATION / UPDATE
+Die Dateien aus der ZIP gehören im GitHub-Repository direkt nach /(root), nicht in einen zusätzlichen Ordner.
+GitHub main wurde mit den geänderten Quelldateien bereits aktualisiert.
+Auf Android App neu öffnen, ggf. mehrere Sekunden nach Service-Worker-Aktualisierung erneut starten.
+Browserdaten/Website-Speicher NICHT löschen – andernfalls können lokale Bestandsdaten verloren gehen.
+Die Word-Mastercheckliste bauhaus.docx liegt im ZIP-Stammverzeichnis und nochmals unter DOKUMENTATION/.
