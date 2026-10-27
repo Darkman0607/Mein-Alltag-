@@ -1,0 +1,10 @@
+MEIN ALLTAG · L11 · 0.11.0
+
+1. ZIP vollständig entpacken und alle Dateien inklusive index.html gemeinsam in die Root des GitHub-Repositorys hochladen; bestehende Dateien überschreiben.
+2. GitHub Pages ist auf main / (root) eingestellt. Nach Veröffentlichung im Chrome-Browser aktualisieren oder App schließen/neu öffnen.
+3. Lagerhaus → Artikel → Fotoarchiv. Ein Artikel oder Lagerort muss bereits existieren, damit du Fotos speichern kannst.
+4. Im Archiv Phase (Vorher/Nachher/Zwischenstand) und optional eine Vergleichsreihe eintragen; wenn gewünscht Aufnahmedatum angeben. Ohne Datum ist das angezeigte Datum nur das Importdatum.
+5. Ab zwei Fotos findest du „Zwei Aufnahmen vergleichen“. Bild links und rechts wählen, dann vergleichen.
+6. Vor dem Entfernen von Browserdaten Fotos mit „Bild sichern“ einzeln herunterladen. Die ZIP beinhaltet keine privaten Fotos oder Lagerdaten.
+
+TESTSTATUS: Automatische Code- und Modultests bestanden. End-to-End Android/Chrome auf deinem Gerät noch offen.

@@ -152,3 +152,15 @@
 .lager-photo-dialog{background:#071723;color:#eef7ff;border:1px solid #8eacbc;border-radius:14px;padding:12px;max-width:min(94vw,1000px);max-height:92vh}
 .lager-photo-dialog::backdrop{background:#010812ee}.lager-photo-dialog img{display:block;max-width:100%;max-height:75vh;object-fit:contain;margin:8px auto}.lager-photo-dialog p{font-size:12px}
 @media(max-width:390px){.lager-photo-head-actions{width:100%}.lager-photo-head-actions button{flex:1}.lager-item-actions{flex-wrap:wrap}.lager-item-actions button{flex:1 1 115px}}
+
+/* L11: Foto-Historie und 2-Bild-Vergleich, touchfreundlich und ohne horizontales Scrollen. */
+.lager-photo-history,.lager-photo-compare{margin:15px 0;background:#091b29ad;border:1px solid #607f9277;border-radius:14px;padding:12px}
+.lager-photo-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 13px}
+.lager-photo-history input[type=search]{width:100%;min-height:45px}
+.lager-photo-stage{display:inline-block;margin:4px 0 4px 8px;padding:4px 8px;background:#32546c;border:1px solid #53788b;border-radius:18px;color:#f8f6ed;font-size:11px;font-weight:700}
+.lager-compare-dialog{width:min(96vw,1100px)}
+.lager-compare-images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.lager-compare-images figure{margin:0;min-width:0;background:#102536;border:1px solid #4d7084;border-radius:12px;padding:8px}
+.lager-compare-images img{width:100%;height:min(55vh,550px);object-fit:contain;display:block}
+.lager-compare-images figcaption{padding:9px 4px;color:#e4edf4;font-size:12px;overflow-wrap:anywhere}
+@media(max-width:560px){.lager-photo-filters{grid-template-columns:minmax(0,1fr)}.lager-compare-images{grid-template-columns:minmax(0,1fr)}.lager-compare-images img{height:min(36vh,310px)}}

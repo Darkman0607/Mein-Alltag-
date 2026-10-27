@@ -1,0 +1,14 @@
+L11 · Fotohistorie und Vergleich · Mein Alltag Beta V0.11.0
+Datum: 27.10.2026
+
+[x] Vorher/Nachher/Zwischenstand/Bestandsaufnahme, manuelle Vergleichsreihe.
+[x] Optionales Aufnahmedatum; bestehende Fotos nur mit korrektem Importdatum angezeigt.
+[x] Chronologischer Bildverlauf, Kategorie-/Phasenfilter, Textsuche, Sortieroption.
+[x] Vergleich zweier Fotos nur innerhalb identischer Eigentümer-Zuordnung; 2-Bild-Ansicht.
+[x] Einzelbilder speichern, Hauptbild ändern, Angaben bearbeiten, einzelne Bilder löschen.
+[x] Unveränderte IndexedDB-Keys, Fotos/Bestände getrennt, kein Datenbankversionswechsel.
+[x] release-check.mjs, release-check-l05.mjs bis release-check-l11.mjs; JS-Syntax; Versionsdatei und Service-Worker-Caching.
+[ ] Interaktive Browsernavigation in lokaler Testumgebung: ERR_BLOCKED_BY_ADMINISTRATOR.
+[ ] Android-Kamera, Galerie, IndexedDB-Wiederöffnung, Offline-/Update-Prüfung am Endgerät.
+
+GitHub-Commit nach erfolgreicher Veröffentlichung im Word-Protokoll vermerkt.

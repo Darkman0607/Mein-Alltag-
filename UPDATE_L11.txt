@@ -1,0 +1,14 @@
+MEIN ALLTAG – LAGERHAUS – UPDATE L11 (BETA 0.11.0)
+Datum: 27.10.2026
+
+Fotohistorie und Vergleich
+1. Vorher/Nachher/Zwischenstand/Bestandsaufnahme und optionale Vergleichsreihe pro Foto.
+2. Optional manuell eingetragenes Aufnahmedatum. Ohne Datum wird ausdrücklich nur das Erfassungs-/Importdatum angezeigt.
+3. Chronologische Liste mit Filter nach Bildkategorie und Zustand, Suche und Sortierung.
+4. Zwei Fotos desselben Artikels oder Lagerortes in einer mobilen Vergleichsansicht nebeneinander (schmaler Bildschirm: untereinander).
+5. Fotoangaben bearbeiten, Hauptbild bestimmen, einzelne Fotos lokal sichern und einzeln löschen.
+6. Keine Migration mit Löschung nötig: L10-Fotos bleiben lesbar, Metadaten werden beim Bearbeiten ergänzt.
+7. Version 0.11.0, Service-Worker-Cachename v0-11-0, lokaler DB-Name und bisherige Schlüssel bleiben stabil.
+
+SPEICHER: Nur Chrome/Android IndexedDB; ZIP sichert keine privaten Nutzerdaten. Browserdaten nicht ohne gesicherte Bilder löschen.
+TESTS: Node-L04 bis L11, JavaScript-Syntax, ZIP-/Wordprüfung PASS. Lokale Browsernavigation durch ERR_BLOCKED_BY_ADMINISTRATOR verhindert; Android-Kamera, Galerie und Offline-Test bleiben offen.

@@ -1,21 +1,54 @@
-/** L10 – private offline photo archive. Binary payloads live in individual IndexedDB keys,
+/** L10–L11 – private offline photo archive. Binary payloads live in individual IndexedDB keys,
  * metadata and small thumbnails in a separate key. No uploads and no network requests. */
 import {getModuleValue,mutateModuleValuesWithDeletes} from '../assets/database.js';
 export const PHOTO_INDEX_KEY='photos.index.v1';
 export const PHOTO_PREFIX='photos.binary.';
 export const PHOTO_CATEGORIES=Object.freeze({allgemein:'Allgemein',artikel:'Artikel',lagerort:'Lagerort',verpackung:'Verpackung',zustand:'Zustand',sonstiges:'Sonstiges'});
+export const PHOTO_STAGES=Object.freeze({bestand:'Bestandsaufnahme',vorher:'Vorher',nachher:'Nachher',verlauf:'Zwischenstand'});
 export const MAX_SOURCE_BYTES=25*1024*1024;
 export const MAX_EDGE=2048;
 const ALLOWED_TYPES=new Set(['image/jpeg','image/png','image/webp','image/avif']);
 const clean=(v,max)=>String(v??'').trim().slice(0,max);
 const randomId=()=>globalThis.crypto?.randomUUID?.()||`foto-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 export const photoKey=id=>`${PHOTO_PREFIX}${id}`;
+// History uses the actual optional capture date, falling back to the *import date* of legacy L10 photos.
+// Import dates must never be presented as a verified capture date.
+export const photoDate=p=>p.takenOn||String(p.createdAt||'').slice(0,10);
 export const ownerPhotos=(index,type,id)=>(Array.isArray(index)?index:[]).filter(p=>p.ownerType===type&&p.ownerId===id).sort((a,b)=>Number(Boolean(b.cover))-Number(Boolean(a.cover))||String(b.createdAt).localeCompare(String(a.createdAt)));
+export function photoHistory(index,type,id,{category='',stage='',search='',sort='newest'}={}){
+ const needle=String(search||'').trim().toLocaleLowerCase('de');
+ const filtered=ownerPhotos(index,type,id).filter(p=>
+  (!category||p.category===category)&&(!stage||(p.stage||'bestand')===stage)&&
+  (!needle||[p.description,p.series,PHOTO_CATEGORIES[p.category],PHOTO_STAGES[p.stage||'bestand']].some(x=>String(x||'').toLocaleLowerCase('de').includes(needle))));
+ return filtered.sort((a,b)=>((sort==='oldest'?1:-1)*(photoDate(a).localeCompare(photoDate(b))||String(a.createdAt).localeCompare(String(b.createdAt))||String(a.id).localeCompare(String(b.id)))));
+}
+export function comparisonPhotos(index,type,id,beforeId,afterId){
+ if(!beforeId||!afterId||beforeId===afterId)throw new Error('Bitte zwei unterschiedliche Fotos auswählen.');
+ const group=ownerPhotos(index,type,id),a=group.find(p=>p.id===beforeId),b=group.find(p=>p.id===afterId);
+ if(!a||!b)throw new Error('Vergleich nur innerhalb desselben Artikels oder Lagerortes möglich.');
+ return [a,b];
+}
+export function suggestedComparison(index,type,id){
+ const sorted=photoHistory(index,type,id,{sort:'newest'});
+ const after=sorted.find(p=>p.stage==='nachher');
+ const before=after&&sorted.find(p=>p.stage==='vorher'&&(p.series||'')===(after.series||''));
+ return before&&after?[before.id,after.id]:['',''];
+}
+function normalizeTakenOn(input){
+ const str=clean(input,10);if(!str)return '';
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(str))throw new Error('Aufnahmedatum muss ein gültiges Datum sein.');
+ const d=new Date(`${str}T12:00:00Z`);
+ if(!Number.isFinite(d.getTime())||d.toISOString().slice(0,10)!==str)throw new Error('Aufnahmedatum ist ungültig.');
+ return str;
+}
+export function photoDetails(values){
+ return {category:PHOTO_CATEGORIES[values.category]?values.category:'allgemein',description:clean(values.description,140),
+  stage:PHOTO_STAGES[values.stage]?values.stage:'bestand',series:clean(values.series,64),takenOn:normalizeTakenOn(values.takenOn)};
+}
 export function sanitizePhotoInfo(values){
  const ownerType=values.ownerType,ownerId=clean(values.ownerId,100);
  if(!['item','location'].includes(ownerType)||!ownerId)throw new Error('Bitte einen gültigen Foto-Lagerort oder Artikel auswählen.');
- const category=PHOTO_CATEGORIES[values.category]?values.category:'allgemein';
- return {ownerType,ownerId,category,description:clean(values.description,140)};
+ return {ownerType,ownerId,...photoDetails(values)};
 }
 export function coverPhoto(index,type,id){return ownerPhotos(index,type,id).find(p=>p.cover)||ownerPhotos(index,type,id)[0]||null;}
 export function insertPhoto(index,info,{id=randomId(),now=new Date().toISOString()}={}){
@@ -33,8 +66,9 @@ export function markCover(index,id){
 }
 export function updatePhoto(index,id,values){
  const target=index.find(p=>p.id===id);if(!target)throw new Error('Foto nicht mehr vorhanden.');
- const category=PHOTO_CATEGORIES[values.category]?values.category:'allgemein';
- return index.map(p=>p.id===id?{...p,category,description:clean(values.description,140)}:p);
+ // Preserve pre-L11 values when older callers only pass category and description.
+ const detail=photoDetails({...target,...values});
+ return index.map(p=>p.id===id?{...p,...detail}:p);
 }
 export function dropPhoto(index,id){
  const target=index.find(p=>p.id===id);if(!target)throw new Error('Foto nicht mehr vorhanden.');

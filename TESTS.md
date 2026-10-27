@@ -109,3 +109,11 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - Modelltests: Hauptfoto-/Kategorienverwaltung, stabile Eigentümer-IDs, isolierte Artikel-/Lagerortbilder, Fotolöschung, Indexserialisierung – PASS.
 - Komplettes Browser-End-to-End `http://127.0.0.1:8765/#/lagerhaus/items` – NICHT bestanden (Testumgebung `ERR_BLOCKED_BY_ADMINISTRATOR`), daher keine Aussage über reales Laden/Speichern in Chrome möglich.
 - Android-Kamera, Galerie, IndexedDB-Wiederöffnung, Offline und Updates – OFFEN (echtes Endgerät erforderlich).
+
+
+## L11 · Beta V0.11.0 (27.10.2026)
+- [x] L04–L10-Regressionstests erneut unter V0.11.0 bestanden. Die Versions-Assertions der alten Tests wurden auf die neue Versionsnummer aktualisiert.
+- [x] Neuer Test `node release-check-l11.mjs`: Phasen, Reihen, optionale Daten, L10-Altbilder, chronologische Sortierung, kombinierte Filter, Suche, Vorher-/Nachher-Vorschlag, Vergleichseigentümer-Isolation, Hauptbildersetzung, Einzellöschung, bestehende Keys.
+- [x] JavaScript-Syntax aller produktiven Module, Service-Worker-Dateiliste und Versionskonstanten geprüft.
+- [ ] Vollständiger Chrome-Browser-End-to-End-Test über localhost: durch ERR_BLOCKED_BY_ADMINISTRATOR gesperrt, **nicht** als bestanden gewertet.
+- [ ] Echtes Android/Chrome: Fotoauswahl, Bildvergleich, Download, IndexedDB-Wiederöffnung, Offline und Update auf dem Nutzergerät zu prüfen.

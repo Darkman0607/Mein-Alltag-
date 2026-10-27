@@ -4,11 +4,11 @@ import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoi
 import {templatesFor,propertiesFor,templateById,detailedProperties} from './lagerhaus-templates.js';
 import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock} from './lagerhaus-stock.js';
 import {addContainer,updateContainer,addDevice,updateDevice,containerState,CONTAINER_STATES,DEVICE_STATES,trackedSummary} from './lagerhaus-tracking.js';
-import {PHOTO_INDEX_KEY,PHOTO_CATEGORIES,photoKey,coverPhoto,ownerPhotos,readPhotoIndex,readPhotoBlob,preparePhoto,savePhoto,changePhoto,removePhoto} from './lagerhaus-photos.js';
+import {PHOTO_INDEX_KEY,PHOTO_CATEGORIES,PHOTO_STAGES,photoKey,coverPhoto,ownerPhotos,photoHistory,photoDate,suggestedComparison,comparisonPhotos,readPhotoIndex,readPhotoBlob,preparePhoto,savePhoto,changePhoto,removePhoto} from './lagerhaus-photos.js';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const newid=()=>globalThis.crypto?.randomUUID?.()||`item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-let items=[],rooms=[],areas=[],editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[],trackingItemId=null,trackingRecordId=null,trackingOperation=null,photos=[],photoOpen=false,photoType='item',photoTarget='',photoBusy=false;
+let items=[],rooms=[],areas=[],editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[],trackingItemId=null,trackingRecordId=null,trackingOperation=null,photos=[],photoOpen=false,photoType='item',photoTarget='',photoBusy=false,photoFilterCategory='',photoFilterStage='',photoFilterSearch='',photoSort='newest',comparisonBefore='',comparisonAfter='';
 const option=(value,label,current)=>`<option value="${esc(value)}" ${value===current?'selected':''}>${esc(label)}</option>`;
 function choices(map,current){return Object.entries(map).map(([v,l])=>option(v,l,current)).join('');}
 function locationSelect(current){return locationChoices(rooms,areas).map(c=>option(c.id,c.label,current)).join('');}
@@ -160,49 +160,69 @@ function photoTargets(){
  if(missing)active.push({id:photoTarget,label:'⚠ Lagerort/Artikel existiert nicht mehr – Fotos sichern oder löschen'});
  return active;
 }
+function prettyPhotoDate(date){
+ const value=String(date||'');
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return 'Datum unbekannt';
+ return new Intl.DateTimeFormat('de-AT',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'UTC'}).format(new Date(`${value}T12:00:00Z`));
+}
+function resetPhotoSelection(){photoFilterCategory='';photoFilterStage='';photoFilterSearch='';photoSort='newest';comparisonBefore='';comparisonAfter='';}
 function photoPanel(){
  if(!photoOpen)return '';
  const targets=photoTargets();if(!targets.some(x=>x.id===photoTarget))photoTarget=targets[0]?.id||'';
- const gallery=ownerPhotos(photos,photoType,photoTarget);
+ const all=ownerPhotos(photos,photoType,photoTarget);
+ const gallery=photoHistory(photos,photoType,photoTarget,{category:photoFilterCategory,stage:photoFilterStage,search:photoFilterSearch,sort:photoSort});
  const validTarget=targets.some(x=>x.id===photoTarget&&!x.label.startsWith('⚠'));
- return `<section class="lager-photo-panel" id="lagerPhotoPanel" aria-label="Lokales Fotoarchiv">
- <div class="lager-item-form-title"><div><span class="eyebrow">L10 · OFFLINE FOTOARCHIV</span><h2>Meine Fotos</h2></div><button type="button" id="lagerPhotoClose" class="secondary-button">Schließen</button></div>
- <p class="lager-photo-notice">Fotos bleiben ausschließlich in diesem Chrome-Profil (IndexedDB). Löschen von Browserdaten entfernt auch Fotos. Kein Cloud-Backup.</p>
+ const recommended=suggestedComparison(photos,photoType,photoTarget);
+ const before=all.some(p=>p.id===comparisonBefore)?comparisonBefore:recommended[0];
+ const after=all.some(p=>p.id===comparisonAfter)?comparisonAfter:recommended[1];
+ const cmpChoices=selected=>all.map(p=>option(p.id,`${p.stage==='vorher'?'VORHER · ':p.stage==='nachher'?'NACHHER · ':''}${prettyPhotoDate(photoDate(p))} · ${p.description||PHOTO_CATEGORIES[p.category]||'Foto'}`,selected)).join('');
+ const galleryHtml=gallery.map(p=>`<article class="lager-photo-tile" data-photo-id="${esc(p.id)}">
+ <button type="button" class="lager-photo-preview" data-photo-preview="${esc(p.id)}" aria-label="Foto vergrößert ansehen"><img src="${esc(p.thumbnail)}" alt="${esc(p.description||'Lagerfoto')}" loading="lazy"></button>
+ <div class="lager-photo-details">${p.cover?'<span class="lager-photo-main">★ Hauptbild</span>':''}<span class="lager-photo-stage">${esc(PHOTO_STAGES[p.stage||'bestand']||PHOTO_STAGES.bestand)}</span><small>${p.takenOn?'Aufnahme':'Erfasst'}: ${esc(prettyPhotoDate(photoDate(p)))} · ${esc(p.width)} × ${esc(p.height)} px · ${(p.bytes/1024/1024).toFixed(2)} MB</small>
+ <label>Kategorie<select data-photo-category="${esc(p.id)}">${Object.entries(PHOTO_CATEGORIES).map(([v,t])=>option(v,t,p.category)).join('')}</select></label>
+ <label>Zustandsphase<select data-photo-stage="${esc(p.id)}">${Object.entries(PHOTO_STAGES).map(([v,t])=>option(v,t,p.stage||'bestand')).join('')}</select></label>
+ <div class="lager-item-grid"><label>Vergleichsreihe<input data-photo-series="${esc(p.id)}" maxlength="64" value="${esc(p.series||'')}" placeholder="z. B. Reparatur 2026"></label><label>Aufnahmedatum (optional)<input data-photo-taken="${esc(p.id)}" type="date" value="${esc(p.takenOn||'')}"></label></div>
+ <label>Beschreibung<input data-photo-description="${esc(p.id)}" maxlength="140" value="${esc(p.description||'')}"></label>
+ <div class="lager-photo-buttons"><button type="button" class="secondary-button" data-photo-save="${esc(p.id)}">Speichern</button>${p.cover?'':`<button type="button" class="secondary-button" data-photo-cover="${esc(p.id)}">★ Hauptbild</button>`}<button type="button" class="secondary-button" data-photo-download="${esc(p.id)}">Bild sichern</button><button type="button" class="secondary-button lager-delete" data-photo-delete="${esc(p.id)}">Löschen</button></div></div></article>`).join('');
+ return `<section class="lager-photo-panel" id="lagerPhotoPanel" aria-label="Lokale Fotohistorie und Vergleich">
+ <div class="lager-item-form-title"><div><span class="eyebrow">L11 · OFFLINE FOTOHISTORIE</span><h2>Meine Fotos & Vergleiche</h2></div><button type="button" id="lagerPhotoClose" class="secondary-button">Schließen</button></div>
+ <p class="lager-photo-notice">Fotos liegen nur in diesem Chrome-Profil (IndexedDB), nicht in der Cloud. Vor dem Löschen von Browserdaten die gewünschten Bilder einzeln sichern.</p>
  <div class="lager-item-grid"><label>Fotos für<select id="lagerPhotoType">${option('item','Artikel',photoType)}${option('location','Lagerort / Fach',photoType)}</select></label>
  <label>Auswahl<select id="lagerPhotoTarget">${targets.map(t=>option(t.id,t.label,photoTarget)).join('')}</select></label></div>
  ${validTarget?`<div class="lager-photo-add"><div class="lager-photo-inputs"><label class="primary-button" for="lagerPhotoCamera">📷 Kamera öffnen<input id="lagerPhotoCamera" type="file" accept="image/jpeg,image/png,image/webp,image/avif" capture="environment"></label><label class="secondary-button" for="lagerPhotoGallery">▧ Galerie auswählen<input id="lagerPhotoGallery" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple></label></div>
- <div class="lager-item-grid"><label>Kategorie für neue Fotos<select id="lagerPhotoNewCategory">${Object.entries(PHOTO_CATEGORIES).map(([v,t])=>option(v,t,'allgemein')).join('')}</select></label><label>Beschreibung (optional)<input id="lagerPhotoNewDescription" maxlength="140" placeholder="z. B. Regal oben"></label></div>
+ <div class="lager-item-grid"><label>Kategorie für neue Fotos<select id="lagerPhotoNewCategory">${Object.entries(PHOTO_CATEGORIES).map(([v,t])=>option(v,t,'allgemein')).join('')}</select></label><label>Zustandsphase<select id="lagerPhotoNewStage">${Object.entries(PHOTO_STAGES).map(([v,t])=>option(v,t,'bestand')).join('')}</select></label></div>
+ <div class="lager-item-grid"><label>Vergleichsreihe (optional)<input id="lagerPhotoNewSeries" maxlength="64" placeholder="z. B. Vorher/Nachher Hecke"></label><label>Aufnahmedatum (optional)<input id="lagerPhotoNewTakenOn" type="date"></label></div>
+ <label>Beschreibung (optional)<input id="lagerPhotoNewDescription" maxlength="140" placeholder="z. B. Zustand vor Reinigung"></label>
  <label class="lager-photo-quality"><input type="checkbox" id="lagerPhotoOriginal"> Original-Dateien unverändert behalten</label>
- <p class="lager-photo-notice">Standard: optimierte WebP-Datei (max. 2048 px, Qualitätsfaktor 90 %), nur wenn kleiner als Original. Mit Häkchen wird die Originaldatei ohne Qualitätsänderung gespeichert. Pro Bild max. 25 MB.</p></div>`:'<p class="lager-photo-notice">Bitte einen vorhandenen Artikel oder Lagerort auswählen.</p>'}
- <h3>${gallery.length} Foto${gallery.length===1?'':'s'} gespeichert</h3><div class="lager-photo-grid">${gallery.map(p=>`<article class="lager-photo-tile" data-photo-id="${esc(p.id)}">
- <button type="button" class="lager-photo-preview" data-photo-preview="${esc(p.id)}" aria-label="Foto in Originalgröße ansehen"><img src="${esc(p.thumbnail)}" alt="${esc(p.description||'Lagerfoto')}" loading="lazy"></button>
- <div class="lager-photo-details">${p.cover?'<span class="lager-photo-main">★ Hauptbild</span>':''}<small>${esc(p.width)} × ${esc(p.height)} px · ${(p.bytes/1024/1024).toFixed(2)} MB · ${p.optimized?'optimiert':'Original'}</small>
- <label>Kategorie<select data-photo-category="${esc(p.id)}">${Object.entries(PHOTO_CATEGORIES).map(([v,t])=>option(v,t,p.category)).join('')}</select></label>
- <label>Beschreibung<input data-photo-description="${esc(p.id)}" maxlength="140" value="${esc(p.description||'')}"></label>
- <div class="lager-photo-buttons"><button type="button" class="secondary-button" data-photo-save="${esc(p.id)}">Speichern</button>${p.cover?'':`<button type="button" class="secondary-button" data-photo-cover="${esc(p.id)}">★ Hauptbild</button>`}<button type="button" class="secondary-button lager-delete" data-photo-delete="${esc(p.id)}">Löschen</button></div></div></article>`).join('')||'<p class="lager-hint">Noch keine Fotos an dieser Stelle.</p>'}</div>
+ <p class="lager-photo-notice">Standard: optionale WebP-Komprimierung bis 2048 px, nur falls kleiner. Originalmodus speichert ohne Qualitätsänderung. Maximal 25 MB pro Bild. Das Aufnahmedatum wird nur gesetzt, wenn du es selbst angibst.</p></div>`:'<p class="lager-photo-notice">Bitte einen vorhandenen Artikel oder Lagerort auswählen.</p>'}
+ <div class="lager-photo-history"><h3>🕘 Bildverlauf · ${all.length} gespeichert</h3><div class="lager-photo-filters"><label>Kategorie<select id="lagerPhotoFilterCategory"><option value="">Alle Kategorien</option>${Object.entries(PHOTO_CATEGORIES).map(([v,t])=>option(v,t,photoFilterCategory)).join('')}</select></label><label>Phase<select id="lagerPhotoFilterStage"><option value="">Alle Phasen</option>${Object.entries(PHOTO_STAGES).map(([v,t])=>option(v,t,photoFilterStage)).join('')}</select></label><label>Reihenfolge<select id="lagerPhotoSort">${option('newest','Neueste zuerst',photoSort)}${option('oldest','Älteste zuerst',photoSort)}</select></label><label>Suche<input type="search" id="lagerPhotoFilterSearch" value="${esc(photoFilterSearch)}" placeholder="Beschreibung, Vergleichsreihe …"></label></div>
+ <p class="lager-photo-notice">${gallery.length} Treffer. Ohne selbst eingetragenes Aufnahmedatum wird das Importdatum angezeigt.</p></div>
+ ${all.length>=2?`<div class="lager-photo-compare"><h3>↔ Zwei Aufnahmen vergleichen</h3><p class="lager-photo-notice">Nur Fotos desselben Artikels bzw. Lagerortes. Passende Vorher-/Nachher-Bilder derselben Vergleichsreihe werden vorausgewählt.</p>
+ <div class="lager-item-grid"><label>Bild links (vorher)<select id="lagerCompareBefore"><option value="">Bitte wählen</option>${cmpChoices(before)}</select></label><label>Bild rechts (nachher)<select id="lagerCompareAfter"><option value="">Bitte wählen</option>${cmpChoices(after)}</select></label></div><button type="button" class="primary-button" id="lagerCompareOpen">Bildvergleich öffnen</button></div>`:''}
+ <div class="lager-photo-grid">${galleryHtml||'<p class="lager-hint">Keine passenden Fotos. Filter ändern oder neues Foto hinzufügen.</p>'}</div>
  <dialog id="lagerPhotoDialog" class="lager-photo-dialog"><button type="button" id="lagerPhotoDialogClose" class="secondary-button">Schließen ✕</button><img id="lagerPhotoFull" alt="Foto-Vorschau"><p id="lagerPhotoInfo"></p></dialog>
+ <dialog id="lagerCompareDialog" class="lager-photo-dialog lager-compare-dialog"><button type="button" id="lagerCompareClose" class="secondary-button">Schließen ✕</button><h3>Bildvergleich</h3><div class="lager-compare-images"><figure><img id="lagerCompareLeft" alt="Linkes Vergleichsfoto"><figcaption id="lagerCompareLeftInfo"></figcaption></figure><figure><img id="lagerCompareRight" alt="Rechtes Vergleichsfoto"><figcaption id="lagerCompareRightInfo"></figcaption></figure></div></dialog>
  </section>`;
 }
 function bindPhotoPanel(el,preselect){
  const panel=el.querySelector('#lagerPhotoPanel');if(!panel)return;
  const refresh=async msg=>{photos=await readPhotoIndex();draw(preselect);if(msg)status(msg);};
  panel.querySelector('#lagerPhotoClose').addEventListener('click',()=>{photoOpen=false;draw(preselect);});
- panel.querySelector('#lagerPhotoType').addEventListener('change',e=>{photoType=e.target.value;photoTarget='';draw(preselect);});
- panel.querySelector('#lagerPhotoTarget').addEventListener('change',e=>{photoTarget=e.target.value;draw(preselect);});
+ panel.querySelector('#lagerPhotoType').addEventListener('change',e=>{photoType=e.target.value;photoTarget='';resetPhotoSelection();draw(preselect);});
+ panel.querySelector('#lagerPhotoTarget').addEventListener('change',e=>{photoTarget=e.target.value;resetPhotoSelection();draw(preselect);});
+ const filterIds=[['lagerPhotoFilterCategory',v=>photoFilterCategory=v],['lagerPhotoFilterStage',v=>photoFilterStage=v],['lagerPhotoSort',v=>photoSort=v]];
+ for(const [id,fn] of filterIds)panel.querySelector('#'+id)?.addEventListener('change',e=>{fn(e.target.value);draw(preselect);});
+ panel.querySelector('#lagerPhotoFilterSearch')?.addEventListener('change',e=>{photoFilterSearch=e.target.value;draw(preselect);});
  const handleFiles=async e=>{
   const files=[...e.target.files];if(!files.length||photoBusy)return;
-  photoBusy=true;const buttons=panel.querySelectorAll('input[type=file]');buttons.forEach(b=>b.disabled=true);
+  photoBusy=true;const inputs=panel.querySelectorAll('input[type=file]');inputs.forEach(b=>b.disabled=true);
   const ownerType=photoType,ownerId=photoTarget;
-  const category=panel.querySelector('#lagerPhotoNewCategory').value;
-  const description=panel.querySelector('#lagerPhotoNewDescription').value;
-  const keepOriginal=panel.querySelector('#lagerPhotoOriginal').checked;
-  let completed=0;
+  const data={ownerType,ownerId,category:panel.querySelector('#lagerPhotoNewCategory').value,description:panel.querySelector('#lagerPhotoNewDescription').value,
+   stage:panel.querySelector('#lagerPhotoNewStage').value,series:panel.querySelector('#lagerPhotoNewSeries').value,takenOn:panel.querySelector('#lagerPhotoNewTakenOn').value};
+  const keepOriginal=panel.querySelector('#lagerPhotoOriginal').checked;let completed=0;
   try{
-   for(const file of files){
-    status(`Foto ${completed+1} von ${files.length} wird lokal vorbereitet …`);
-    const prepared=await preparePhoto(file,{keepOriginal});
-    await savePhoto({ownerType,ownerId,category,description},prepared);
-    completed++;
+   for(const file of files){status(`Foto ${completed+1} von ${files.length} wird lokal vorbereitet …`);
+    const prepared=await preparePhoto(file,{keepOriginal});await savePhoto(data,prepared);completed++;
    }
    await refresh(`${completed} Foto${completed===1?'':'s'} lokal gespeichert.`);
   }catch(err){await refresh(`${completed} gespeichert. Fotoimport unterbrochen: ${err.message}`);}
@@ -210,20 +230,23 @@ function bindPhotoPanel(el,preselect){
  };
  panel.querySelector('#lagerPhotoCamera')?.addEventListener('change',handleFiles);
  panel.querySelector('#lagerPhotoGallery')?.addEventListener('change',handleFiles);
+ const readEdit=id=>({category:panel.querySelector(`[data-photo-category="${id}"]`).value,
+  description:panel.querySelector(`[data-photo-description="${id}"]`).value,stage:panel.querySelector(`[data-photo-stage="${id}"]`).value,
+  series:panel.querySelector(`[data-photo-series="${id}"]`).value,takenOn:panel.querySelector(`[data-photo-taken="${id}"]`).value});
  panel.querySelectorAll('[data-photo-save]').forEach(b=>b.addEventListener('click',async()=>{
   const id=b.dataset.photoSave;b.disabled=true;
-  try{await changePhoto(id,{category:panel.querySelector(`[data-photo-category="${id}"]`).value,description:panel.querySelector(`[data-photo-description="${id}"]`).value});await refresh('Fotoangaben gespeichert.');}
+  try{await changePhoto(id,readEdit(id));await refresh('Fotohistorie aktualisiert.');}
   catch(err){b.disabled=false;status(err.message);}
  }));
  panel.querySelectorAll('[data-photo-cover]').forEach(b=>b.addEventListener('click',async()=>{
   const id=b.dataset.photoCover;b.disabled=true;
-  try{const p=photos.find(x=>x.id===id);await changePhoto(id,p,{cover:true});await refresh('Neues Hauptbild gespeichert.');}
+  try{await changePhoto(id,readEdit(id),{cover:true});await refresh('Neues Hauptbild gespeichert.');}
   catch(err){b.disabled=false;status(err.message);}
  }));
  panel.querySelectorAll('[data-photo-delete]').forEach(b=>b.addEventListener('click',async()=>{
-  if(!confirm('Dieses Foto dauerhaft aus dem lokalen Archiv löschen?'))return;
+  if(!confirm('Dieses Foto unwiderruflich löschen? Andere Fotos und Bestände bleiben bestehen.'))return;
   b.disabled=true;
-  try{await removePhoto(b.dataset.photoDelete);await refresh('Foto endgültig gelöscht.');}
+  try{await removePhoto(b.dataset.photoDelete);await refresh('Nur das ausgewählte Foto wurde gelöscht.');}
   catch(err){b.disabled=false;status(err.message);}
  }));
  const dialog=panel.querySelector('#lagerPhotoDialog');let previewURL=null;
@@ -232,15 +255,39 @@ function bindPhotoPanel(el,preselect){
  panel.querySelector('#lagerPhotoDialogClose').addEventListener('click',()=>dialog.close());
  panel.querySelectorAll('[data-photo-preview]').forEach(b=>b.addEventListener('click',async()=>{
   b.disabled=true;
-  try{
-   const photo=photos.find(p=>p.id===b.dataset.photoPreview),blob=await readPhotoBlob(photo.id);
-   cleanup();previewURL=URL.createObjectURL(blob);
-   dialog.querySelector('#lagerPhotoFull').src=previewURL;
+  try{const photo=photos.find(p=>p.id===b.dataset.photoPreview),blob=await readPhotoBlob(photo.id);
+   cleanup();previewURL=URL.createObjectURL(blob);dialog.querySelector('#lagerPhotoFull').src=previewURL;
    dialog.querySelector('#lagerPhotoInfo').textContent=`${photo.description||PHOTO_CATEGORIES[photo.category]} · ${photo.width} × ${photo.height} Pixel`;
    dialog.showModal();
   }catch(err){cleanup();status('Vorschau nicht verfügbar: '+err.message);}
   finally{b.disabled=false;}
  }));
+ panel.querySelectorAll('[data-photo-download]').forEach(b=>b.addEventListener('click',async()=>{
+  b.disabled=true;let url;
+  try{const p=photos.find(x=>x.id===b.dataset.photoDownload);if(!p)throw new Error('Foto fehlt.');
+   const blob=await readPhotoBlob(p.id);url=URL.createObjectURL(blob);const a=document.createElement('a');
+   a.href=url;a.download=`lagerfoto-${p.id}.${blob.type==='image/png'?'png':blob.type==='image/avif'?'avif':blob.type==='image/webp'?'webp':'jpg'}`;
+   document.body.append(a);a.click();a.remove();status('Bildspeicherung angestoßen. Download im Browser überprüfen.');
+  }catch(err){status('Bild konnte nicht gesichert werden: '+err.message);}
+  finally{if(url)setTimeout(()=>URL.revokeObjectURL(url),30_000);b.disabled=false;}
+ }));
+ const compare=panel.querySelector('#lagerCompareDialog');let compareURLs=[];
+ const clearCompare=()=>{compareURLs.forEach(x=>URL.revokeObjectURL(x));compareURLs=[];};
+ compare?.addEventListener('close',clearCompare);
+ panel.querySelector('#lagerCompareClose')?.addEventListener('click',()=>compare.close());
+ panel.querySelector('#lagerCompareOpen')?.addEventListener('click',async e=>{
+  const btn=e.currentTarget;comparisonBefore=panel.querySelector('#lagerCompareBefore').value;comparisonAfter=panel.querySelector('#lagerCompareAfter').value;
+  btn.disabled=true;
+  try{const pair=comparisonPhotos(photos,photoType,photoTarget,comparisonBefore,comparisonAfter);
+   // Resolve both blobs before replacing the current preview, so failed reads do not leave a half-open modal.
+   const binaries=await Promise.all(pair.map(p=>readPhotoBlob(p.id)));clearCompare();compareURLs=binaries.map(b=>URL.createObjectURL(b));
+   compare.querySelector('#lagerCompareLeft').src=compareURLs[0];compare.querySelector('#lagerCompareRight').src=compareURLs[1];
+   const details=p=>`${PHOTO_STAGES[p.stage||'bestand']} · ${p.takenOn?'Aufnahme':'Erfasst'}: ${prettyPhotoDate(photoDate(p))} · ${p.description||PHOTO_CATEGORIES[p.category]}`;
+   compare.querySelector('#lagerCompareLeftInfo').textContent=details(pair[0]);compare.querySelector('#lagerCompareRightInfo').textContent=details(pair[1]);
+   compare.showModal();
+  }catch(err){status('Vergleich nicht verfügbar: '+err.message);}
+  finally{btn.disabled=false;}
+ });
 }
 function draw(preselect=''){
  const el=document.getElementById('lagerItemContent');if(!el)return;
@@ -256,7 +303,7 @@ function draw(preselect=''){
  ${trackingSelected?trackingPanel(trackingSelected):''}
  <label class="lager-item-search-label" for="lagerItemSearch">Artikel durchsuchen</label><input id="lagerItemSearch" class="lager-item-search" type="search" placeholder="Name, Seriennummer, Kennung, Kategorie …" value="${esc(query)}">
  <div id="lagerItemList">${filtered.length?filtered.map(card).join(''):'<p class="lager-hint">Keine Artikel vorhanden oder keine Treffer. Mit „+ Artikel“ kannst du deinen ersten Gegenstand erfassen.</p>'}</div>`;
- el.querySelector('#lagerPhotoOpen').addEventListener('click',()=>{photoOpen=!photoOpen;photoType='item';photoTarget=items[0]?.id||'';draw(preselect);});
+ el.querySelector('#lagerPhotoOpen').addEventListener('click',()=>{photoOpen=!photoOpen;photoType='item';photoTarget=items[0]?.id||'';resetPhotoSelection();draw(preselect);});
  bindPhotoPanel(el,preselect);
  el.querySelector('#lagerItemAdd').addEventListener('click',()=>{stockItemId=null;trackingItemId=null;editId=null;formOpen=true;draw(preselect);el.querySelector('[name="name"]')?.focus();});
  el.querySelector('#lagerItemCancel')?.addEventListener('click',()=>{editId=null;formOpen=false;draw(preselect);});
@@ -299,7 +346,7 @@ function draw(preselect=''){
  bindCards(el.querySelector('#lagerItemList'));
 }
 function bindCards(el){
- el?.querySelectorAll('[data-photo-item]').forEach(btn=>btn.addEventListener('click',()=>{photoType='item';photoTarget=btn.dataset.photoItem;photoOpen=true;draw();document.getElementById('lagerPhotoPanel')?.scrollIntoView({block:'start',behavior:'smooth'});}));
+ el?.querySelectorAll('[data-photo-item]').forEach(btn=>btn.addEventListener('click',()=>{photoType='item';photoTarget=btn.dataset.photoItem;photoOpen=true;resetPhotoSelection();draw();document.getElementById('lagerPhotoPanel')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-track-open]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=btn.dataset.trackOpen;trackingRecordId=null;trackingOperation=null;stockItemId=null;formOpen=false;editId=null;draw();document.querySelector('.lager-tracking-panel')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-stock-open]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=null;stockItemId=btn.dataset.stockOpen;stockKind=btn.dataset.kind;formOpen=false;editId=null;draw();document.getElementById('lagerStockForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-item-edit]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=null;stockItemId=null;editId=btn.dataset.itemEdit;formOpen=true;draw();document.getElementById('lagerItemForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
@@ -345,7 +392,7 @@ function bindTracking(el,preselect){
 }
 export function renderLagerartikel(){return `<div class="lager-heading"><span class="eyebrow">MEIN ALLTAG · LAGERHAUS</span><h1>Meine Artikel</h1><p>Artikel, Mengen und mehrere Lagerorte verwalten – lokal und offline.</p></div><div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Lagerbereiche</a></div><div class="lager-status" id="lagerItemStatus" role="status" aria-live="polite">Artikel werden geladen …</div><div id="lagerItemContent"></div>`;}
 export async function mountLagerartikel(preselectRoomId=''){
- editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;photoOpen=false;photoType='item';photoTarget='';query='';try{await load();if(!document.getElementById('lagerItemContent'))return;
+ editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;photoOpen=false;photoType='item';photoTarget='';resetPhotoSelection();query='';try{await load();if(!document.getElementById('lagerItemContent'))return;
   draw(rooms.some(r=>r.id===preselectRoomId)?preselectRoomId:'');status(`${items.length} Artikel geladen · offline gespeichert.`);
  }catch(e){status('Artikel konnten nicht geladen werden: '+e.message);}
 }
