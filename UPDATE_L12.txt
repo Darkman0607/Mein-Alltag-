@@ -1,0 +1,18 @@
+MEIN ALLTAG – LAGERHAUS – UPDATE L12 (BETA 0.12.0)
+Datum: 27.10.2026
+
+1. Größere isometrische 3D-Raumansicht mit Vollbild, Zoom +/−, Reset und Zwei-Finger-Pinch.
+2. Packungssymbole auf belegten Möbeln, ausschließlich aus echtem Artikelbestand / tatsächlichen Lagerort-IDs.
+3. Tippen auf Regal öffnet Regal-Inventar mit Fachzuordnung, Artikelname, Menge, optionalem Bild und Gebindestatus.
+4. Unzugeordnete Raumartikel sichtbar; nicht reservierte Mengen per Formular direkt einräumen.
+5. Angebrochene Packungen: Kapazität + reale Anfangsrestmenge, Bestandsbuchung nur der tatsächlichen Restmenge; fortlaufender Verbrauch und Mehrfachpackungen bereits integriert.
+6. Fehler korrigiert: Anzeige auf Lagerhausseite jetzt Update 12 statt festem Update 09.
+7. Kein Datenbank-Schemawechsel, keine Löschung von Nutzerdaten. Android-Daten befinden sich nicht im ZIP.
+
+BEDIENUNG
+- Regal tippen: Bestand aufklappen. Möbel ziehen: Position bearbeiten. Zoom über ± oder zwei Finger.
+- „Gebinde verwalten“ in „Meine Artikel“: z.B. Packungsgröße 100, Restmenge 37, Quelle „Bestand bereits erfasst“ oder „Neu einlagern“ passend auswählen.
+- „Noch nicht eingeräumt“: freie Mengen im Raum ein Regal/Fach zuordnen; reservierte Gebinde separat über Gebindeverwaltung umlagern.
+
+TESTS
+Node L05–L12, Syntax, Bestandsregression, Cache-Dateiliste PASS. Browser E2E auf localhost wegen ERR_BLOCKED_BY_ADMINISTRATOR nicht durchgeführt. Android-Gerätetest ausstehend.

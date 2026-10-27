@@ -117,3 +117,11 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - [x] JavaScript-Syntax aller produktiven Module, Service-Worker-Dateiliste und Versionskonstanten geprüft.
 - [ ] Vollständiger Chrome-Browser-End-to-End-Test über localhost: durch ERR_BLOCKED_BY_ADMINISTRATOR gesperrt, **nicht** als bestanden gewertet.
 - [ ] Echtes Android/Chrome: Fotoauswahl, Bildvergleich, Download, IndexedDB-Wiederöffnung, Offline und Update auf dem Nutzergerät zu prüfen.
+
+
+## L12 – größeres 3D-Regal und reale Gebinde (27.10.2026)
+- PASS: `node release-check-l12.mjs`: echte Fachbestände, 3D-Packungssymbole, nicht eingeräumte Positionen, voll/angebrochen, Bestandsanpassung, Buchung/Transfer, kein Doppelzählen, Offline-Assetliste und Versionsgleichheit.
+- PASS: L05–L11-Regressionsskripte mit ausschließlich auf 0.12.0 / L12 angepassten Release-Metadaten; alle Logikprüfungen bestanden.
+- PASS: `node --check` aller produktiven JS-Dateien.
+- OFFEN: volle lokale Browsernavigation: `net::ERR_BLOCKED_BY_ADMINISTRATOR` bei `http://127.0.0.1:8765/`.
+- OFFEN: realer Android-Chrome-Test für Pinch-Zoom, Vollbild, Touch-Auswahl, Lagerorte und Offline-Verhalten; Benutzerdaten liegen nur auf dem jeweiligen Gerät.

@@ -1,4 +1,4 @@
-# Mein Alltag – Beta V0.4.0
+# Mein Alltag – Beta V0.12.0 (Lagerhaus L12)
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -129,3 +129,14 @@ Die Artikelseite im Lagerhaus bietet jetzt drei Buchungsarten: Einlagern, Entneh
 ## L11 – Fotohistorie und Vorher/Nachher-Vergleich (Beta V0.11.0)
 Für jeden Artikel und Lagerort können einzelne Fotos der Zustandsphase Vorher, Nachher, Zwischenstand oder Bestandsaufnahme zugewiesen und über eine frei benannte Vergleichsreihe verknüpft werden. Das Aufnahmedatum wird optional manuell eingetragen und als solches gekennzeichnet; ältere Fotos zeigen ohne das Datum nur den Importtag. Die Fotoübersicht lässt sich chronologisch sortieren, nach Kategorie/Zustandsphase filtern und durchsuchen. Zwei Bilder desselben Artikels/Fachs lassen sich groß vergleichen; weitere Bilder bleiben unangetastet. Einzeldownload, Hauptbildwechsel und Bildlöschung sind verfügbar.
 Alle Bilder bleiben lokal in IndexedDB; die ZIP archiviert **keine** persönlichen Bilder. Im Gerätebrowser kann die Installation/Offlinefunktion abweichen. Der Android-Praxistest ist ausständig.
+
+
+## Lagerhaus Update L12 – Version 0.12.0 (27.10.2026)
+- Vergrößerte isometrische Raumansicht mit Zoom +/−, Zurücksetzen, Zwei-Finger-Zoom und Vollbildmodus (CSS-Fallback).
+- Symbolische Waren-/Packungskörper direkt auf belegten Möbeln, nur aus den realen gelagerten Artikeln generiert.
+- Regal antippen zeigt echten Bestand je Fach und Foto-Vorschaubild, falls gespeichert; inklusive voller/angebrochener Gebinde und Restmenge.
+- Raumartikel ohne Möbelzuordnung werden als „Noch nicht eingeräumt“ angezeigt; freie Mengen direkt einem Regal oder Fach zubuchbar.
+- Bereits angebrochene Gebinde können mit Kapazität und tatsächlich vorhandener Restmenge erfasst werden. Keine künstliche Verdoppelung des Bestands.
+- Frühere Kategorien-&-Tags-Roadmap L12 wurde nach Nutzerwunsch verschoben, siehe bauhaus.docx.
+- Datenschema und bestehende IDs bleiben unverändert; kein Import/Export oder automatischer Datenabgleich.
+- Tests: Modell- und Regressionsprüfungen bestanden; interaktive End-to-End-Navigation in lokalem Chromium durch ERR_BLOCKED_BY_ADMINISTRATOR verhindert.

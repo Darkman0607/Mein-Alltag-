@@ -51,17 +51,17 @@ function booking(item,type,quantity,fromId,toId,validIds,opts={}){
  return bookStock(item,{type,quantity,unitMode:'units',fromId,toId},validIds,opts);
 }
 /** Neue Gebinde immer in ARTIKEL-GRUNDEINHEITEN erfassen (z.B. 0,75 l). */
-export function addContainer(items,itemId,{capacity,locationId,source='new',label=''},validIds,{now=nowIso(),makeId=makeUUID,makeEventId=makeUUID}={}){
+export function addContainer(items,itemId,{capacity,remaining,locationId,source='new',label=''},validIds,{now=nowIso(),makeId=makeUUID,makeEventId=makeUUID}={}){
  const idx=findItem(items,itemId),item=items[idx];
  if(item.type!=='verbrauch')throw new Error('Gebindeverwaltung nur für Verbrauchsmaterial.');
- const amount=unmilli(milli(capacity));const place=String(locationId??'');validateLocation(validIds,place);
+ const amount=unmilli(milli(capacity));const rest=remaining===''||remaining===null||remaining===undefined?amount:unmilli(milli(remaining));if(rest>amount)throw new Error('Die Restmenge darf die Packungsgröße nicht überschreiten.');const place=String(locationId??'');validateLocation(validIds,place);
  if(!['new','existing'].includes(source))throw new Error('Ungültige Erfassungsart.');
- if(source==='existing'&&milli(untrackedAt(item,place))<milli(amount))throw new Error('Nicht genügend frei verfügbarer Bestand für dieses Gebinde.');
+ if(source==='existing'&&milli(untrackedAt(item,place))<milli(rest))throw new Error('Nicht genügend frei verfügbarer Bestand für dieses Gebinde.');
  const id=String(makeId());if(!id||duplicateId(items,id))throw new Error('Ungültige Gebinde-ID.');
  let next=item,event;
- if(source==='new'){const booked=booking(item,'receive',amount,'',place,validIds,{now,makeId:makeEventId});next=booked.item;event=booked.event;}
+ if(source==='new'){const booked=booking(item,'receive',rest,'',place,validIds,{now,makeId:makeEventId});next=booked.item;event=booked.event;}
  const identity=nextCode(item,'B',item.containers||[]);
- const c={id,code:identity.code,locationId:place,label:text(label,80),capacity:amount,remaining:amount,openedAt:null,createdAt:now,updatedAt:now};
+ const c={id,code:identity.code,locationId:place,label:text(label,80),capacity:amount,remaining:rest,openedAt:rest<amount?now:null,createdAt:now,updatedAt:now};
  next={...next,[identity.field]:identity.sequence,containers:[...(next.containers||[]),c],updatedAt:now};assertTrackedBalances(next);
  return {items:replace(items,idx,next),event};
 }

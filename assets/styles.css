@@ -164,3 +164,25 @@
 .lager-compare-images img{width:100%;height:min(55vh,550px);object-fit:contain;display:block}
 .lager-compare-images figcaption{padding:9px 4px;color:#e4edf4;font-size:12px;overflow-wrap:anywhere}
 @media(max-width:560px){.lager-photo-filters{grid-template-columns:minmax(0,1fr)}.lager-compare-images{grid-template-columns:minmax(0,1fr)}.lager-compare-images img{height:min(36vh,310px)}}
+
+/* L12 – larger isometric stock view, touch controls, real shelf inventory */
+.lager-stage{height:clamp(380px,112vw,580px);position:relative;touch-action:none;isolation:isolate}
+.lager-stage-viewport{height:100%;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.lager-stage-viewport>.lager-room-svg{width:100%;height:100%;max-width:none;transform:translate(var(--lager-offset-x,0px),var(--lager-offset-y,0px)) scale(var(--lager-zoom,1));transform-origin:50% 50%;transition:none;overflow:visible}
+.lager-stage--fullscreen{position:fixed;inset:0;z-index:1000;border-radius:0;height:100dvh;width:100vw;background:#091820;touch-action:none}
+.lager-stage--fullscreen .lager-stage-viewport{height:100%;width:100%}
+.lager-stage--fullscreen:after{content:'Vollbild: zum Schließen die Zurück-Taste oder „Schließen“ unter dem Raum verwenden';font-size:11px;color:#e4d5af;position:absolute;bottom:16px;left:10px;right:10px;text-align:center;pointer-events:none;text-shadow:0 2px 4px #000}
+.lager-stage--fullscreen~.lager-stage-tools{position:fixed;z-index:1001;top:10px;right:10px;width:auto;background:#132633ef;border-radius:14px;padding:7px;max-width:calc(100% - 20px)}
+.lager-stage--fullscreen~.lager-stage-tools>span{display:none}
+.lager-stage-buttons{align-items:center}
+.lager-stage-buttons button{min-width:42px}
+.lager-stock-cube{pointer-events:none}
+.lager-shelf-panel,.lager-unassigned{margin:16px 0;padding:14px;border-radius:18px;border:1px solid #6a91a7;background:linear-gradient(142deg,#1f3847,#0d1d29);box-shadow:0 9px 25px #0005}
+.lager-shelf-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.lager-shelf-head h2{font-size:20px;margin:5px 0}.lager-shelf-head small{font-size:11px;color:#b1cbd8}.lager-shelf-head button{min-height:43px;white-space:nowrap}
+.lager-shelf-group{margin-top:16px;border-top:1px solid #ffffff22;padding-top:11px}.lager-shelf-group h3{font-size:15px;color:#edcf8c;margin:0 0 10px}
+.lager-shelf-line,.lager-unassigned-line{display:flex;align-items:flex-start;gap:12px;background:#0c1c27;border:1px solid #5c768355;border-radius:12px;padding:11px;margin:8px 0;min-width:0}
+.lager-shelf-line>div,.lager-unassigned-line>div{min-width:0;flex:1}.lager-shelf-line strong,.lager-unassigned-line strong{font-size:14px;display:block;overflow-wrap:anywhere}.lager-shelf-line small,.lager-unassigned-line small{font-size:12px;display:block;color:#bbcbd7;line-height:1.6}
+.lager-shelf-photo{width:62px;height:62px;object-fit:cover;border:1px solid #63818c;border-radius:11px;flex-shrink:0}.lager-shelf-photo--symbol{display:grid;place-items:center;background:#294553;font-size:30px;color:#f6cf87}
+.lager-shelf-link{display:inline-block;margin-top:7px;color:#ffdb92;text-decoration:underline;text-underline-offset:3px;font-size:12px}.lager-shelf-manage{display:inline-flex;min-height:44px;align-items:center;margin-top:14px;text-decoration:none}
+.lager-unassigned h2{font-size:18px;color:#ffcf82}.lager-quick-assign{margin-top:16px;border-top:1px solid #4d7383;padding-top:8px}.lager-quick-assign h3{font-size:14px}.lager-quick-assign label{display:block;font-size:12px;margin:8px 0;color:#b9d1db}.lager-quick-assign input,.lager-quick-assign select{display:block;width:100%;min-height:46px;border:1px solid #6d8996;border-radius:11px;background:#0e202c;color:white;padding:9px;font-size:14px;margin-top:5px}
+@media(max-width:410px){.lager-stage-buttons{width:100%;gap:5px}.lager-stage-buttons button{flex:1;min-width:39px;padding:9px 7px;font-size:11px}.lager-shelf-head{flex-wrap:wrap}}
