@@ -7,5 +7,5 @@ L10 · Fotoarchiv · 27.10.2026 · Beta 0.10.0
 [x] Canvas-Kompression im Chromium-about:blank-Test bestanden.
 [ ] Vollständige lokale Browserbedienung/IndexedDB-Persistenz geprüft: ERR_BLOCKED_BY_ADMINISTRATOR.
 [ ] Android-Kamera-/Galerie-/Offline-Prüfung nach Veröffentlichung auf Nutzergerät.
-[ ] GitHub-Veröffentlichung: Status wird nach Upload dokumentiert.
-[ ] ZIP/Word-Prüfung: nach finaler Paketierung dokumentieren.
+[x] GitHub main veröffentlicht; Code-Commit 666a234d7e72ecb81ecee2ba661f97ae97c58ef7; öffentliche Dateien erneut gelesen.
+[x] ZIP und Word-Checkliste strukturell geprüft; 36 geplante Updates, L10 abgehakt.

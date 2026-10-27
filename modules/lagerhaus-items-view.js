@@ -192,6 +192,7 @@ function bindPhotoPanel(el,preselect){
  const handleFiles=async e=>{
   const files=[...e.target.files];if(!files.length||photoBusy)return;
   photoBusy=true;const buttons=panel.querySelectorAll('input[type=file]');buttons.forEach(b=>b.disabled=true);
+  const ownerType=photoType,ownerId=photoTarget;
   const category=panel.querySelector('#lagerPhotoNewCategory').value;
   const description=panel.querySelector('#lagerPhotoNewDescription').value;
   const keepOriginal=panel.querySelector('#lagerPhotoOriginal').checked;
@@ -200,7 +201,7 @@ function bindPhotoPanel(el,preselect){
    for(const file of files){
     status(`Foto ${completed+1} von ${files.length} wird lokal vorbereitet …`);
     const prepared=await preparePhoto(file,{keepOriginal});
-    await savePhoto({ownerType:photoType,ownerId:photoTarget,category,description},prepared);
+    await savePhoto({ownerType,ownerId,category,description},prepared);
     completed++;
    }
    await refresh(`${completed} Foto${completed===1?'':'s'} lokal gespeichert.`);
