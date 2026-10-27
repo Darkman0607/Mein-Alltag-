@@ -1,0 +1,18 @@
+Mein Alltag · Lagerhaus L05 · Artikelkarte · Version 0.5.0
+Datum: 27.10.2026
+Code-Veröffentlichung: https://github.com/Darkman0607/Mein-Alltag-/commit/599068de264d70b0fecce30006c05607e87845e6
+
+[x] Artikel erfassen (Name, Typ, Kategorie, Menge, Einheit, Marke, Artikelnummer, Zustand, Notiz).
+[x] Foto-Platzhalter (noch keine Kamera/Galerie bis L10).
+[x] Artikel einem vorhandenen Raum, Möbelstück oder Fach zuordnen.
+[x] Artikel anzeigen, durchsuchen, bearbeiten und löschen; Codes bleiben stabil.
+[x] Eigener Lagerhaus-IDB-Schlüssel items.v1, sequenzierter Code-Stand items.sequence.v1.
+[x] Raum-/Fach-/Möbelumzug: ID-basierte Standortzuordnung bleibt erhalten.
+[x] Löschen belegter Raum-/Möbel-/Fachorte abgewiesen.
+[x] Node-Syntax- und Logiktests sowie L04-Regressionsprüfungen bestanden.
+[x] GitHub main auf V0.5.0 aktualisiert; Version/SW/Module erneut von GitHub gelesen.
+[x] bauhaus.docx L05 angekreuzt und gerendert.
+[ ] Chrome-End-to-End-Test: nicht durchführbar (ERR_BLOCKED_BY_ADMINISTRATOR).
+[ ] Android-Praxistest: noch nicht vom Nutzer bestätigt.
+
+Keine Veränderung an privaten Gesundheits-, Familien-, Putz- und Gewerbedaten.
