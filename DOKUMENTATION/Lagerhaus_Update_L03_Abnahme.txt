@@ -1,4 +1,4 @@
-UPDATE L03 – 27.10.2026 – APP V0.3.0
+UPDATE L03 – 27.10.2026 – APP V0.3.1 (HF01)
 
 UMGESETZT
 [x] Möbel per Pointer-Events ziehen (Finger/Maus)
@@ -11,7 +11,9 @@ UMGESETZT
 [x] JS-Syntax, JSON, Geometriemodelle, SVG-Escaping und Cache-Version geprüft
 [ ] Browser-End-to-End-Test – durch Chromium ERR_BLOCKED_BY_ADMINISTRATOR verhindert
 [ ] Echtes Android-Handy getestet – nicht möglich in diesem System
-[ ] GitHub main veröffentlicht – dort zuletzt 0.1.0 gefunden
+[x] GitHub main veröffentlicht – V0.3.1, Commit 143207b22814587631650d793cce9d30fed01f1c
 
 WICHTIG: Für GitHub Pages alle Dateien AUS der ZIP direkt in /(root) des Branch main hochladen.
 Die ZIP als einzelne Repository-Datei hochzuladen genügt nicht.
+
+HINWEIS: V0.1.0 auf altem Screenshot erklärte sich durch den vorigen GitHub-Stand. Aktuelle Versionsabfrage via version.json und PWA-Updatebanner; Android-Praxistest ausstehend.
