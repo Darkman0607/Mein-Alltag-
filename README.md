@@ -106,3 +106,8 @@ Test: `node release-check.mjs && node release-check-l05.mjs`. Browser-/Android-P
 - Alte L05-Artikel bleiben bearbeitbar; App-Datenbank, Datenbankversion und lokaler Schlüssel `items.v1` bleiben unverändert.
 - Änderungen aus L07 (Bestandsbuchung/Mehrfachlagerort) gehören nicht zu diesem Update.
 - Android- und echtes Browser-End-to-End-Verhalten ist noch nicht nachgewiesen.
+
+## L07 – Bestandsmanager (V0.7.0)
+Die Artikelseite im Lagerhaus bietet jetzt drei Buchungsarten: Einlagern, Entnehmen und Umlagern. Ein Artikel kann gleichzeitig Mengen an mehreren Standorten haben. Jeder Standort wird separat angezeigt; der Gesamtbestand ist deren Summe. Mindestbestand und Packungsgröße werden in den Artikeldetails gepflegt. Buchungen können in Grundeinheiten oder in Packungen durchgeführt werden, mit höchstens drei Dezimalstellen. Die letzten fünf Buchungen eines Artikels werden angezeigt.
+
+**Daten:** bestehende L05/L06-Artikel werden beim ersten Buchungsvorgang ohne Löschung übernommen. IndexedDB `mein-alltag-v0`, Lagerhaus-Schlüssel `items.v1`, `items.sequence.v1` und neuer `items.movements.v1`. Buchungs- und Lagerort-Änderungen nutzen gemeinsame IndexedDB-Transaktionen. Bitte Chrome-Speicherdaten nicht löschen; Android-Praxistest bleibt offen.

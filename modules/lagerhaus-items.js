@@ -1,5 +1,6 @@
-/** L05/L06 – article records, templates and stable location references. */
+/** L05–L07 – article records, templates and stable location references. */
 import {normalizeProperties} from './lagerhaus-templates.js';
+import {stockPositions,stockTotal,stockSettings} from './lagerhaus-stock.js';
 export const ITEM_KEY='items.v1';
 export const ITEM_SEQ_KEY='items.sequence.v1';
 export const ITEM_TYPES=Object.freeze({geraet:'Gerät',verbrauch:'Verbrauchsmaterial',einzel:'Einzelstück',sonstiges:'Sonstiges'});
@@ -35,9 +36,10 @@ export function validateItem(values,rooms,areas){
  const amount=Number(values.quantity);
  if(values.quantity===''||values.quantity===null||!Number.isFinite(amount)||amount<0||amount>1_000_000)throw new Error('Menge muss zwischen 0 und 1.000.000 liegen.');
  if(Math.abs(amount-Math.round(amount*1000)/1000)>1e-7)throw new Error('Maximal drei Nachkommastellen erlaubt.');
+ const {minimumStock,packSize}=stockSettings(values);
  const locationId=clean(values.locationId,100);
  if(!resolveItemLocation(locationId,rooms,areas).valid)throw new Error('Ausgewählter Lagerort existiert nicht mehr.');
- return {name,category,type,condition,unit,quantity:Math.round(amount*1000)/1000,locationId,
+ return {name,category,type,condition,unit,quantity:Math.round(amount*1000)/1000,locationId,minimumStock,packSize,
    brand:clean(values.brand,80),articleNumber:clean(values.articleNumber,80),note:clean(values.note,2000),
    properties:normalizeProperties(type,values.properties)};
 }
@@ -52,13 +54,19 @@ export function upsertItem(items,values,{id=null,rooms=[],areas=[],now=new Date(
  const result=items.map(i=>({...i}));
  if(id){
   const idx=result.findIndex(x=>x.id===id);if(idx<0)throw new Error('Artikel existiert nicht mehr.');
-  result[idx]={...result[idx],...data,updatedAt:now};
+  const prior=result[idx];
+  if(stockTotal(prior)>0&&prior.unit!==data.unit)throw new Error('Bei vorhandenem Bestand kann die Einheit nicht geändert werden.');
+  // Article metadata edits never change multi-location stock. Use bookings instead.
+  if(Array.isArray(prior.stockLocations)){
+   const positions=stockPositions(prior);
+   result[idx]={...prior,...data,stockLocations:positions,quantity:stockTotal(prior),locationId:positions[0]?.locationId||'',updatedAt:now};
+  } else result[idx]={...prior,...data,updatedAt:now};
   return {items:result,sequence};
  }
  const identity=String(makeId());
  if(!identity||result.some(x=>x.id===identity))throw new Error('Ungültige oder doppelte Artikel-ID.');
  const next=nextArticleCode(result,sequence);
- result.push({id:identity,code:next.code,...data,createdAt:now,updatedAt:now});
+ result.push({id:identity,code:next.code,...data,stockLocations:data.quantity>0?[{locationId:data.locationId,quantity:data.quantity}]:[],createdAt:now,updatedAt:now});
  return {items:result,sequence:next.sequence};
 }
 export function deleteItem(items,id){
@@ -74,9 +82,9 @@ export function locationsInNode(kind,object){
 }
 export function assertNodeHasNoItems(items,kind,object){
  const ids=new Set(locationsInNode(kind,object));
- if(items.some(item=>ids.has(item.locationId)))throw new Error('Dort liegen noch Artikel. Bitte Artikel zuerst einem anderen Lagerort zuordnen.');
+ if(items.some(item=>stockPositions(item).some(pos=>ids.has(pos.locationId))))throw new Error('Dort liegen noch Artikel. Bitte Artikel zuerst einem anderen Lagerort zuordnen.');
 }
 export function assertLocationsRetained(items,rooms){
  const present=new Set(rooms.flatMap(r=>locationsInNode('room',r)));
- if(items.some(item=>item.locationId&&!present.has(item.locationId)))throw new Error('Änderung würde einen Artikel-Lagerort löschen. Artikel zuerst verschieben.');
+ if(items.some(item=>stockPositions(item).some(pos=>pos.locationId&&!present.has(pos.locationId))))throw new Error('Änderung würde einen Artikel-Lagerort löschen. Artikel zuerst verschieben.');
 }

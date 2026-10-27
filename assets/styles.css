@@ -78,3 +78,23 @@
 .lager-item-properties-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:5px 15px;border-top:1px solid rgba(185,210,236,.15);padding-top:10px;margin:10px 0}
 .lager-item-properties-list>div{min-width:0}.lager-item-properties-list dt{font-size:.73rem;color:#90a5b3}.lager-item-properties-list dd{margin:0;overflow-wrap:anywhere;font-size:.87rem}
 @media(max-width:360px){.lager-item-form .lager-item-grid{grid-template-columns:1fr}}
+
+/* L07 – Lagerbestand und Touch-Buchungen */
+.lager-stock-form{padding:17px;margin:13px 0 19px;border:1px solid rgba(99,194,233,.5);border-radius:17px;background:linear-gradient(150deg,#13313e,#0a1825);box-shadow:0 8px 25px #0005}
+.lager-stock-form h2{font-size:18px;margin:0;color:#dbedff}.lager-stock-form .lager-item-form-title{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.lager-stock-form label{display:block;font-weight:650;font-size:13px;color:#d5eafa;margin:12px 0}
+.lager-stock-form input,.lager-stock-form select{display:block;width:100%;min-height:50px;margin-top:7px;padding:10px;border:1px solid #6b879c;background:#0a1e2c;color:#fff;border-radius:11px;font-size:15px}
+.lager-stock-form .primary-button{width:100%;min-height:50px;margin-top:11px}
+.lager-stock-modes,.lager-stock-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.lager-stock-modes button,.lager-stock-actions button{min-height:45px;padding:8px 3px;font-size:12px;overflow-wrap:anywhere}
+.lager-stock-modes .is-stock-active{border-color:#e2b861;color:#ffdf92;background:#364034}
+.lager-stock-help{font-size:12px;color:#a5becc;line-height:1.5}
+.lager-stock-total{color:#bed1df;font-size:14px}.lager-stock-total strong{color:#f8e2ad}
+.lager-stock-positions{margin-top:11px;border-top:1px solid #49606d66;border-bottom:1px solid #49606d66}
+.lager-stock-positions>div{display:flex;gap:12px;justify-content:space-between;padding:9px 1px;border-bottom:1px solid #49606d33;min-width:0;font-size:12px;color:#b8d5e4}
+.lager-stock-positions>div span{overflow-wrap:anywhere}.lager-stock-positions>div strong{white-space:nowrap;color:#eaf8fb}
+.lager-stock-empty{color:#a7bbc8;font-size:12px}.lager-stock-warning{color:#ffdb83;background:#4639214a;border:1px solid #bc8e4d8c;padding:8px 11px;border-radius:8px;font-size:12px}
+@media(max-width:390px){.lager-stock-actions{grid-template-columns:1fr 1fr}.lager-stock-modes{grid-template-columns:1fr}}
+.lager-stock-history{margin-top:14px;border-top:1px solid #65849477;padding-top:10px;color:#d4e4ea;font-size:12px}
+.lager-stock-history>div{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#a8c3ce}
+.lager-stock-history>div span:last-child{white-space:nowrap;color:#f8e6b3}

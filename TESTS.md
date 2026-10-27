@@ -83,3 +83,10 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - [x] Versionskonstante, `version.json`, Service-Worker-Cache und Cache-Dateiliste abgestimmt.
 - [ ] Realer Browser-End-to-End-Test: lokaler Headless-Chromium-Aufruf endet mit Timeout; nicht als bestanden bewertet.
 - [ ] Auf Android: Auswahlliste/Vorlage testen, Pflichtfelder, Öffnen der erweiterten Angaben, Speichern/Offline und alte Artikel prüfen.
+
+## L07 – Bestandsmanager V0.7.0
+- PASS: Syntax aller JavaScript-Dateien.
+- PASS: `release-check.mjs`, `release-check-l05.mjs`, `release-check-l06.mjs` (Regression).
+- PASS: `release-check-l07.mjs` – Gesamt-/Teilbestände, Lagerorte, Buchungen, Packungsgrößen, Mindestbestände, Präzision, Negativschutz, Rollback, Bestandsschutz, Altartikel, Cache-Manifest.
+- PASS: ZIP-Struktur, App-Version, SW-Präcache und aktualisierte Word-Checkliste (nach Erstellung).
+- **OFFEN:** interaktiver Chromium-End-to-End-Test; Headless-Chromium lief lokal in einen Timeout. Keine Behauptung, dass Touch-Praxistest/Cache-Umstieg am Android durchgeführt wurden.

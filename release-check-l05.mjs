@@ -7,9 +7,9 @@ import {ensureHierarchy,relocateCompartment} from './modules/lagerhaus-hierarchy
 import {ITEM_KEY,ITEM_SEQ_KEY,locationChoices,resolveItemLocation,validateItem,upsertItem,deleteItem,assertNodeHasNoItems,assertLocationsRetained,nextArticleCode} from './modules/lagerhaus-items.js';
 const root=path.dirname(fileURLToPath(import.meta.url));const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const version=JSON.parse(read('version.json'));
-assert.equal(version.version,'0.6.0');assert.equal(version.build,'L06');
-assert.match(read('assets/app.js'),/APP_VERSION='0.6.0'/);assert.match(read('assets/app.js'),/page:'lagerartikel'/);
-assert.match(read('sw.js'),/CACHE='mein-alltag-v0-6-0'/);assert.match(read('sw.js'),/lagerhaus-items-view.js/);
+assert.equal(version.version,'0.7.0');assert.equal(version.build,'L07');
+assert.match(read('assets/app.js'),/APP_VERSION='0.7.0'/);assert.match(read('assets/app.js'),/page:'lagerartikel'/);
+assert.match(read('sw.js'),/CACHE='mein-alltag-v0-7-0'/);assert.match(read('sw.js'),/lagerhaus-items-view.js/);
 assert.match(read('assets/app.js'),/renderLagerartikel\(\)/);assert.match(read('modules/lagerhaus-app.js'),/assertLocationsRetained/);
 assert.equal(furnitureModelCount(),15);assert.equal(read('assets/database.js').includes("DB_NAME = 'mein-alltag-v0'"),true);
 for(const quote of read('sw.js').split('const ASSETS=[')[1].split('];')[0].match(/'\.\/[^']+'/g)||[]){const file=quote.slice(1,-1).replace(/^\.\//,'');assert(fs.existsSync(path.join(root,file)),`SW missing ${file}`);}
@@ -30,8 +30,8 @@ assert.throws(()=>assertNodeHasNoItems(state.items,'room',rooms[1]),/Artikel/);
 assert.throws(()=>assertLocationsRetained(state.items,[rooms[0]]),/Lagerort/);
 assert.doesNotThrow(()=>assertLocationsRetained(state.items,rooms));
 state=upsertItem(state.items,{...input,name:'Akku neu',quantity:0,locationId:'r-old'}, {id:'item-1',rooms,areas,sequence:1});
-assert.equal(state.items[0].code,'A-0001');assert.equal(state.items[0].id,'item-1');assert.equal(state.items[0].quantity,0);
-assert.equal(state.items[0].locationId,'r-old');assert.equal(state.sequence,1);
+assert.equal(state.items[0].code,'A-0001');assert.equal(state.items[0].id,'item-1');assert.equal(state.items[0].quantity,2.5); // L07: Mengenänderungen nur via Buchung, Bearbeiten darf kein Umlagern/Überschreiben auslösen
+assert.equal(state.items[0].locationId,'c-old');assert.equal(state.sequence,1);
 assert.throws(()=>validateItem({...input,name:'    '},rooms,areas),/Artikelnamen/);
 assert.throws(()=>validateItem({...input,quantity:'-2'},rooms,areas),/Menge/);
 assert.throws(()=>validateItem({...input,quantity:'10.12345'},rooms,areas),/Nachkommastellen/);

@@ -1,0 +1,26 @@
+MEIN ALLTAG – LAGERHAUS UPDATE L07 – BETA 0.7.0
+27. Oktober 2026
+
+Bestandsmanager:
+- Mehrere Lagerorte pro Artikel mit jeweils eigenem Mengenbestand.
+- Einlagern, Entnehmen und Umlagern über Buchungsformulare.
+- Kein negativer Bestand; max. drei Nachkommastellen; Mengenlimits.
+- Gesamtmenge wird aus den Lagerort-Mengen berechnet.
+- Mindestbestand je Artikel, Warnung bei oder unter Schwelle.
+- Packungsgröße je Artikel; Buchung als Stückzahl oder Packungen.
+- Buchungsprotokoll (letzte fünf pro Artikel sichtbar, max. 3000 Datensätze lokal).
+- Änderung der Artikelstammdaten überschreibt die Bestandspositionen nicht.
+- Bestehende L05/L06-Artikel ohne stockLocations werden beim ersten Buchungsvorgang automatisch übernommen.
+- Erhöhte Konsistenz: Buchungen und Hierarchie-Änderungen innerhalb einer IndexedDB-Transaktion.
+
+Version: 0.7.0 in app.js, version.json und sw.js.
+Datenbank: unverändert mein-alltag-v0 (Version 1), kein Löschen alter Daten.
+Weitere Gebinde- und Einzelgeräteverwaltung bleibt für L08 vorgesehen.
+
+Tests:
+- node --experimental-default-type=module release-check.mjs
+- node --experimental-default-type=module release-check-l05.mjs
+- node --experimental-default-type=module release-check-l06.mjs
+- node --experimental-default-type=module release-check-l07.mjs
+- node --check für alle JS-Dateien.
+Android-/Chrome-End-to-End und PWA-Cache-Wechsel auf echtem Gerät: OFFEN.

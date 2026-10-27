@@ -70,3 +70,30 @@ export async function getModuleCount(store){
     req.onerror=()=>reject(req.error);
   });
 }
+/** L07: read/validate/write multiple keys in ONE readwrite transaction.
+ * Callback must be synchronous; avoiding a read-before-write race across tabs. */
+export async function mutateModuleValues(store,keys,change){
+ assertStore(store);
+ const db=await openDatabase();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite');
+  const object=tx.objectStore(store);
+  const values=Object.create(null);
+  let pending=keys.length,output,callbackError;
+  tx.oncomplete=()=>resolve(output);
+  tx.onabort=()=>reject(callbackError||tx.error||new Error('Buchung abgebrochen'));
+  tx.onerror=()=>{}; // onabort handles the original transaction error
+  for(const key of keys){
+   const req=object.get(key);
+   req.onsuccess=()=>{
+    values[key]=req.result??null;
+    if(--pending!==0)return;
+    try{
+     output=change(values);
+     if(!Array.isArray(output))throw new Error('Ungültiger Buchungsauftrag.');
+     for(const [writeKey,data] of output)object.put(data,writeKey);
+    }catch(err){callbackError=err;tx.abort();}
+   };
+  }
+ });
+}
