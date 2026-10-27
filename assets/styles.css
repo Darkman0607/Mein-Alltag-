@@ -131,3 +131,24 @@
 .lager-fach-booking button{min-height:49px;width:100%;margin:12px 0 3px}
 .lager-fach-booking label[hidden]{display:none}
 @media(max-width:430px){.lager-fach-list{grid-template-columns:1fr}.lager-fach-overview{padding:12px}}
+/* L10 · Local photo archive */
+.lager-photo-head-actions{display:flex;gap:9px;flex-wrap:wrap}.lager-photo-head-actions button{min-height:48px}
+.lager-item-cover{width:100%;height:165px;object-fit:cover;display:block;border-radius:12px;border:1px solid rgba(179,202,224,.28);margin-bottom:14px}
+.lager-photo-panel{margin:14px 0 22px;border:1px solid #7187a28a;background:linear-gradient(145deg,#20374a,#0a1927);border-radius:19px;padding:clamp(12px,3vw,20px);box-shadow:0 9px 30px #0006}
+.lager-photo-panel h2{color:#ffdc9d;font-size:21px;margin:5px 0}.lager-photo-panel h3{color:#dbeefb;margin:15px 0 9px;font-size:16px}
+.lager-photo-panel label{display:block;font-size:12px;font-weight:650;color:#dbe7f5;margin:8px 0}
+.lager-photo-panel select,.lager-photo-panel input:not([type=file]):not([type=checkbox]){width:100%;min-height:45px;background:#0b1d2b;border:1px solid #6c8599;color:white;border-radius:11px;padding:10px;margin-top:5px}
+.lager-photo-notice{font-size:12px;color:#a6c2d3;line-height:1.5;margin:10px 0}
+.lager-photo-add{border:1px solid #486c806b;border-radius:13px;background:#0b19289e;padding:12px;margin:12px 0}
+.lager-photo-inputs{display:flex;flex-wrap:wrap;gap:10px}.lager-photo-inputs label{min-height:50px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin:4px 0 10px;flex:1 1 155px;position:relative;text-align:center}
+.lager-photo-inputs input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.lager-photo-quality{display:flex!important;align-items:center;gap:10px;min-height:44px;font-size:13px!important}.lager-photo-quality input{width:20px;height:20px;accent-color:#e7b86d}
+.lager-photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:13px;margin:13px 0}
+.lager-photo-tile{background:#0b1c29;border:1px solid #647e9180;border-radius:14px;overflow:hidden;min-width:0}
+.lager-photo-preview{background:#071721;display:block;width:100%;border:0;padding:0;cursor:zoom-in;min-height:120px}
+.lager-photo-preview img{display:block;width:100%;height:180px;object-fit:contain}
+.lager-photo-details{padding:11px}.lager-photo-details small{display:block;color:#adc2d2;font-size:11px;margin:4px 0}.lager-photo-main{display:inline-block;color:#f5d083;font-weight:750;font-size:12px}
+.lager-photo-buttons{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.lager-photo-buttons button{flex:1 1 85px;min-height:43px;font-size:12px;padding:8px}
+.lager-photo-dialog{background:#071723;color:#eef7ff;border:1px solid #8eacbc;border-radius:14px;padding:12px;max-width:min(94vw,1000px);max-height:92vh}
+.lager-photo-dialog::backdrop{background:#010812ee}.lager-photo-dialog img{display:block;max-width:100%;max-height:75vh;object-fit:contain;margin:8px auto}.lager-photo-dialog p{font-size:12px}
+@media(max-width:390px){.lager-photo-head-actions{width:100%}.lager-photo-head-actions button{flex:1}.lager-item-actions{flex-wrap:wrap}.lager-item-actions button{flex:1 1 115px}}

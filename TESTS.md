@@ -101,3 +101,11 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - [x] JavaScript-Syntax, Versions- und Offline-Precache-Prüfung.
 - [x] L04–L08-Logiktests erneut ausgeführt.
 - [ ] Interaktive Chrome-/Android-Touch- und Offline-Prüfung am Endgerät.
+
+## L10 · Beta V0.10.0
+- `node release-check.mjs` und `node release-check-l05.mjs` bis `node release-check-l10.mjs` – PASS.
+- `node --check` für alle produktiven JS-Module – PASS.
+- `python test_photo_canvas.py` (lokale Prüfroutine, nicht Teil der Veröffentlichungs-ZIP): Chromium `about:blank`, JPG-Quelle 2400×1800 Pixel: Original nicht verändert, optimierte Datei kleiner und maximal 2048 px – PASS.
+- Modelltests: Hauptfoto-/Kategorienverwaltung, stabile Eigentümer-IDs, isolierte Artikel-/Lagerortbilder, Fotolöschung, Indexserialisierung – PASS.
+- Komplettes Browser-End-to-End `http://127.0.0.1:8765/#/lagerhaus/items` – NICHT bestanden (Testumgebung `ERR_BLOCKED_BY_ADMINISTRATOR`), daher keine Aussage über reales Laden/Speichern in Chrome möglich.
+- Android-Kamera, Galerie, IndexedDB-Wiederöffnung, Offline und Updates – OFFEN (echtes Endgerät erforderlich).

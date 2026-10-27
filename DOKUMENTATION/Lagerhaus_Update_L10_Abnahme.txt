@@ -1,0 +1,11 @@
+L10 · Fotoarchiv · 27.10.2026 · Beta 0.10.0
+[x] Mehrere lokal gespeicherte Fotos je Artikel/Lagerort umgesetzt.
+[x] Kamera-/Galerie-Dateiauswahl, Hauptbild, Kategorien, Vorschau umgesetzt.
+[x] Thumbnail plus Originalmodus bzw. optionale optimierte Bildkopie umgesetzt.
+[x] Foto-/Metadatenzugriffe inklusive Löschungen in einer IndexedDB-Transaktion implementiert.
+[x] Code, Syntax, L04–L10 Regressionstests bestanden.
+[x] Canvas-Kompression im Chromium-about:blank-Test bestanden.
+[ ] Vollständige lokale Browserbedienung/IndexedDB-Persistenz geprüft: ERR_BLOCKED_BY_ADMINISTRATOR.
+[ ] Android-Kamera-/Galerie-/Offline-Prüfung nach Veröffentlichung auf Nutzergerät.
+[ ] GitHub-Veröffentlichung: Status wird nach Upload dokumentiert.
+[ ] ZIP/Word-Prüfung: nach finaler Paketierung dokumentieren.

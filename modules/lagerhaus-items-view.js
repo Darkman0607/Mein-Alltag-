@@ -1,25 +1,26 @@
 /** L05–L07 – touch-oriented cards, quick entry, templates and dynamic properties. */
-import {getModuleValue,mutateModuleValues} from '../assets/database.js';
+import {getModuleValue,mutateModuleValuesWithDeletes} from '../assets/database.js';
 import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoices,resolveItemLocation,upsertItem,deleteItem} from './lagerhaus-items.js';
 import {templatesFor,propertiesFor,templateById,detailedProperties} from './lagerhaus-templates.js';
 import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock} from './lagerhaus-stock.js';
 import {addContainer,updateContainer,addDevice,updateDevice,containerState,CONTAINER_STATES,DEVICE_STATES,trackedSummary} from './lagerhaus-tracking.js';
+import {PHOTO_INDEX_KEY,PHOTO_CATEGORIES,photoKey,coverPhoto,ownerPhotos,readPhotoIndex,readPhotoBlob,preparePhoto,savePhoto,changePhoto,removePhoto} from './lagerhaus-photos.js';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const newid=()=>globalThis.crypto?.randomUUID?.()||`item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-let items=[],rooms=[],areas=[],editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[],trackingItemId=null,trackingRecordId=null,trackingOperation=null;
+let items=[],rooms=[],areas=[],editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[],trackingItemId=null,trackingRecordId=null,trackingOperation=null,photos=[],photoOpen=false,photoType='item',photoTarget='',photoBusy=false;
 const option=(value,label,current)=>`<option value="${esc(value)}" ${value===current?'selected':''}>${esc(label)}</option>`;
 function choices(map,current){return Object.entries(map).map(([v,l])=>option(v,l,current)).join('');}
 function locationSelect(current){return locationChoices(rooms,areas).map(c=>option(c.id,c.label,current)).join('');}
 function status(message){const el=document.getElementById('lagerItemStatus');if(el)el.textContent=message;}
 async function load(){
  const [is,rs,as,events]=await Promise.all([getModuleValue('lagerhaus',ITEM_KEY),getModuleValue('lagerhaus','rooms.v1'),getModuleValue('lagerhaus','areas.v1'),getModuleValue('lagerhaus',MOVEMENT_KEY)]);
- items=Array.isArray(is)?is:[];rooms=Array.isArray(rs)?rs:[];areas=Array.isArray(as)?as:[];stockEvents=Array.isArray(events)?events:[];
+ items=Array.isArray(is)?is:[];rooms=Array.isArray(rs)?rs:[];areas=Array.isArray(as)?as:[];stockEvents=Array.isArray(events)?events:[];photos=await readPhotoIndex();
 }
 async function modify(fn){
  const task=operation.catch(()=>{}).then(async()=>{
   let saved;
-  await mutateModuleValues('lagerhaus',[ITEM_KEY,ITEM_SEQ_KEY,'rooms.v1','areas.v1',MOVEMENT_KEY],values=>{
+  await mutateModuleValuesWithDeletes('lagerhaus',[ITEM_KEY,ITEM_SEQ_KEY,'rooms.v1','areas.v1',MOVEMENT_KEY,PHOTO_INDEX_KEY],values=>{
    const current=Array.isArray(values[ITEM_KEY])?values[ITEM_KEY]:[];
    const seq=Number(values[ITEM_SEQ_KEY])||0;
    const freshRooms=Array.isArray(values['rooms.v1'])?values['rooms.v1']:[];
@@ -27,9 +28,14 @@ async function modify(fn){
    const history=Array.isArray(values[MOVEMENT_KEY])?values[MOVEMENT_KEY]:[];
    const outcome=fn(current,seq,freshRooms,freshAreas,history);
    saved={...outcome,rooms:freshRooms,areas:freshAreas};
-   return [[ITEM_KEY,outcome.items],[ITEM_SEQ_KEY,outcome.sequence],...(outcome.movements?[[MOVEMENT_KEY,outcome.movements]]:[])];
+   const existingPhotos=Array.isArray(values[PHOTO_INDEX_KEY])?values[PHOTO_INDEX_KEY]:[];
+   const retainedIds=new Set(outcome.items.map(i=>i.id));
+   const removed=existingPhotos.filter(p=>p.ownerType==='item'&&!retainedIds.has(p.ownerId));
+   const nextPhotos=removed.length?existingPhotos.filter(p=>!removed.includes(p)):existingPhotos;
+   saved.photos=nextPhotos;
+   return {write:[[ITEM_KEY,outcome.items],[ITEM_SEQ_KEY,outcome.sequence],...(outcome.movements?[[MOVEMENT_KEY,outcome.movements]]:[]),...(removed.length?[[PHOTO_INDEX_KEY,nextPhotos]]:[])],remove:removed.map(p=>photoKey(p.id))};
   });
-  items=saved.items;rooms=saved.rooms;areas=saved.areas;
+  items=saved.items;rooms=saved.rooms;areas=saved.areas;photos=saved.photos;
   if(saved.movements)stockEvents=saved.movements;
  });
  operation=task;return task;
@@ -108,7 +114,7 @@ function form(item,requestedLocation=''){
    <label>Notiz<textarea name="note" rows="3" maxlength="2000" placeholder="Eigene Informationen zum Artikel">${esc(a.note)}</textarea></label>
   </div>
  </details>
- <div class="lager-photo-placeholder" aria-label="Fotofunktion für späteres Update vorgesehen">▧ <span>Artikelfoto – Platzhalter. Kamera und Galerie folgen mit L10.</span></div>
+ <p class="lager-item-quick-tip">📷 Artikelfotos kannst du nach dem Speichern direkt über „Fotos“ auf der Artikelkarte hinzufügen.</p>
  <button class="primary-button" type="submit">${item?'Änderungen speichern':'Artikel speichern'}</button></form>`;
 }
 function bindTemplates(el){
@@ -136,7 +142,8 @@ function card(item){
  const loc=resolveItemLocation(item.locationId,rooms,areas);
  const props=detailedProperties(item);
  const stock=stockAlert(item);
- return `<article class="lager-item-card"><div class="lager-item-card-top"><span class="lager-identifier">${esc(item.code)}</span><span class="lager-item-type">${esc(ITEM_TYPES[item.type]||'Sonstiges')}</span></div>
+ const cover=coverPhoto(photos,'item',item.id),count=ownerPhotos(photos,'item',item.id).length;
+ return `<article class="lager-item-card">${cover?`<img class="lager-item-cover" src="${esc(cover.thumbnail)}" alt="Hauptfoto von ${esc(item.name)}" loading="lazy">`:''}<div class="lager-item-card-top"><span class="lager-identifier">${esc(item.code)}</span><span class="lager-item-type">${esc(ITEM_TYPES[item.type]||'Sonstiges')}</span></div>
  <h3>${esc(item.name)}</h3><p class="lager-item-path">⌖ ${stockPositions(item).length>1?'Mehrere Lagerorte':esc(loc.label)}</p>
  <div class="lager-item-facts"><span><strong>${esc(stockQuantity(stock.total))}</strong> ${esc(ITEM_UNITS[item.unit]||item.unit)}</span><span>Packung: ${esc(stockQuantity(item.packSize??1))}</span><span>${esc(item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
  ${stock.low?`<p class="lager-stock-warning">⚠ Mindestbestand erreicht (${esc(stockQuantity(stock.minimumStock))} ${esc(ITEM_UNITS[item.unit]||item.unit)})</p>`:''}
@@ -145,7 +152,94 @@ function card(item){
  ${(item.brand||item.articleNumber)?`<p class="lager-item-extra">${esc([item.brand,item.articleNumber].filter(Boolean).join(' · '))}</p>`:''}${props.length?`<dl class="lager-item-properties-list">${props.map(p=>`<div><dt>${esc(p.label)}</dt><dd>${esc(p.value)}</dd></div>`).join('')}</dl>`:''}${item.note?`<p class="lager-item-note">${esc(item.note)}</p>`:''}
  <div class="lager-stock-actions"><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="receive">+ Einlagern</button><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="issue" ${stock.empty?'disabled':''}>− Entnehmen</button><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="transfer" ${stock.empty?'disabled':''}>↔ Umlagern</button></div>
  ${(item.type==='geraet'||item.type==='verbrauch')?`<button type="button" class="primary-button lager-track-main-button" data-track-open="${esc(item.id)}">${item.type==='geraet'?'⚙ Einzelgeräte':'▣ Gebinde'} verwalten</button>`:''}
- <div class="lager-item-actions"><button type="button" class="secondary-button" data-item-edit="${esc(item.id)}">Bearbeiten</button><button type="button" class="secondary-button lager-delete" data-item-delete="${esc(item.id)}">Löschen</button></div></article>`;
+ <div class="lager-item-actions"><button type="button" class="secondary-button" data-photo-item="${esc(item.id)}">📷 Fotos (${count})</button><button type="button" class="secondary-button" data-item-edit="${esc(item.id)}">Bearbeiten</button><button type="button" class="secondary-button lager-delete" data-item-delete="${esc(item.id)}">Löschen</button></div></article>`;
+}
+function photoTargets(){
+ const active=photoType==='item'?items.map(i=>({id:i.id,label:`${i.code} · ${i.name}`})):locationChoices(rooms,areas).filter(x=>x.id);
+ const missing=ownerPhotos(photos,photoType,photoTarget).length>0&&photoTarget&&!active.some(x=>x.id===photoTarget);
+ if(missing)active.push({id:photoTarget,label:'⚠ Lagerort/Artikel existiert nicht mehr – Fotos sichern oder löschen'});
+ return active;
+}
+function photoPanel(){
+ if(!photoOpen)return '';
+ const targets=photoTargets();if(!targets.some(x=>x.id===photoTarget))photoTarget=targets[0]?.id||'';
+ const gallery=ownerPhotos(photos,photoType,photoTarget);
+ const validTarget=targets.some(x=>x.id===photoTarget&&!x.label.startsWith('⚠'));
+ return `<section class="lager-photo-panel" id="lagerPhotoPanel" aria-label="Lokales Fotoarchiv">
+ <div class="lager-item-form-title"><div><span class="eyebrow">L10 · OFFLINE FOTOARCHIV</span><h2>Meine Fotos</h2></div><button type="button" id="lagerPhotoClose" class="secondary-button">Schließen</button></div>
+ <p class="lager-photo-notice">Fotos bleiben ausschließlich in diesem Chrome-Profil (IndexedDB). Löschen von Browserdaten entfernt auch Fotos. Kein Cloud-Backup.</p>
+ <div class="lager-item-grid"><label>Fotos für<select id="lagerPhotoType">${option('item','Artikel',photoType)}${option('location','Lagerort / Fach',photoType)}</select></label>
+ <label>Auswahl<select id="lagerPhotoTarget">${targets.map(t=>option(t.id,t.label,photoTarget)).join('')}</select></label></div>
+ ${validTarget?`<div class="lager-photo-add"><div class="lager-photo-inputs"><label class="primary-button" for="lagerPhotoCamera">📷 Kamera öffnen<input id="lagerPhotoCamera" type="file" accept="image/jpeg,image/png,image/webp,image/avif" capture="environment"></label><label class="secondary-button" for="lagerPhotoGallery">▧ Galerie auswählen<input id="lagerPhotoGallery" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple></label></div>
+ <div class="lager-item-grid"><label>Kategorie für neue Fotos<select id="lagerPhotoNewCategory">${Object.entries(PHOTO_CATEGORIES).map(([v,t])=>option(v,t,'allgemein')).join('')}</select></label><label>Beschreibung (optional)<input id="lagerPhotoNewDescription" maxlength="140" placeholder="z. B. Regal oben"></label></div>
+ <label class="lager-photo-quality"><input type="checkbox" id="lagerPhotoOriginal"> Original-Dateien unverändert behalten</label>
+ <p class="lager-photo-notice">Standard: optimierte WebP-Datei (max. 2048 px, Qualitätsfaktor 90 %), nur wenn kleiner als Original. Mit Häkchen wird die Originaldatei ohne Qualitätsänderung gespeichert. Pro Bild max. 25 MB.</p></div>`:'<p class="lager-photo-notice">Bitte einen vorhandenen Artikel oder Lagerort auswählen.</p>'}
+ <h3>${gallery.length} Foto${gallery.length===1?'':'s'} gespeichert</h3><div class="lager-photo-grid">${gallery.map(p=>`<article class="lager-photo-tile" data-photo-id="${esc(p.id)}">
+ <button type="button" class="lager-photo-preview" data-photo-preview="${esc(p.id)}" aria-label="Foto in Originalgröße ansehen"><img src="${esc(p.thumbnail)}" alt="${esc(p.description||'Lagerfoto')}" loading="lazy"></button>
+ <div class="lager-photo-details">${p.cover?'<span class="lager-photo-main">★ Hauptbild</span>':''}<small>${esc(p.width)} × ${esc(p.height)} px · ${(p.bytes/1024/1024).toFixed(2)} MB · ${p.optimized?'optimiert':'Original'}</small>
+ <label>Kategorie<select data-photo-category="${esc(p.id)}">${Object.entries(PHOTO_CATEGORIES).map(([v,t])=>option(v,t,p.category)).join('')}</select></label>
+ <label>Beschreibung<input data-photo-description="${esc(p.id)}" maxlength="140" value="${esc(p.description||'')}"></label>
+ <div class="lager-photo-buttons"><button type="button" class="secondary-button" data-photo-save="${esc(p.id)}">Speichern</button>${p.cover?'':`<button type="button" class="secondary-button" data-photo-cover="${esc(p.id)}">★ Hauptbild</button>`}<button type="button" class="secondary-button lager-delete" data-photo-delete="${esc(p.id)}">Löschen</button></div></div></article>`).join('')||'<p class="lager-hint">Noch keine Fotos an dieser Stelle.</p>'}</div>
+ <dialog id="lagerPhotoDialog" class="lager-photo-dialog"><button type="button" id="lagerPhotoDialogClose" class="secondary-button">Schließen ✕</button><img id="lagerPhotoFull" alt="Foto-Vorschau"><p id="lagerPhotoInfo"></p></dialog>
+ </section>`;
+}
+function bindPhotoPanel(el,preselect){
+ const panel=el.querySelector('#lagerPhotoPanel');if(!panel)return;
+ const refresh=async msg=>{photos=await readPhotoIndex();draw(preselect);if(msg)status(msg);};
+ panel.querySelector('#lagerPhotoClose').addEventListener('click',()=>{photoOpen=false;draw(preselect);});
+ panel.querySelector('#lagerPhotoType').addEventListener('change',e=>{photoType=e.target.value;photoTarget='';draw(preselect);});
+ panel.querySelector('#lagerPhotoTarget').addEventListener('change',e=>{photoTarget=e.target.value;draw(preselect);});
+ const handleFiles=async e=>{
+  const files=[...e.target.files];if(!files.length||photoBusy)return;
+  photoBusy=true;const buttons=panel.querySelectorAll('input[type=file]');buttons.forEach(b=>b.disabled=true);
+  const category=panel.querySelector('#lagerPhotoNewCategory').value;
+  const description=panel.querySelector('#lagerPhotoNewDescription').value;
+  const keepOriginal=panel.querySelector('#lagerPhotoOriginal').checked;
+  let completed=0;
+  try{
+   for(const file of files){
+    status(`Foto ${completed+1} von ${files.length} wird lokal vorbereitet …`);
+    const prepared=await preparePhoto(file,{keepOriginal});
+    await savePhoto({ownerType:photoType,ownerId:photoTarget,category,description},prepared);
+    completed++;
+   }
+   await refresh(`${completed} Foto${completed===1?'':'s'} lokal gespeichert.`);
+  }catch(err){await refresh(`${completed} gespeichert. Fotoimport unterbrochen: ${err.message}`);}
+  finally{photoBusy=false;}
+ };
+ panel.querySelector('#lagerPhotoCamera')?.addEventListener('change',handleFiles);
+ panel.querySelector('#lagerPhotoGallery')?.addEventListener('change',handleFiles);
+ panel.querySelectorAll('[data-photo-save]').forEach(b=>b.addEventListener('click',async()=>{
+  const id=b.dataset.photoSave;b.disabled=true;
+  try{await changePhoto(id,{category:panel.querySelector(`[data-photo-category="${id}"]`).value,description:panel.querySelector(`[data-photo-description="${id}"]`).value});await refresh('Fotoangaben gespeichert.');}
+  catch(err){b.disabled=false;status(err.message);}
+ }));
+ panel.querySelectorAll('[data-photo-cover]').forEach(b=>b.addEventListener('click',async()=>{
+  const id=b.dataset.photoCover;b.disabled=true;
+  try{const p=photos.find(x=>x.id===id);await changePhoto(id,p,{cover:true});await refresh('Neues Hauptbild gespeichert.');}
+  catch(err){b.disabled=false;status(err.message);}
+ }));
+ panel.querySelectorAll('[data-photo-delete]').forEach(b=>b.addEventListener('click',async()=>{
+  if(!confirm('Dieses Foto dauerhaft aus dem lokalen Archiv löschen?'))return;
+  b.disabled=true;
+  try{await removePhoto(b.dataset.photoDelete);await refresh('Foto endgültig gelöscht.');}
+  catch(err){b.disabled=false;status(err.message);}
+ }));
+ const dialog=panel.querySelector('#lagerPhotoDialog');let previewURL=null;
+ const cleanup=()=>{if(previewURL){URL.revokeObjectURL(previewURL);previewURL=null;}};
+ dialog.addEventListener('close',cleanup);
+ panel.querySelector('#lagerPhotoDialogClose').addEventListener('click',()=>dialog.close());
+ panel.querySelectorAll('[data-photo-preview]').forEach(b=>b.addEventListener('click',async()=>{
+  b.disabled=true;
+  try{
+   const photo=photos.find(p=>p.id===b.dataset.photoPreview),blob=await readPhotoBlob(photo.id);
+   cleanup();previewURL=URL.createObjectURL(blob);
+   dialog.querySelector('#lagerPhotoFull').src=previewURL;
+   dialog.querySelector('#lagerPhotoInfo').textContent=`${photo.description||PHOTO_CATEGORIES[photo.category]} · ${photo.width} × ${photo.height} Pixel`;
+   dialog.showModal();
+  }catch(err){cleanup();status('Vorschau nicht verfügbar: '+err.message);}
+  finally{b.disabled=false;}
+ }));
 }
 function draw(preselect=''){
  const el=document.getElementById('lagerItemContent');if(!el)return;
@@ -154,12 +248,15 @@ function draw(preselect=''){
  const stockSelected=items.find(i=>i.id===stockItemId);
  const trackingSelected=items.find(i=>i.id===trackingItemId);
  const lowCount=items.filter(i=>stockAlert(i).low).length;
- el.innerHTML=`<div class="lager-item-head"><div><strong>${items.length}</strong> Artikel gespeichert · <strong>${lowCount}</strong> Mindestbestand-Warnungen</div><button type="button" id="lagerItemAdd" class="primary-button">+ Artikel</button></div>
+ el.innerHTML=`<div class="lager-item-head"><div><strong>${items.length}</strong> Artikel gespeichert · <strong>${lowCount}</strong> Mindestbestand-Warnungen</div><div class="lager-photo-head-actions"><button type="button" id="lagerPhotoOpen" class="secondary-button">📷 Fotoarchiv</button><button type="button" id="lagerItemAdd" class="primary-button">+ Artikel</button></div></div>
+ ${photoPanel()}
  ${formOpen?form(selected,preselect):''}
  ${stockSelected?stockPanel(stockSelected):''}
  ${trackingSelected?trackingPanel(trackingSelected):''}
  <label class="lager-item-search-label" for="lagerItemSearch">Artikel durchsuchen</label><input id="lagerItemSearch" class="lager-item-search" type="search" placeholder="Name, Seriennummer, Kennung, Kategorie …" value="${esc(query)}">
  <div id="lagerItemList">${filtered.length?filtered.map(card).join(''):'<p class="lager-hint">Keine Artikel vorhanden oder keine Treffer. Mit „+ Artikel“ kannst du deinen ersten Gegenstand erfassen.</p>'}</div>`;
+ el.querySelector('#lagerPhotoOpen').addEventListener('click',()=>{photoOpen=!photoOpen;photoType='item';photoTarget=items[0]?.id||'';draw(preselect);});
+ bindPhotoPanel(el,preselect);
  el.querySelector('#lagerItemAdd').addEventListener('click',()=>{stockItemId=null;trackingItemId=null;editId=null;formOpen=true;draw(preselect);el.querySelector('[name="name"]')?.focus();});
  el.querySelector('#lagerItemCancel')?.addEventListener('click',()=>{editId=null;formOpen=false;draw(preselect);});
  bindTemplates(el);
@@ -201,6 +298,7 @@ function draw(preselect=''){
  bindCards(el.querySelector('#lagerItemList'));
 }
 function bindCards(el){
+ el?.querySelectorAll('[data-photo-item]').forEach(btn=>btn.addEventListener('click',()=>{photoType='item';photoTarget=btn.dataset.photoItem;photoOpen=true;draw();document.getElementById('lagerPhotoPanel')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-track-open]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=btn.dataset.trackOpen;trackingRecordId=null;trackingOperation=null;stockItemId=null;formOpen=false;editId=null;draw();document.querySelector('.lager-tracking-panel')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-stock-open]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=null;stockItemId=btn.dataset.stockOpen;stockKind=btn.dataset.kind;formOpen=false;editId=null;draw();document.getElementById('lagerStockForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-item-edit]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=null;stockItemId=null;editId=btn.dataset.itemEdit;formOpen=true;draw();document.getElementById('lagerItemForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
@@ -246,7 +344,7 @@ function bindTracking(el,preselect){
 }
 export function renderLagerartikel(){return `<div class="lager-heading"><span class="eyebrow">MEIN ALLTAG · LAGERHAUS</span><h1>Meine Artikel</h1><p>Artikel, Mengen und mehrere Lagerorte verwalten – lokal und offline.</p></div><div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Lagerbereiche</a></div><div class="lager-status" id="lagerItemStatus" role="status" aria-live="polite">Artikel werden geladen …</div><div id="lagerItemContent"></div>`;}
 export async function mountLagerartikel(preselectRoomId=''){
- editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;query='';try{await load();if(!document.getElementById('lagerItemContent'))return;
+ editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;photoOpen=false;photoType='item';photoTarget='';query='';try{await load();if(!document.getElementById('lagerItemContent'))return;
   draw(rooms.some(r=>r.id===preselectRoomId)?preselectRoomId:'');status(`${items.length} Artikel geladen · offline gespeichert.`);
  }catch(e){status('Artikel konnten nicht geladen werden: '+e.message);}
 }

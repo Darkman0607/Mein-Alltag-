@@ -1,0 +1,21 @@
+MEIN ALLTAG · LAGERHAUS · L10 · BETA V0.10.0 · 27.10.2026
+
+NEU: LOKALES FOTOARCHIV
+1) Mehrere Fotos je Artikel und je Lagerort (Raum/Möbel/Fach); Verknüpfung mit stabiler ID.
+2) Kameraaufnahme und Mehrfachauswahl aus der Galerie in der Artikelseite unter „Fotoarchiv“.
+3) Auswahl eines Hauptbildes pro Artikel oder Lagerort; Foto-Miniatur im Artikeldatensatz.
+4) Sechs Fotokategorien, Beschreibung, Galerie und vergrößerte Vorschau.
+5) Standard: WebP-Komprimierung Qualitätsfaktor 90 %, maximal 2048 Pixel längste Kante; wird nur gewählt, wenn Datei kleiner als Original. Alternativ: Original unverändert behalten.
+6) Fotos als Blob pro Bild in derselben IndexedDB nur im Lagerhaus-Modulspeicher; Metadaten/kleine Thumbnails getrennt. Speicherung und Löschung atomar.
+7) Beim endgültigen Löschen einer Artikelkarte werden die zugehörigen Bilddateien atomar mit entfernt. Bei gelöschten Lagerorten bleiben die Bilder mit alter Kennung abrufbar, damit keine Daten ungefragt verloren gehen.
+8) Zugelassene Formate: JPG, PNG, WebP und AVIF, maximal 25 MB pro Bild. Kein automatischer Cloud-Upload.
+
+ANLEITUNG
+Lagerhaus → Meine Artikel → „📷 Fotoarchiv“ oder „📷 Fotos“ bei einem Artikel.
+Artikel oder Lagerort auswählen, Kamera/Galerie öffnen, Kategorie/Beschreibung festlegen, optional „Original-Dateien unverändert behalten“ aktivieren. Foto antippen für große Vorschau. „★ Hauptbild“ definiert das Foto der Artikelkarte.
+
+DATENSCHUTZ / BACKUP
+Die Fotos sind lokal im Chrome-/Android-App-Speicher abgelegt. Browserverlauf allein ist normalerweise unkritisch, das Löschen von Website-/App-Daten hingegen löscht die Galerie. Dieses Update enthält weiterhin KEINEN Foto-Backup-/Export-Manager und KEINEN Cloud-Abgleich. Ein ZIP-Update selbst ist KEINE Sicherung deiner bereits erfassten Fotos.
+
+TESTS
+Node-Version/Regressionsprüfungen L04–L10 bestanden; Modellprüfungen für Fotometadaten, Hauptbild, eindeutige Referenzen, Version/Offline-Cache erfolgreich. Browserseitige Canvas-Bildkodierung mit Chromium about:blank geprüft: Originalbytes unverändert und WebP-Komprimierung mit 2048-Pixel-Grenze. Lokales Chromium-End-to-End scheitert weiterhin mit ERR_BLOCKED_BY_ADMINISTRATOR; echte Android-Kamera/Galerie/Offline-Prüfung steht aus. Diese Tests gelten ausdrücklich NICHT als bestanden.

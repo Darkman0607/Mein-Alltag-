@@ -1,0 +1,8 @@
+Mein Alltag · Beta 0.10.0 – Update L10 (27.10.2026)
+
+1. Lade alle Dateien dieser ZIP in das GitHub-Repository „Mein-Alltag-“ auf Branch main, ins Wurzelverzeichnis (nur wenn der automatische GitHub-Upload nicht bereits erfolgt ist).
+2. Öffne GitHub Pages. Unter „Mehr“ soll Beta V0.10.0 stehen. Falls noch V0.9.0 angezeigt wird: „Auf Updates prüfen“ und App neu öffnen.
+3. Öffne Lagerhaus → Meine Artikel → Fotoarchiv. Lege zunächst einen Artikel oder Lagerraum an, falls noch keiner vorhanden ist.
+4. Teste ein Foto per Kamera und eines aus der Galerie, dann Seite neu laden. Beide Bilder müssen sichtbar bleiben. Hauptbild wechseln, Vorschau öffnen, Kategorie bearbeiten und ein Foto löschen.
+5. Achtung: Fotos sind NUR lokal gespeichert. Die ZIP enthält den Programmcode, nicht deine persönlichen Fotos. Die Browser-Speicherdaten nicht löschen.
+6. Die Word-Datei „bauhaus.docx“ enthält die aktuelle Mastercheckliste; Android-Fototests bleiben offen, bis du sie auf deinem Gerät geprüft hast.

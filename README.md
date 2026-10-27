@@ -121,3 +121,6 @@ Die Artikelseite im Lagerhaus bietet jetzt drei Buchungsarten: Einlagern, Entneh
 - Atomare Bestandsbuchungen für Einlagerung, Entnahme, Fach-zu-Fach-Umlagerung; gegen reservierte Gebinde/Geräte geschützt.
 - Keine Änderung des Datenbankschemas oder der bestehenden IDs.
 - Tests: `node release-check.mjs`, `node release-check-l05.mjs` bis `node release-check-l09.mjs`.
+
+## L10 – Lokales Fotoarchiv (V0.10.0)
+Über **Lagerhaus → Meine Artikel → 📷 Fotoarchiv** oder **Fotos** an einer Artikelkarte lassen sich Artikel- und Lagerortfotos aufnehmen/importieren. Es gibt eine Bildvorschau, ein frei wählbares Hauptbild, Kategorien und Beschreibungen. Fotos werden als einzelne Binary-Blobs lokal in IndexedDB gespeichert, Vorschaubilder und Verknüpfungen separat in `photos.index.v1`. Bilder bleiben an stabile Artikel-/Fachkennungen gebunden, nicht an deren Namen. Originale können unverändert gespeichert werden; sonst wird eine kleinere WebP-Datei mit 2048-Pixel-Limit vorgeschlagen (nur wenn kleiner). Löschvorgänge sind transaktional. **Wichtig:** Kein Backup für Fotos und keine Cloud-Synchronisation vorhanden. Der ZIP-Download der App enthält keine persönlichen lokalen Daten. Android-End-to-End-Test offen.

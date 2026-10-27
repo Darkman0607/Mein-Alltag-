@@ -97,3 +97,32 @@ export async function mutateModuleValues(store,keys,change){
   }
  });
 }
+
+/** L10: atomic photo/metadata changes including physical deletion of photo payload keys.
+ * Callbacks are synchronous and run after all requested keys have been read. */
+export async function mutateModuleValuesWithDeletes(store,keys,change){
+ assertStore(store);
+ if(!Array.isArray(keys)||keys.length===0||new Set(keys).size!==keys.length)throw new Error('Ungültige Transaktionsschlüssel.');
+ const db=await openDatabase();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite'),object=tx.objectStore(store);
+  const values=Object.create(null);let pending=keys.length,output,callbackError;
+  tx.oncomplete=()=>resolve(output);
+  tx.onerror=()=>{};
+  tx.onabort=()=>reject(callbackError||tx.error||new Error('Foto-Speicherung abgebrochen.'));
+  for(const key of keys){
+   const req=object.get(key);
+   req.onsuccess=()=>{
+    values[key]=req.result??null;if(--pending!==0)return;
+    try{
+     output=change(values);
+     if(!output||!Array.isArray(output.write)||!Array.isArray(output.remove||[]))throw new Error('Ungültige Speicheraktion.');
+     const removed=new Set(output.remove||[]);
+     if(output.write.some(([k])=>removed.has(k)))throw new Error('Derselbe Schlüssel kann nicht gleichzeitig gelöscht und geschrieben werden.');
+     for(const [key,value] of output.write)object.put(value,key);
+     for(const key of removed)object.delete(key);
+    }catch(e){callbackError=e;tx.abort();}
+   };
+  }
+ });
+}
