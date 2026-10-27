@@ -130,3 +130,12 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - [x] Paar/Stück-Umrechnung, Gebinde mit Restmengen, Zuordnungsschutz und Cache geprüft.
 - [ ] Chrome-End-to-End (gesperrt: ERR_BLOCKED_BY_ADMINISTRATOR).
 - [ ] Echtes Android-Touch-/Offline-/Update-Testing.
+
+## L12-HF02 · V0.12.2 · Regal-Detaildialog
+- [x] HTML-dialog/showModal: Top-Layer verhindert Überdeckung durch App-Header.
+- [x] Reaktionsfähige Kopfzeile: Text und Schließen-Button auf 320/360/412/768px ohne Kollision.
+- [x] Isolierter Chromium-Dialogtest: ✕ klickbar; Escape funktioniert; keine horizontale Überbreite.
+- [x] L04–L12-HF01 Node-Regressionen, HF02-Version/Modalprüfung und produktive JavaScript-Syntax PASS.
+- [x] App-Version 0.12.2 / SW-Cache mein-alltag-v0-12-2.
+- [ ] Vollständiger Browser-App-E2E: Netzaufruf in Testumgebung durch ERR_BLOCKED_BY_ADMINISTRATOR verhindert.
+- [ ] Echtes Android-Handy, Offline-/Versionswechsel-Bedienung bestätigt.

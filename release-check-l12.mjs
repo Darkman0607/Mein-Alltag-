@@ -33,9 +33,9 @@ assert.equal(formatAmount(1.5),'1,5');
 const rm=roomSvg({...room,furniture:[{...f,compartments:[]}]});assert.match(rm,/lager-room-svg/);
 for(const s of ['lagerZoomIn','lagerFullScreen','lagerShelfPanel','lagerQuickAssign','shelfPackagesSvg','inventoryFurniture'])assert(fs.readFileSync('modules/lagerhaus-app.js','utf8').includes(s),s);
 const trackingUi=fs.readFileSync('modules/lagerhaus-items-view.js','utf8');assert(trackingUi.includes('name="remaining"'));
-const meta=JSON.parse(fs.readFileSync('version.json','utf8'));assert.equal(meta.version,'0.12.1');assert.equal(meta.build,'L12-HF01');
-assert(fs.readFileSync('assets/app.js','utf8').includes("APP_VERSION='0.12.1'"));
-const sw=fs.readFileSync('sw.js','utf8');assert(sw.includes("'./modules/lagerhaus-shelf.js'"));assert(sw.includes('mein-alltag-v0-12-1'));
+const meta=JSON.parse(fs.readFileSync('version.json','utf8'));assert.equal(meta.version,'0.12.2');assert.equal(meta.build,'L12-HF02');
+assert(fs.readFileSync('assets/app.js','utf8').includes("APP_VERSION='0.12.2'"));
+const sw=fs.readFileSync('sw.js','utf8');assert(sw.includes("'./modules/lagerhaus-shelf.js'"));assert(sw.includes('mein-alltag-v0-12-2'));
 for(const entry of sw.matchAll(/'\.\/([^']+)'/g)){assert(fs.existsSync(entry[1]),entry[1]);}
 for(const s of ['DB_NAME','DB_VERSION'])assert(fs.readFileSync('assets/database.js','utf8').includes(s));
 console.log('L12 PASS – Lagerregal, offene Gebinde, Restmengen, Buchung, Mengenbilanz, Darstellung, unzugeordnete Artikel, Version, Offline-Assets');

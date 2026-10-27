@@ -280,7 +280,7 @@ function shelfInventoryPanel(room){
  const tierGroups=groups.filter(g=>g.id!==f.id);
  const visualGroups=tierGroups.length?[...tierGroups,...(entries.some(x=>x.locationId===f.id)?[groups[0]]:[])]:[{id:f.id,name:'Regalfläche'}];
  const focus=`<div class="lager-focus-3d" aria-label="Vergrößertes Regal mit Fächern und realen Artikeln"><div class="lager-focus-top">${esc(f.name||'Regal')}</div><div class="lager-focus-rack">${visualGroups.map((g,index)=>{const direct=entries.filter(x=>x.locationId===g.id||(g.id===f.id&&x.locationId===f.id));return `<div class="lager-focus-tier"><div class="lager-focus-objects">${direct.length?direct.slice(0,8).map(x=>`<div class="lager-focus-box" title="${esc(x.name)}: ${esc(formatAmount(x.quantity))} ${esc(x.unit)}"><b>▣</b><span>${esc(x.name)}</span><small>${esc(formatAmount(x.quantity))} ${esc(x.unit)}${pairText(x)}</small></div>`).join(''):'<span class="lager-focus-empty">Noch frei</span>'}</div><div class="lager-focus-plank"><span>${esc(g.name)}</span></div></div>`;}).join('')}</div></div>`;
- return `<section id="lagerShelfPanel" class="lager-shelf-panel lager-shelf-modal" role="dialog" aria-modal="true" aria-label="Regal vergrößert: ${esc(f.name||'Regal')}" tabindex="-1"><div class="lager-shelf-inner"><div class="lager-shelf-head"><div><span class="eyebrow">3D-REGAL · DETAILANSICHT</span><h2>${esc(f.name||FURNITURE[f.type]?.name||'Lagermöbel')}</h2><small>${esc(f.code||'')} · ${entries.length} Artikelpositionen</small></div><button type="button" id="lagerCloseShelf" class="secondary-button">✕ Schließen</button></div>${focus}<h3>Artikel im Regal</h3>${entries.length?groups.map(g=>{const lines=entries.filter(x=>x.locationId===g.id);return lines.length?`<div class="lager-shelf-group"><h3>${esc(g.name)}</h3>${lines.map(oneLine).join('')}</div>`:'';}).join(''):'<p class="lager-hint">In diesem Regal ist noch kein Artikel hinterlegt. Artikel im Raum werden NICHT automatisch einem Regal zugeordnet.</p>'}${roomUnassigned(room,itemRecords).length?`<p class="lager-hint">📦 ${roomUnassigned(room,itemRecords).length} Artikelposition(en) liegen noch direkt im Raum. Unterhalb der 3D-Skizze kannst du sie dem gewünschten Fach zuordnen.</p>`:''}<a class="secondary-button lager-shelf-manage" href="#/lagerhaus/items/${encodeURIComponent(room.id)}">▣ Artikel und Lagerorte verwalten</a></div></section>`;
+ return `<dialog id="lagerShelfPanel" class="lager-shelf-panel lager-shelf-modal" role="dialog" aria-modal="true" aria-label="Regal vergrößert: ${esc(f.name||'Regal')}" tabindex="-1"><div class="lager-shelf-inner"><div class="lager-shelf-head"><div class="lager-shelf-title"><span class="eyebrow">3D-REGAL · DETAILANSICHT</span><h2>${esc(f.name||FURNITURE[f.type]?.name||'Lagermöbel')}</h2><small>${esc(f.code||'')} · ${entries.length} Artikelpositionen</small></div><button type="button" id="lagerCloseShelf" class="secondary-button" aria-label="Regalansicht schließen"><span aria-hidden="true">✕</span><span>Schließen</span></button></div>${focus}<h3>Artikel im Regal</h3>${entries.length?groups.map(g=>{const lines=entries.filter(x=>x.locationId===g.id);return lines.length?`<div class="lager-shelf-group"><h3>${esc(g.name)}</h3>${lines.map(oneLine).join('')}</div>`:'';}).join(''):'<p class="lager-hint">In diesem Regal ist noch kein Artikel hinterlegt. Artikel im Raum werden NICHT automatisch einem Regal zugeordnet.</p>'}${roomUnassigned(room,itemRecords).length?`<p class="lager-hint">📦 ${roomUnassigned(room,itemRecords).length} Artikelposition(en) liegen noch direkt im Raum. Unterhalb der 3D-Skizze kannst du sie dem gewünschten Fach zuordnen.</p>`:''}<a class="secondary-button lager-shelf-manage" href="#/lagerhaus/items/${encodeURIComponent(room.id)}">▣ Artikel und Lagerorte verwalten</a></div></dialog>`;
 }
 function unassignedPanel(room){
  const entries=roomUnassigned(room,itemRecords);
@@ -306,10 +306,26 @@ function renderRoom(room){const el=document.getElementById('lagerRoomContent');i
  el.querySelector('#lagerZoomOut')?.addEventListener('click',()=>zoomBy(-.2));
  el.querySelector('#lagerZoomReset')?.addEventListener('click',()=>{stageZoom=1;stageOffsetX=0;stageOffsetY=0;syncView();});
  el.querySelector('#lagerFullScreen')?.addEventListener('click',()=>{stageFull=!stageFull;renderRoom(room);});
- el.querySelector('#lagerCloseShelf')?.addEventListener('click',()=>{inventoryFurniture=null;renderRoom(room);});
  const shelfModal=el.querySelector('#lagerShelfPanel');
- shelfModal?.focus({preventScroll:true});
- shelfModal?.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();inventoryFurniture=null;renderRoom(room);} });
+ if(shelfModal){
+  // A native modal dialog uses the browser top layer. It cannot be covered by
+  // the app header (the previous fixed panel was trapped in main's z-index).
+  // showModal() also isolates the app controls below the open shelf.
+  const closeShelf=()=>{
+   if(!shelfModal.open)return;
+   shelfModal.close();
+   inventoryFurniture=null;
+   // When launched from a room preview, clear the deep-link shelf segment.
+   // Otherwise refresh the room in place without changing navigation history.
+   const shelfRoute=roomLink(room.id)+'/shelf/';
+   if(location.hash.startsWith(shelfRoute))location.hash=roomLink(room.id);
+   else renderRoom(room);
+  };
+  el.querySelector('#lagerCloseShelf')?.addEventListener('click',closeShelf);
+  shelfModal.addEventListener('cancel',e=>{e.preventDefault();closeShelf();});
+  shelfModal.addEventListener('keydown',e=>{if(e.key==='Escape')e.stopPropagation();});
+  shelfModal.showModal();
+ }
  const trackedTouches=new Map();let pinch=null,pan=null,drag=null,pinchUsed=false;
  const distance=()=>{const [a,b]=[...trackedTouches.values()];return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0;};
  // Native page pinch/scroll is disabled ONLY over the 3D stage, not over the app.

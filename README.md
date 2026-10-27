@@ -146,3 +146,10 @@ Alle Bilder bleiben lokal in IndexedDB; die ZIP archiviert **keine** persönlich
 - Paarverbrauch bei Handschuhen (1 Paar = 2 Stück), volle/angebrochene Packungen, reale Restmengen.
 - Ohne Datenbankmigration; bestehende Daten und IDs bleiben bestehen.
 - Node-Regressionen bestanden; echter Android-Test offen.
+
+## L12-HF02 · Hotfix V0.12.2 (27.10.2026)
+- Titel und Schließen-Schaltfläche im Regal-Detailfenster überlagerten die App-Kopfzeile: behoben mit nativem HTML-Dialog im Browser-Top-Layer.
+- Responsiver zweispaltiger Kopf mit Umbruch, mindestens 44px großer Schließen-Schaltfläche.
+- ✕, Escape/Android-Zurückaktion und Rücknavigation nach Regal-Direktlink korrigiert.
+- Bestands-, Fach- und Packungsdaten unverändert; keine Datenbankmigration.
+- Chromium-Komponententests bei 320/360/412/768px und JS-/Node-Regressionen bestanden; Android-Praxistest noch offen.

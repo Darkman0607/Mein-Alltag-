@@ -1,0 +1,6 @@
+Mein Alltag / Lagerhaus / L12-HF02 V0.12.2 – 27.10.2026
+Fehler Android: Regalansicht Titel/Überschrift überschneiden obere App-Leiste. Schließen-X nicht anklickbar.
+Korrektur: verschachteltes fixed-Panel durch natives <dialog> + showModal() im Browser Top-Layer ersetzt; responsiver Titelblock und separater großer Schließen-Button; Escape-/Zurückbehandlung und Deep-Link bereinigt.
+Tests: JS Syntax und Node Regression bestanden. Separater Chromium UI-Test bei 320/360/412/768px prüft Layout, Klick auf X, Escape und horizontale Breite. Vollständiger App-End-to-End und Android bleiben offen (lokaler Chromium-URL-Test ERR_BLOCKED_BY_ADMINISTRATOR).
+Bestandsdaten/Fachkennungen unverändert.
+Word-Checkliste bauhaus.docx mit anklickbaren Häkchen ist in der beigefügten Hotfix-ZIP-Datei aktualisiert.

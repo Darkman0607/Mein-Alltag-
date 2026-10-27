@@ -7,7 +7,7 @@ import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
 
-export const APP_VERSION='0.12.1';
+export const APP_VERSION='0.12.2';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -149,7 +149,7 @@ backButton.addEventListener('click',()=>{if(history.length>1)history.back();else
 document.getElementById('settingsButton').addEventListener('click',()=>navigate('more'));
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));
 window.addEventListener('hashchange',render);
-window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!backButton.hidden){if(history.length>1)history.back();else navigate('home');}});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('#lagerShelfPanel[open]')&&!backButton.hidden){if(history.length>1)history.back();else navigate('home');}});
 if(!location.hash)history.replaceState(null,'','#/home');
 render();
 openDatabase().catch(err=>console.warn('IndexedDB nicht verfügbar:',err));

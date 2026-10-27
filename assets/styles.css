@@ -208,3 +208,53 @@
 .lager-quick-pair button{min-height:42px;padding:9px;border:1px solid #7aafa7;color:#eaffee;background:#22483f;border-radius:11px;cursor:pointer}
 .lager-room-card .lager-room-illustration [data-furniture]{cursor:pointer}
 .lager-room-card .lager-room-illustration [data-furniture]:hover{filter:drop-shadow(0 0 5px #eac878)}
+
+
+/* L12-HF02 / V0.12.2 – real top-layer shelf dialog and collision-free mobile header.
+   Native <dialog>.showModal() prevents the app toolbar and navigation from
+   painting above the detail view or intercepting its Close button. */
+dialog.lager-shelf-modal {
+  position:fixed; inset:0; display:none;
+  width:100vw; max-width:none; height:100dvh; max-height:none;
+  margin:0; padding:max(16px,env(safe-area-inset-top,0px))
+    max(12px,env(safe-area-inset-right,0px))
+    max(22px,env(safe-area-inset-bottom,0px))
+    max(12px,env(safe-area-inset-left,0px));
+  border:0; border-radius:0; color:#eef5f7; background:#0b1821;
+  overflow-x:hidden; overflow-y:auto; box-sizing:border-box;
+  overscroll-behavior:contain; isolation:isolate;
+}
+dialog.lager-shelf-modal[open]{display:block}
+dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
+.lager-shelf-modal .lager-shelf-inner{width:100%; max-width:740px; margin:0 auto; padding:0 0 36px; min-width:0}
+.lager-shelf-modal .lager-shelf-head{
+  position:sticky; top:-1px; z-index:5;
+  display:grid; grid-template-columns:minmax(0,1fr) auto;
+  align-items:start; gap:12px; min-width:0;
+  margin:0 0 16px; padding:12px 10px 14px;
+  border:1px solid #476471; border-radius:16px;
+  background:#0f2732; box-shadow:0 5px 16px #0005;
+}
+.lager-shelf-modal .lager-shelf-title{min-width:0; max-width:100%; overflow-wrap:anywhere}
+.lager-shelf-modal .lager-shelf-title .eyebrow{
+  display:block; line-height:1.55; letter-spacing:.09em;
+  font-size:clamp(10px,2.6vw,12px); margin-bottom:8px;
+}
+.lager-shelf-modal .lager-shelf-head h2{
+  font-size:clamp(18px,4.6vw,24px);line-height:1.3;
+  margin:0 0 9px; overflow-wrap:anywhere;
+}
+.lager-shelf-modal .lager-shelf-head small{display:block;line-height:1.55;overflow-wrap:anywhere}
+.lager-shelf-modal #lagerCloseShelf{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:48px;min-width:48px;padding:9px 12px;
+  border-radius:12px; white-space:nowrap;
+  font-size:clamp(12px,3vw,15px);line-height:1.3;
+  touch-action:manipulation; position:relative;z-index:6;
+}
+.lager-shelf-modal #lagerCloseShelf span[aria-hidden]{font-size:19px;line-height:1}
+@media(max-width:360px){
+ .lager-shelf-modal .lager-shelf-head{gap:9px;padding:10px 8px 12px}
+ .lager-shelf-modal #lagerCloseShelf{padding:8px;min-width:44px}
+ .lager-shelf-modal #lagerCloseShelf span:last-child{display:none}
+}
