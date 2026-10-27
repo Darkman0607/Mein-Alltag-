@@ -1,0 +1,27 @@
+MEIN ALLTAG – L07 / BETA V0.7.0 – ABNAHME
+Stand: 27. Oktober 2026
+
+Veröffentlicht auf GitHub main:
+Code-Commit: c137bf12f802a476470c0fb677ef6f01caabd381
+Repository: https://github.com/Darkman0607/Mein-Alltag-
+App: https://darkman0607.github.io/Mein-Alltag-/
+
+FERTIG:
+[x] Mehrere Lagerorte pro Artikel; Bestandssumme aus Lagerpositionen
+[x] Einlagern/Entnehmen/Umlagern als Buchungen; keine Überentnahme
+[x] Mindestbestand je Artikel und Warnanzeige
+[x] Packungsgrößen mit Umrechnung für Buchungen
+[x] Letzte fünf Buchungen pro Artikel sichtbar, Protokoll lokal
+[x] Atomare read-modify-write-Transaktionen für Artikel-Buchungen sowie Raum/Fach-Änderungen
+[x] Übernahme früherer Artikel L05/L06 ohne Löschung oder Neuanlage; IDs erhalten
+[x] Alte Modultrennung und Datenbankschema erhalten
+[x] Automatisierte L04–L06-Regressions- und L07-Tests bestanden
+[x] App-Version, version.json und sw.js auf GitHub main abgeglichen
+[x] ZIP inklusive bauhaus.docx mit L07-Häkchen zusammengestellt
+
+OFFEN:
+[ ] Echte Android-Touch-/PWA-Offline- und Cachewechsel-Prüfung
+[ ] Browser-End-to-End-Test (Chromium-Headless-Timeout trotz HTTP-200)
+
+Hinweis: Vorherige Browserdaten NICHT löschen. L08 enthält erst differenzierte
+Gebinde-Einzelverwaltung/Seriennummern, nicht Bestandteil von L07.

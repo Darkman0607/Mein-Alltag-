@@ -1,0 +1,12 @@
+MEIN ALLTAG – BETA 0.7.0 – UPDATE L07
+
+1. https://darkman0607.github.io/Mein-Alltag-/ in Chrome öffnen.
+2. Bei Hinweis „Neue Version verfügbar“ auf Aktualisieren drücken.
+3. Version unten: BETA V0.7.0.
+4. Lagerhaus → Meine Artikel öffnen.
+5. Artikel: + Einlagern, − Entnehmen oder ↔ Umlagern.
+6. Artikel bearbeiten → Weitere Angaben: Mindestbestand und Packungsgröße.
+7. Mehrere Lagerorte stehen auf der Artikelkarte unter dem Gesamtbestand.
+8. ALTE LAGERDATEN NICHT LÖSCHEN. Browser-/Android-Praxistest bleibt ausstehend.
+
+Technik: PWA mit IndexedDB, Offline-Service-Worker, Versionsdatei.
