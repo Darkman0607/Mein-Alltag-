@@ -1,4 +1,4 @@
-# Mein Alltag – Beta V0.1.0
+# Mein Alltag – Beta V0.3.1
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -51,3 +51,30 @@ Persönliche Daten werden nur im lokalen Browserprofil per IndexedDB gespeichert
 ### Prüfstatus L01
 JavaScript-Syntax (`node --check`) sowie statische und gezielte Rendering-Unitprüfungen bestanden.
 Browser-End-to-End-Test lokal durch Umgebungsrichtlinie blockiert; echter Android/Chrome-Gerätetest nach GitHub-Veröffentlichung erforderlich.
+
+
+## Lagerhaus Update L02 – Version 0.2.0 (27.10.2026)
+- 15 unterscheidbare Lagermöbelmodelle in fünf Kategorien; Größe kompakt/standard/groß; Material Metall/Holz/Kunststoff.
+- Möbel beim Hinzufügen benennen und später Bezeichnung/Größe/Material ändern.
+- Mehrere gleiche Möbel je Raum einfügen; Modellvarianten werden lokal gespeichert.
+- L01-Datenmodell und alte Möbelkennungen bleiben kompatibel.
+- Es handelt sich weiterhin um eine schematische 3D-Lageransicht, nicht um einen freien 3D-Editor.
+- Unit- und Syntaxprüfungen bestanden. Browser-E2E und echter Android-Test nicht abgeschlossen (Umgebungsbeschränkung).
+
+## Lagerhaus Update L03 – Version 0.3.0 (27.10.2026)
+- Finger-/Maus-Drag im schematischen 3D-Raum, mit 8-Pixel-Bewegungsschwelle (Tippen bleibt Auswahl).
+- 25-cm-Raster, Wandmagnetismus, ein-/ausblendbare Rasterlinien und Positionstasten.
+- Kollisionserkennung auf Basis der 2D-Möbelgrundflächen einschließlich Größenvariante und Drehung.
+- 90°-Drehung nur bei freiem Platz; automatische konfliktfreie Startplatzwahl.
+- Rückgängig für die letzten 15 Möbeländerungen je Raum während der Sitzung.
+- Daten dauerhaft in bestehendem Offline-Lagerhaus-Store, Version 0.3.0 des App-Caches.
+- Einschränkung: Schematische Raumkoordinaten, noch kein maßstabstreuer frei konfigurierbarer 3D-Editor.
+
+## Hotfix L03-HF01 – V0.3.1 (27.10.2026)
+
+- Grund für alte Anzeige: GitHub `main` hatte App-V0.1.0 und einen alten Service-Worker, die ZIP war bereits V0.3.0.
+- Versionsdatei `version.json` für eindeutigen Online-Abgleich ergänzt.
+- Anzeige in Start und Einstellungen nutzt V0.3.1; der Bereichskopf zeigt dieselbe Version.
+- Service-Worker-Cache auf `mein-alltag-v0-3-1` gesetzt; lokaler IndexedDB-Speicher bleibt unverändert.
+- In **Mehr → Auf Updates prüfen** kann die veröffentlichte Version ohne Cache abgefragt werden.
+- Nach Upload auf GitHub Pages muss der neue Service-Worker installiert bzw. das Updatebanner bestätigt werden.

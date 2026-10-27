@@ -1,7 +1,7 @@
 /* Mein Alltag – offline shell cache; increment version when updating assets. */
-const CACHE='mein-alltag-v0-1-0';
+const CACHE='mein-alltag-v0-3-1';
 const ASSETS=[
- './','./index.html','./manifest.webmanifest','./assets/styles.css','./assets/app.js','./assets/database.js',
+ './','./index.html','./version.json','./manifest.webmanifest','./assets/styles.css','./assets/app.js','./assets/database.js',
  './assets/icons/app-192.png','./assets/icons/app-512.png',
  './assets/icons/lagerhaus.png','./assets/icons/frauengesundheit.png','./assets/icons/familienplaner.png','./assets/icons/putzmanager.png','./assets/icons/hausservice.png',
  './modules/lagerhaus.js','./modules/lagerhaus-app.js','./modules/frauengesundheit.js','./modules/familienplaner.js','./modules/putzmanager.js','./modules/hausservice.js'

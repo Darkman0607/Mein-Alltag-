@@ -1,0 +1,11 @@
+MEIN ALLTAG · L03 HOTFIX HF01 · Version 0.3.1 · 27.10.2026
+
+Grund: Veröffentlichung auf GitHub war V0.1.0 geblieben, obwohl ZIP L03 V0.3.0 enthielt.
+
+Änderungen:
+- Online-Version prüfbar über version.json, Caching umgangen.
+- Version V0.3.1 einheitlich in App und Offline-Cache.
+- Keine Änderungen an der lokalen IndexedDB oder ihren Nutzerdaten.
+- Upload auf GitHub muss alle Webdateien aus der ZIP enthalten, nicht die ZIP als einzige Datei.
+
+Hinweis: Bei veraltetem installiertem App-Symbol erst neu starten / Updatebanner bestätigen. Browserdaten NICHT löschen.

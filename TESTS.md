@@ -37,3 +37,18 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - PASS: SVG-Rendering, HTML-Escaping, Routing-/Offline-Cache-/DB-Store-Statischkonsistenz (`unit_test.mjs`).
 - NICHT AUSGEFÜHRT: Browser-End-to-End-Test (lokales Chromium ist durch Administratorrichtlinie für Navigation gesperrt).
 - NOCH OFFEN: Android-Gerätetest mit Installation und tatsächlicher Offline-Nutzung.
+
+## L03 (27.10.2026) – Prüfstand
+- [x] Node-Test für 15 Möbel, Größen/Drehungen, Kollisions-/Grenzprüfung, Raster/Positionslogik und SVG-Escaping.
+- [x] JavaScript-Syntax aller Module und Manifest-JSON geprüft.
+- [x] ZIP-Vollständigkeit und Dokumentation kontrolliert.
+- [ ] Browser-E2E (Chromium: `ERR_BLOCKED_BY_ADMINISTRATOR`).
+- [ ] Realer Finger-Test und Offline-Retest auf Android.
+- [ ] GitHub-Veröffentlichung: `main` noch auf 0.1.0, L03 nicht veröffentlicht.
+
+## L03-HF01 V0.3.1 – Versionsabgleich
+- [x] App-Versionskonstante / Cache / version.json stimmen überein.
+- [x] Updatesuche fragt serverseitige version.json mit Cache-Bypass ab.
+- [x] Keine Änderung von DB_NAME oder DB_VERSION; vorhandene Daten bleiben in derselben Datenbank.
+- [ ] Auf GitHub main alle Release-Dateien veröffentlicht und GitHub Pages live kontrolliert.
+- [ ] Auf Android mit der bereits installierten App Updatebanner testen; lokale Räume und Lagerobjekte prüfen.

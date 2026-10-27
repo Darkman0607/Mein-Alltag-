@@ -1,0 +1,1 @@
+L02 (V0.2.0): Modelle 15/15, Größen 3/3, Materialien 3/3, individuelle Namen, mehrere Modelle und L01-Kompatibilität. Node Unit: PASS. Browser-E2E: BLOCKIERT. Android-Praxistest: OFFEN.

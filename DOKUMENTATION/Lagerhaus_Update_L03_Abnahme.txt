@@ -1,0 +1,17 @@
+UPDATE L03 – 27.10.2026 – APP V0.3.0
+
+UMGESETZT
+[x] Möbel per Pointer-Events ziehen (Finger/Maus)
+[x] Bewegungen mit 8px-Schwelle; Auswahl per Tippen
+[x] Raster in 25-cm-Plot-Einheiten, Wandmagnetismus
+[x] Präzise Pfeiltasten und Raster anzeigen/ausblenden
+[x] 90°-Drehung, Raumgrenzen- und Rechteck-Kollisionsprüfung
+[x] Rückgängig für letzte 15 Möbeländerungen je Raum (Sitzung)
+[x] Positionsdaten persistieren in vorhandener Lagerdatenbank
+[x] JS-Syntax, JSON, Geometriemodelle, SVG-Escaping und Cache-Version geprüft
+[ ] Browser-End-to-End-Test – durch Chromium ERR_BLOCKED_BY_ADMINISTRATOR verhindert
+[ ] Echtes Android-Handy getestet – nicht möglich in diesem System
+[ ] GitHub main veröffentlicht – dort zuletzt 0.1.0 gefunden
+
+WICHTIG: Für GitHub Pages alle Dateien AUS der ZIP direkt in /(root) des Branch main hochladen.
+Die ZIP als einzelne Repository-Datei hochzuladen genügt nicht.

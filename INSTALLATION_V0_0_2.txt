@@ -1,0 +1,17 @@
+MEIN ALLTAG – V0.0.2 – INSTALLATIONSHILFE (27.10.2026)
+
+App: https://darkman0607.github.io/Mein-Alltag-/
+
+1. Link vollständig direkt in Google Chrome öffnen (nicht in einem eingebetteten Browser).
+2. In der App unter den fünf Modulen „App installieren – Anleitung“ wählen.
+3. Falls Chrome eine native Installationsaufforderung bereitstellt: „App jetzt installieren“ tippen.
+4. Sonst Chrome-Menü ⋮ > „Zum Startbildschirm hinzufügen“ > „Installieren“ (falls angeboten).
+5. Falls nur „Verknüpfung erstellen“ erscheint, ist das nicht identisch mit einer WebAPK-Installation.
+
+Nicht bestätigt: echte App-Installation auf Vivo X300 Pro und Live-GitHub-Pages-Antwort auf diesem Gerät.
+
+Github: https://github.com/Darkman0607/Mein-Alltag-/
+Commit App: 0047ce96904d8bd044dcf2765a7554750b1340a5
+
+ZIP-Ordnerstruktur: index.html muss auf GitHub im Repository-Stammverzeichnis liegen.
+Veränderungen gegenüber V0.0.1: direkte Installationshilfe, Manifestpräzisierung, neue Cache-Version; fünf Modulicons und Modulstrukturen unverändert.

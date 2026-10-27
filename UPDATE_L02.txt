@@ -1,0 +1,21 @@
+MEIN ALLTAG – LAGERHAUS UPDATE L02 · Beta V0.2.0 · 27.10.2026
+
+UMGESETZT
+- Erweiterbare Bibliothek mit 15 Modelltypen: 5 Regalvarianten, 3 Schrankvarianten, 2 Schubladen-/Wagentypen, 3 Boxen-/Kistentypen und 2 Werkbänke.
+- 5 Auswahlkategorien und 3 Größenvarianten (kompakt/standard/groß).
+- 3 Materialdarstellungen: Metall, Holz, Kunststoff.
+- Individuelle Möbelbezeichnung beim Hinzufügen und nachträglich ändern.
+- Mehrfachplatzierung; stabile eigene Möbel-IDs.
+- Getrennte Speicherung der Modell-, Größen- und Materialauswahl pro Möbel in der bisherigen IndexedDB-Raumdatei.
+- Vorhandene L01-Möbel bleiben ohne Datenmigration nutzbar.
+- 3D-Ansicht bleibt schematisch: keine maßstabsgetreue Raumplanung, kein freier Editor.
+
+PRÜFUNG
+- Node JS-Syntax und gezielte Unit-/Modelltests für alle 15 Modelle bestanden.
+- SVG-Rendering einschließlich Legacy-Möbeln und HTML-Sonderzeichen geprüft.
+- Browser-E2E-Test im Container mit ERR_BLOCKED_BY_ADMINISTRATOR blockiert.
+- Android/Chrome-Praxistest noch offen; weder als bestanden behauptet noch simuliert.
+- GitHub Uploadstatus: siehe separate Freigabeinformation.
+
+Installation: Alle Dateien aus dieser ZIP direkt in den ROOT des GitHub Pages Repo hochladen (index.html im Root), wenn GitHub nicht automatisch aktualisiert ist. Chrome-Seite neu öffnen; gegebenenfalls Service-Worker-Update abwarten.
+WICHTIG: Browserdaten nicht löschen; die Daten sind lokal und ohne externes Backup bislang nicht geschützt.

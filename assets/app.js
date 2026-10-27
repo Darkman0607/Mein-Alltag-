@@ -6,7 +6,7 @@ import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
 
-export const APP_VERSION='0.1.0';
+export const APP_VERSION='0.3.1';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -27,7 +27,7 @@ export function navigate(page,id){
   if(location.hash===newHash){render();return;}
   location.hash=newHash;
 }
-function section(title,subtitle=''){return `<div class="section-heading"><span class="eyebrow">Mein Alltag · V0</span><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>`;}
+function section(title,subtitle=''){return `<div class="section-heading"><span class="eyebrow">Mein Alltag · Beta V${APP_VERSION}</span><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>`;}
 function renderHome(){
   return `<div class="home-intro">Fünf Bereiche. Ein Ort für deinen Alltag.</div><div class="module-grid">${MODULES.map((m,i)=>`<button type="button" class="module-tile ${i===4?'wide':''}" data-open="${m.id}" data-id="${m.id}" aria-label="${esc(m.name)} öffnen"><img src="${icon(m)}" alt="" draggable="false"/><div class="tile-copy"><div class="tile-title">${esc(m.name)}</div><div class="tile-desc">${esc(m.subtitle)}</div></div></button>`).join('')}</div><div class="home-footer"><button class="install-link" id="installAction" type="button">App installieren – Anleitung</button><p id="installHelp" class="install-help" aria-live="polite"></p>MEIN ALLTAG · BETA V${APP_VERSION}</div>`;
 }
@@ -112,7 +112,21 @@ function bindView(route){
    loadStorage();document.getElementById('checkUpdate').addEventListener('click',async()=>{
      const message=document.getElementById('moreMessage');
      if(!('serviceWorker' in navigator)){message.textContent='Updateprüfung wird hier nicht unterstützt.';return;}
-     try{const registration=await navigator.serviceWorker.getRegistration();if(!registration){message.textContent='Noch kein Service Worker installiert.';return;}await registration.update();message.textContent='Prüfung abgeschlossen. Wenn eine neue Version bereitsteht, erscheint ein Hinweis.';}catch(e){message.textContent=`Updateprüfung nicht möglich: ${e.message}`;}
+     try{
+       message.textContent='Prüfe die veröffentlichte Version …';
+       // Bypass the offline cache; this tells us what is actually published online.
+       const url=new URL('../version.json',import.meta.url);
+       url.searchParams.set('_',String(Date.now()));
+       const response=await fetch(url,{cache:'no-store'});
+       if(!response.ok)throw new Error(`Serverstatus ${response.status}`);
+       const release=await response.json();
+       if(typeof release.version!=='string')throw new Error('Ungültige Versionsdatei');
+       const registration=await navigator.serviceWorker.getRegistration();
+       if(registration)await registration.update();
+       message.textContent=release.version===APP_VERSION
+         ?`Du verwendest Beta V${APP_VERSION}. Der Server bietet dieselbe Version an.`
+         :`Auf GitHub liegt Beta V${release.version}, installiert ist V${APP_VERSION}. Die Aktualisierung wird vorbereitet. Falls kein Banner erscheint, App vollständig schließen und wieder öffnen.`;
+     }catch(e){message.textContent=`Online-Version derzeit nicht prüfbar: ${e.message}. Lokale App V${APP_VERSION} funktioniert offline weiter.`;}
    });
  }
 }

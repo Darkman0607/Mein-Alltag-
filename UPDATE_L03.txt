@@ -1,0 +1,10 @@
+MEIN ALLTAG – LAGERHAUS UPDATE L03 · Beta V0.3.0 · 27.10.2026
+
+1. 3D-Schemamöbel per Finger oder Maus ziehen und neu platzieren.
+2. Rasterbewegung in 0,25-Schritten, Wandmagnetismus, Raster ein-/ausblenden.
+3. Präzise Pfeiltasten bleiben verfügbar.
+4. Kollisionserkennung prüft Grundfläche, Größenvariante, Rotation und Raumgrenzen.
+5. Rückgängig für die letzten 15 Möbeländerungen je Raum (Sitzung).
+6. Alle Positionen werden persistent in der vorhandenen Lagerdatenbank gespeichert.
+
+Die Grundrissgrafik bleibt schematisch. Erweiterte freie 3D-Konstruktion und QR-Codes folgen erst in späten Updates.

@@ -1,0 +1,5 @@
+Mein Alltag – Lagerhaus U01 / 27.10.2026
+Status: Quellcode implementiert; JS-Syntax und Unit/Statischprüfungen bestanden.
+Browserautomation im Container administrativ blockiert; echter Android-Praxistest bleibt offen.
+Basisräume erstellen/bearbeiten/löschen; optionale Maße; schematischer 3D-Raum; fünf Möbeltypen; Pfeilsteuerung und 90°-Drehung.
+Noch nicht umgesetzt: freies Finger-Drag (L03), 15 Modelle (L02), Artikelfächer, QR-Codes, Backups.
