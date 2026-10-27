@@ -319,3 +319,31 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
 .lager-l14-jump{margin:7px 4px 4px 0;width:max-content;max-width:100%}
 @media(min-width:520px){.lager-l14-controls{grid-template-columns:1fr 165px}}
 @media(max-width:360px){.lager-l14-panel,.lager-l14-card,.lager-l14-room{padding:11px}.lager-l14-switch button{font-size:11px}.lager-l14-treehead>.lager-l14-cta{width:100%}.lager-l14-treenode .lager-l14-cta{font-size:12px}}
+
+
+/* L15: individual device/service files – narrow screens first. */
+.lager-service-overview{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:14px 16px;background:#111e2a;border:1px solid #3a5264;border-radius:14px;margin:15px 0}
+.lager-service-overview strong{font-size:1.12rem;color:#f4f8fd}
+.lager-service-overview span{color:#c3d4df}
+.lager-service-list{display:grid;gap:12px;margin:14px 0 22px}
+.lager-service-card{border:1px solid #3b5163;background:#111c29;padding:14px;border-radius:14px}
+.lager-service-card.is-due{border-color:#c18b51}
+.lager-service-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.lager-service-card strong{color:#f4f9ff}
+.lager-service-card p{font-size:.88rem;color:#c6d5df;margin:6px 0 12px}
+.lager-service-state{border-radius:999px;border:1px solid #607a89;padding:4px 9px;font-size:.75rem;color:#dbecf5}
+.lager-service-card.is-due .lager-service-state{border-color:#c18b51;color:#ffcf9a}
+.lager-service-editor{border:1px solid #42687c;border-radius:18px;padding:16px 12px;margin:16px 0 28px;background:#0d1822}
+.lager-service-editor>p{margin-bottom:15px}
+.lager-service-editor h2{font-size:1.24rem}
+.lager-service-editor h3{color:#e6f2f9}
+.lager-service-status{padding:14px;background:#182938;border-radius:12px;margin:15px 0}
+.lager-service-status p{color:#d2e0e9;margin:8px 0}
+.lager-service-checks{margin:15px 0;border:1px solid #486177;border-radius:12px;padding:12px;min-width:0}
+.lager-service-checks legend{padding:0 6px;color:#ebf5fa}
+.lager-service-checks label{display:flex;align-items:center;gap:12px;min-height:45px;margin:3px 0;cursor:pointer}
+.lager-service-checks input{width:20px;height:20px;flex-shrink:0}
+.lager-service-checks span{line-height:1.35;overflow-wrap:anywhere}
+.lager-service-editor input,.lager-service-editor textarea{max-width:100%;box-sizing:border-box}
+.lager-service-editor .primary-button,.lager-service-card button{min-height:44px}
+@media(min-width:900px){.lager-service-list{grid-template-columns:repeat(2,minmax(0,1fr))}.lager-service-editor{padding:24px}}

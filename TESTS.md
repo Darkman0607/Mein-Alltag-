@@ -164,3 +164,10 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - PASS: JavaScript-Syntaxprüfungen aller produktiven JS-Dateien; JSON-Manifest und version.json gültig.
 - OFFEN: Browser-End-to-End via Playwright. Chromium blockiert `http://127.0.0.1` mit `net::ERR_BLOCKED_BY_ADMINISTRATOR`.
 - OFFEN: Android-Praxistests für Touch, Scrolling, Regal-Markierung, Offline und installierte GitHub-Pages-Version.
+
+## L15 – Geräte- und Serviceakten (V0.15.0, 27.10.2026)
+- PASS `node release-check-l15.mjs`: pro Gerät separate Serviceakte, Null-/Grenz-/Datumsprüfungen, Herstellerdaten nur manuell, Zählerstand, abgehakte Wartungscheckliste, Fälligkeiten ohne erfundene Basis, Lagerbestände/IDs nicht verändert.
+- PASS `python run-regressions-l15.py`: 13 von 13 früheren automatischen Node-Testmodulen (nur vergangene Versionskonstanten in temporären Testkopien angepasst; Originaltests nicht verändert).
+- PASS `node --check`: alle produktiven JS-Module.
+- BLOCKIERT `python browser-test-l15.py`: lokales Chromium schlägt bereits beim Aufruf der Webseite mit `net::ERR_BLOCKED_BY_ADMINISTRATOR` fehl. Es liegt *kein* erfolgreicher E2E-Durchlauf vor.
+- AUSSTEHEND: Installation, manuelle Bedienung, lokaler Speicher, echtes Offline-Verhalten und GitHub-Pages-Praxis auf Android.

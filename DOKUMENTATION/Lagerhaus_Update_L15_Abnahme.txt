@@ -1,0 +1,33 @@
+MEIN ALLTAG · LAGERHAUS · L15 · V0.15.0 · 27.10.2026
+
+NEU – GERÄTE- UND SERVICEAKTEN
+1. „Lagerhaus → 🔧 Geräte & Service“ sowie „Meine Artikel → 🔧 Geräte & Service“ öffnen die neue Einzelgeräte-Verwaltung.
+2. Jedes tatsächlich registrierte Einzelgerät hat eine separate Serviceakte, automatisch identifiziert durch vorhandene Artikel-ID und eindeutige Geräte-ID; Seriennummer, Lagerort und Gesamtbestand bleiben erhalten.
+3. Optional eintragbare Hersteller-/Modelldaten und Kaufdatum (keine automatische Erfindung von Herstellervorgaben).
+4. Betriebsstundenzähler je Gerät, nur vorwärts änderbar; Stundenangaben auf eine Nachkommastelle validiert.
+5. Wartungscheckliste mit bis zu 25 individuellen Punkten und eigene Serviceintervalle nach Tagen und/oder Betriebsstunden.
+6. Wartung mit Datum, Stundenstand und vollständigem Abhaken der hinterlegten Checkliste bestätigen. Letzter Service wird im Gerät gespeichert.
+7. Wartungsfälligkeit nur bei bekanntem echten letzten Service aus tatsächlichen Nutzereingaben errechnen – bei fehlendem Ausgangspunkt wird ausdrücklich „keine Basis“ angezeigt.
+8. Mobil bedienbare Suchliste, separater Gerätestatus und Formulare; lokale persistente Speicherung in bestehender IndexedDB ohne Versionsmigration.
+
+TECHNIK
+- modules/lagerhaus-service.js (isolierte Prüflogik, Fälligkeit, atomare Geräteaktualisierung), modules/lagerhaus-service-view.js (UI)
+- Daten in items.v1 direkt innerhalb des jeweiligen Geräts unter .service; keine neuen DB-Stores, keine automatische Cloud-Synchronisation.
+- APP_VERSION=0.15.0, version.json build L15, Service Worker Cache mein-alltag-v0-15-0, neue Dateien offline vorgehalten.
+- L16 bleibt für vollständige Service- und Reparaturhistorie, Kosten, Garantien, Belege, Erinnerungen und Geräte-Sperrstatus reserviert.
+
+PRÜFUNGEN
+PASS: node release-check-l15.mjs – Geräte-Isolation, Formvalidierung, Datumsgrenzen, Zeit-/Stundenintervall, Pflicht-Checkliste, Ausgangspunkt, Lagerbestandserhalt, UI-Routen/Offline-Dateiliste.
+PASS: python run-regressions-l15.py – 13/13 vorhandene Node-Testfälle mit ausschließlich angepassten Versionskonstanten.
+PASS: node --check alle produktiven JS-Dateien; version.json gültig.
+OFFEN: vollständiger Chrome-E2E-Test – net::ERR_BLOCKED_BY_ADMINISTRATOR an http://127.0.0.1; nicht als PASS gezählt.
+OFFEN: echte Android-Touch-/Offline-/Installations-Abnahme und finale GitHub-Pages-Sichtprüfung.
+
+INSTALLATION
+Bei GitHub Pages: main /(root) beibehalten. Vorhandene App-Version aktualisieren (ggf. Update-Banner wählen, App neu starten). Auf keinen Fall Chrome-Website-Daten löschen, sonst gehen lokal gespeicherte Daten verloren. Das ZIP sichert keine persönlichen Nutzerdaten.
+
+GITHUB-STATUS
+Siehe Veröffentlichungseintrag in der fertigen Release-ZIP; der Commit-Link wird nur nach bestätigtem Push angegeben.
+
+WICHTIG
+Vor Beginn von L35 (Zubehör- und Ersatzteilmanager) gesondert Bescheid geben; L36 (QR-System) ist das letzte Paket.

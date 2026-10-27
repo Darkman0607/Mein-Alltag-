@@ -174,3 +174,11 @@ Der Lager-Navigator ist auf der Lagerhaus-Startseite und unter „Meine Artikel�
 Er zeigt Bestandspositionen als Suchliste oder die Raum-/Regal-/Fach-Struktur. Jeder gültige Lagerort erhält einen Link zur passenden 3D-Raumansicht; Regal oder Fach werden dort optisch markiert. Die Lagerortanzeige basiert auf den bestehenden `stockLocations` und verändert keine gespeicherten Mengen. Näheres steht in `UPDATE_L14.txt`.
 
 Die Browser-End-to-End-Prüfung ist in der Testumgebung durch die Chromium-Sicherheitsrichtlinie blockiert. Android-Praxistest bleibt offen. Die letzten beiden Entwicklungspakete sind L35 und L36; vor L35 erfolgt eine ausdrückliche Ankündigung.
+
+## Lagerhaus Update L15 – Geräte- und Serviceakten (V0.15.0)
+- Unter **Lagerhaus → Geräte & Service** stehen Einzelgeräteakten für tatsächlich erfasste Maschinen bereit (Artikeltyp „Gerät“, Einheit „Stück“, Einzelgerät registriert).
+- Die Akte ist an **ein konkretes Einzelgerät** gebunden; Seriennummer und Lagerplatz bleiben unverändert. Sie enthält optionale Hersteller-/Modellangaben und Kaufdatum, aktuellen Betriebsstundenzähler, frei konfigurierte Intervalle und eine selbst festgelegte Checkliste.
+- Eine Wartung lässt sich nur mit echten Angaben und vollständig bestätigten Checklistenpunkten abschließen. Die letzte Wartung bildet die Berechnungsbasis; ohne Wartungsbasis wird **kein** fiktiver nächster Termin angezeigt.
+- Alles liegt lokal im vorhandenen IndexedDB-Datensatz des Geräts (`items.v1`), ohne geänderte Datenbankversion oder Speicherung auf Servern.
+- Vollständige Historie, Reparaturen, Garantien, Kosten und Belege sind **L16**. Details und dokumentierte Testgrenzen in `UPDATE_L15.txt`.
+- Test `node release-check-l15.mjs && python run-regressions-l15.py`. Der echte lokale Browser-End-to-End-Test ist wegen der Chromium-Administratorrichtlinie blockiert; Android-Praxistest bleibt offen.
