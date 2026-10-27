@@ -1,0 +1,11 @@
+MEIN ALLTAG – L08 V0.8.0
+1. Auf https://darkman0607.github.io/Mein-Alltag-/ öffnen und neue Version in der App annehmen.
+2. Unter Lagerhaus → Meine Artikel den Verbrauchsartikel oder das Gerät wählen.
+3. „Gebinde verwalten“ oder „Einzelgeräte verwalten“ öffnen.
+4. Beim Erstellen die Quelle beachten:
+   - „Neu einlagern“ erhöht den Bestand.
+   - „Aus bisherigem Bestand kennzeichnen“ erhöht die Gesamtmenge NICHT.
+5. Bei Gebinden Restmengen in derselben Grundeinheit wie der Artikel eingeben (z.B. 0,75 l oder 750 ml).
+6. Bei Geräten die Seriennummer direkt vom Gerät ablesen.
+7. Bestehende App-Daten/Browserdaten NICHT löschen. Nur auf „Aktualisieren“ klicken.
+8. Für Rückfragen die Word-Checkliste und DOKUMENTATION/Lagerhaus_Update_L08_Abnahme.txt beachten.

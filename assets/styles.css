@@ -98,3 +98,17 @@
 .lager-stock-history{margin-top:14px;border-top:1px solid #65849477;padding-top:10px;color:#d4e4ea;font-size:12px}
 .lager-stock-history>div{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#a8c3ce}
 .lager-stock-history>div span:last-child{white-space:nowrap;color:#f8e6b3}
+/* L08 – individuelle Gebinde und Geräte, touchfreundliche Karten */
+.lager-tracking-panel{margin:1rem 0;padding:1rem;border:1px solid rgba(68,203,169,.36);border-radius:18px;background:linear-gradient(140deg,rgba(15,36,40,.97),rgba(12,18,30,.98));}
+.lager-tracking-panel h2{font-size:1.18rem;margin:0}
+.lager-tracking-panel h3{font-size:1.03rem;margin:.4rem 0}
+.lager-tracking-panel .lager-item-form{margin:1rem 0;padding:1rem;border:1px solid rgba(145,171,184,.24);border-radius:14px;}
+.lager-track-overview{display:flex;gap:.6rem;flex-wrap:wrap;margin:.9rem 0}
+.lager-track-overview span{background:rgba(100,156,180,.13);border:1px solid rgba(137,179,191,.23);padding:.6rem .75rem;border-radius:12px}
+.lager-track-list{display:grid;gap:.8rem;margin:1rem 0}
+.lager-track-list article{padding:.85rem;border-radius:14px;border:1px solid rgba(122,170,190,.24);background:rgba(0,0,0,.18)}
+.lager-track-list article p{margin:.4rem 0 .8rem;line-height:1.5;overflow-wrap:anywhere}
+.lager-track-list .lager-item-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.lager-track-list .secondary-button,.lager-track-main-button{min-height:44px}
+.lager-track-status{display:inline-block;padding:.22rem .45rem;margin-left:.3rem;border-radius:9px;background:rgba(40,167,132,.16);color:#a8f1d0;font-size:.85em}
+.lager-track-main-button{width:100%;margin:.7rem 0}

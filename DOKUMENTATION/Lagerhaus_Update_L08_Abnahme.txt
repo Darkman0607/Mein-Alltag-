@@ -1,0 +1,23 @@
+Mein Alltag | Lagerhaus L08 | Beta V0.8.0 | Stand: 27.10.2026
+Status Code: implementiert, automatisierte Tests bestanden.
+Neues Modul: modules/lagerhaus-tracking.js
+Artikelliste: modules/lagerhaus-items-view.js, lagerhaus-items.js
+Buchungssperre: modules/lagerhaus-stock.js
+
+Bestanden:
+[x] Eindeutige Gebinde- und Gerätekennungen samt Sequenzen
+[x] Einzelne Seriennummern, globale Doppelprüfung beim Anlegen
+[x] Voll / angebrochen / leer, Öffnung, Teilverbrauch
+[x] Einzelgerät umlegen, Zustand ändern, ausbuchen
+[x] Kein Doppelzählen bei Kennzeichnung vorhandener Bestände
+[x] Gesamtbestand und reservierte Mengen korrekt
+[x] Bestandssperre bei Entnahme oder Umlagerung gebundener Stücke
+[x] Kein unbemerkter Verlust der Lagerzuordnung beim Hierarchie-Löschen
+[x] L04–L07 Regessionsprüfungen und L08 Logiktests
+[x] JavaScript-Syntax und Offline-Dateiliste
+
+Offen:
+[ ] Vollständiger Browser-End-to-End-Test – Chromium von Administrator blockiert.
+[ ] Android-Praxistest inkl. Touch-, Offline- und Upgrade-Verhalten
+
+GitHub-Veröffentlichungs- und ZIP-Nachweise werden nach erfolgreicher Veröffentlichung ergänzt.

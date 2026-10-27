@@ -3,10 +3,11 @@ import {getModuleValue,mutateModuleValues} from '../assets/database.js';
 import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoices,resolveItemLocation,upsertItem,deleteItem} from './lagerhaus-items.js';
 import {templatesFor,propertiesFor,templateById,detailedProperties} from './lagerhaus-templates.js';
 import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock} from './lagerhaus-stock.js';
+import {addContainer,updateContainer,addDevice,updateDevice,containerState,CONTAINER_STATES,DEVICE_STATES,trackedSummary} from './lagerhaus-tracking.js';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const newid=()=>globalThis.crypto?.randomUUID?.()||`item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-let items=[],rooms=[],areas=[],editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[];
+let items=[],rooms=[],areas=[],editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[],trackingItemId=null,trackingRecordId=null,trackingOperation=null;
 const option=(value,label,current)=>`<option value="${esc(value)}" ${value===current?'selected':''}>${esc(label)}</option>`;
 function choices(map,current){return Object.entries(map).map(([v,l])=>option(v,l,current)).join('');}
 function locationSelect(current){return locationChoices(rooms,areas).map(c=>option(c.id,c.label,current)).join('');}
@@ -34,6 +35,25 @@ async function modify(fn){
  operation=task;return task;
 }
 function stockQuantity(value){return String(value??0).replace('.',',');}
+function trackingPanel(item){
+ const cs=item.containers||[],ds=item.devices||[],sum=trackedSummary(item);
+ const locOptions=locationSelect('');
+ const action=trackingRecordId&&(cs.find(c=>c.id===trackingRecordId)||ds.find(d=>d.id===trackingRecordId));
+ const actionForm=action&&trackingOperation?`<form id="lagerTrackActionForm" class="lager-item-form">
+ <h3>${esc(action.code)} · ${esc(trackingOperation==='consume'?'Gebinde-Verbrauch':trackingOperation==='move'?'Lagerort ändern':'Gerätezustand ändern')}</h3>
+ ${trackingOperation==='consume'?`<label>Entnommene Menge (${esc(ITEM_UNITS[item.unit]||item.unit)})<input name="quantity" type="number" min="0.001" max="${esc(action.remaining)}" step="0.001" required inputmode="decimal"></label>`:''}
+ ${trackingOperation==='move'?`<label>Neuer Lagerort<select name="locationId">${locOptions}</select></label>`:''}
+ ${trackingOperation==='condition'?`<label>Neuer Zustand<select name="condition">${choices(DEVICE_STATES,action.condition)}</select></label>`:''}
+ <button class="primary-button" type="submit">Änderung speichern</button> <button class="secondary-button" type="button" id="lagerTrackCancelAction">Abbrechen</button></form>`:'';
+ return `<section class="lager-tracking-panel" aria-label="Gebinde und Einzelgeräte"><div class="lager-item-form-title"><h2>${esc(item.name)} · Einzelbestände</h2><button type="button" id="lagerTrackClose" class="secondary-button">Schließen</button></div>
+ <p>Der Gesamtbestand wird nicht doppelt gezählt. Bestehende Mengen können einzeln gekennzeichnet oder neue Mengen hinzugebucht werden.</p>
+ <div class="lager-track-overview">${item.type==='verbrauch'?`<span>Voll: <strong>${sum.full}</strong></span><span>Angebrochen: <strong>${sum.open}</strong></span><span>Leer: <strong>${sum.empty}</strong></span>`:item.type==='geraet'?`<span>Einzelgeräte: <strong>${sum.devices}</strong></span>`:''}<span>Frei verfügbar: <strong>${esc(stockQuantity(sum.untracked))} ${esc(ITEM_UNITS[item.unit]||item.unit)}</strong></span></div>
+ ${item.type==='verbrauch'?`<form id="lagerContainerAdd" class="lager-item-form"><h3>Gebinde erfassen</h3><div class="lager-item-grid"><label>Gebindegröße in ${esc(ITEM_UNITS[item.unit]||item.unit)}<input type="number" name="capacity" min="0.001" step="0.001" max="1000000" inputmode="decimal" placeholder="z. B. 0.75" required></label><label>Gebindename (optional)<input name="label" maxlength="80" placeholder="z. B. Sprühflasche"></label></div><label>Lagerort<select name="locationId">${locOptions}</select></label><label>Bestandsquelle<select name="source"><option value="new">Neu einlagern (+ Bestand)</option><option value="existing">Aus bisherigem Bestand kennzeichnen</option></select></label><button class="primary-button" type="submit">+ Gebinde anlegen</button></form>
+ <div class="lager-track-list">${cs.length?cs.map(c=>`<article><div><strong>${esc(c.code)}</strong> ${esc(c.label)} <span class="lager-track-status">${esc(CONTAINER_STATES[containerState(c)])}</span></div><p>${esc(stockQuantity(c.remaining))} / ${esc(stockQuantity(c.capacity))} ${esc(ITEM_UNITS[item.unit]||item.unit)} · ${esc(resolveItemLocation(c.locationId,rooms,areas).label)}</p><div class="lager-item-actions">${containerState(c)==='full'?`<button type="button" class="secondary-button" data-track-action="open" data-track-id="${esc(c.id)}">Öffnen</button>`:''}${containerState(c)!=='empty'?`<button type="button" class="secondary-button" data-track-action="consume" data-track-id="${esc(c.id)}">Verbrauch</button>`:''}<button type="button" class="secondary-button" data-track-action="move" data-track-id="${esc(c.id)}">Umlagern</button><button type="button" class="secondary-button" data-track-action="untrack" data-track-id="${esc(c.id)}">Kennzeichnung entfernen</button></div></article>`).join(''):'<p>Keine Gebinde einzeln erfasst.</p>'}</div>`:''}
+ ${item.type==='geraet'?`<form id="lagerDeviceAdd" class="lager-item-form"><h3>Einzelgerät registrieren</h3><div class="lager-item-grid"><label>Seriennummer *<input name="serialNumber" maxlength="100" required placeholder="Vom Gerät ablesen"></label><label>Gerätebezeichnung<input name="label" maxlength="80" placeholder="z. B. Akkuschrauber 1"></label></div><label>Lagerort<select name="locationId">${locOptions}</select></label><div class="lager-item-grid"><label>Bestandsquelle<select name="source"><option value="new">Neu einlagern (+1)</option><option value="existing">Bestehendes Gerät kennzeichnen</option></select></label><label>Gerätezustand<select name="condition">${choices(DEVICE_STATES,'gut')}</select></label></div><button class="primary-button" type="submit">+ Gerät registrieren</button></form>
+ ${item.unit==='stk'?`<div class="lager-track-list">${ds.length?ds.map(d=>`<article><div><strong>${esc(d.code)}</strong> ${esc(d.label)} <span class="lager-track-status">${esc(DEVICE_STATES[d.condition]||d.condition)}</span></div><p>Seriennummer: <strong>${esc(d.serialNumber)}</strong> · ${esc(resolveItemLocation(d.locationId,rooms,areas).label)}</p><div class="lager-item-actions"><button type="button" class="secondary-button" data-track-action="move" data-track-id="${esc(d.id)}">Umlagern</button><button type="button" class="secondary-button" data-track-action="condition" data-track-id="${esc(d.id)}">Zustand</button><button type="button" class="secondary-button" data-track-action="issue" data-track-id="${esc(d.id)}">Ausbuchen</button><button type="button" class="secondary-button" data-track-action="untrack" data-track-id="${esc(d.id)}">Kennzeichnung entfernen</button></div></article>`).join(''):'<p>Keine Geräte einzeln erfasst.</p>'}</div>`:'<p class="lager-stock-warning">Einzelgeräte benötigen die Einheit „Stück“. Bitte zunächst einen Artikel ohne Bestand auf diese Einheit umstellen.</p>'}`:''}
+ ${actionForm}<p class="lager-stock-help">Eine Kennzeichnung ist kein zusätzlicher Bestand. „Kennzeichnung entfernen“ gibt vorhandene Restmengen wieder frei, „Ausbuchen“ reduziert den tatsächlichen Bestand. Leere Gebinde bleiben dokumentiert, bis du die Kennzeichnung entfernst.</p></section>`;
+}
 function stockPanel(item){
  const list=stockPositions(item);
  const stock=stockAlert(item);
@@ -108,6 +128,10 @@ function bindTemplates(el){
  });
 }
 
+function matchesItem(item,search){
+ const terms=[item.name,item.code,item.category,item.brand,item.articleNumber,item.note,...Object.values(item.properties||{}),...(item.containers||[]).flatMap(c=>[c.code,c.label]),...(item.devices||[]).flatMap(d=>[d.code,d.label,d.serialNumber])];
+ return terms.join(' ').toLocaleLowerCase('de-AT').includes(search.toLocaleLowerCase('de-AT'));
+}
 function card(item){
  const loc=resolveItemLocation(item.locationId,rooms,areas);
  const props=detailedProperties(item);
@@ -117,22 +141,26 @@ function card(item){
  <div class="lager-item-facts"><span><strong>${esc(stockQuantity(stock.total))}</strong> ${esc(ITEM_UNITS[item.unit]||item.unit)}</span><span>Packung: ${esc(stockQuantity(item.packSize??1))}</span><span>${esc(item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
  ${stock.low?`<p class="lager-stock-warning">⚠ Mindestbestand erreicht (${esc(stockQuantity(stock.minimumStock))} ${esc(ITEM_UNITS[item.unit]||item.unit)})</p>`:''}
  ${positionsHtml(item)}
+ ${(item.containers||[]).length||((item.devices||[]).length)?`<p class="lager-item-extra">${(item.containers||[]).length?`Gebinde: ${trackedSummary(item).full} voll · ${trackedSummary(item).open} angebrochen · ${trackedSummary(item).empty} leer`:''} ${(item.devices||[]).length?`Einzelgeräte: ${trackedSummary(item).devices}`:''}</p>`:''}
  ${(item.brand||item.articleNumber)?`<p class="lager-item-extra">${esc([item.brand,item.articleNumber].filter(Boolean).join(' · '))}</p>`:''}${props.length?`<dl class="lager-item-properties-list">${props.map(p=>`<div><dt>${esc(p.label)}</dt><dd>${esc(p.value)}</dd></div>`).join('')}</dl>`:''}${item.note?`<p class="lager-item-note">${esc(item.note)}</p>`:''}
  <div class="lager-stock-actions"><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="receive">+ Einlagern</button><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="issue" ${stock.empty?'disabled':''}>− Entnehmen</button><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="transfer" ${stock.empty?'disabled':''}>↔ Umlagern</button></div>
+ ${(item.type==='geraet'||item.type==='verbrauch')?`<button type="button" class="primary-button lager-track-main-button" data-track-open="${esc(item.id)}">${item.type==='geraet'?'⚙ Einzelgeräte':'▣ Gebinde'} verwalten</button>`:''}
  <div class="lager-item-actions"><button type="button" class="secondary-button" data-item-edit="${esc(item.id)}">Bearbeiten</button><button type="button" class="secondary-button lager-delete" data-item-delete="${esc(item.id)}">Löschen</button></div></article>`;
 }
 function draw(preselect=''){
  const el=document.getElementById('lagerItemContent');if(!el)return;
- const filtered=items.filter(i=>[i.name,i.code,i.category,i.brand,i.articleNumber,i.note,...Object.values(i.properties||{})].join(' ').toLocaleLowerCase('de-AT').includes(query.toLocaleLowerCase('de-AT')));
+ const filtered=items.filter(i=>matchesItem(i,query));
  const selected=items.find(i=>i.id===editId);
  const stockSelected=items.find(i=>i.id===stockItemId);
+ const trackingSelected=items.find(i=>i.id===trackingItemId);
  const lowCount=items.filter(i=>stockAlert(i).low).length;
  el.innerHTML=`<div class="lager-item-head"><div><strong>${items.length}</strong> Artikel gespeichert · <strong>${lowCount}</strong> Mindestbestand-Warnungen</div><button type="button" id="lagerItemAdd" class="primary-button">+ Artikel</button></div>
  ${formOpen?form(selected,preselect):''}
  ${stockSelected?stockPanel(stockSelected):''}
- <label class="lager-item-search-label" for="lagerItemSearch">Artikel durchsuchen</label><input id="lagerItemSearch" class="lager-item-search" type="search" placeholder="Name, Nummer, Marke, Kategorie …" value="${esc(query)}">
+ ${trackingSelected?trackingPanel(trackingSelected):''}
+ <label class="lager-item-search-label" for="lagerItemSearch">Artikel durchsuchen</label><input id="lagerItemSearch" class="lager-item-search" type="search" placeholder="Name, Seriennummer, Kennung, Kategorie …" value="${esc(query)}">
  <div id="lagerItemList">${filtered.length?filtered.map(card).join(''):'<p class="lager-hint">Keine Artikel vorhanden oder keine Treffer. Mit „+ Artikel“ kannst du deinen ersten Gegenstand erfassen.</p>'}</div>`;
- el.querySelector('#lagerItemAdd').addEventListener('click',()=>{stockItemId=null;editId=null;formOpen=true;draw(preselect);el.querySelector('[name="name"]')?.focus();});
+ el.querySelector('#lagerItemAdd').addEventListener('click',()=>{stockItemId=null;trackingItemId=null;editId=null;formOpen=true;draw(preselect);el.querySelector('[name="name"]')?.focus();});
  el.querySelector('#lagerItemCancel')?.addEventListener('click',()=>{editId=null;formOpen=false;draw(preselect);});
  bindTemplates(el);
  el.querySelectorAll('[data-stock-mode]').forEach(b=>b.addEventListener('click',()=>{stockKind=b.dataset.stockMode;draw(preselect);}));
@@ -163,17 +191,19 @@ function draw(preselect=''){
    editId=null;formOpen=false;draw();status('Artikel erfolgreich gespeichert.');
   }catch(e){status('Speichern fehlgeschlagen: '+e.message);submit.disabled=false;}
  });
+ bindTracking(el,preselect);
  el.querySelector('#lagerItemSearch').addEventListener('input',event=>{
   query=event.target.value;const list=el.querySelector('#lagerItemList');
-  const current=items.filter(i=>[i.name,i.code,i.category,i.brand,i.articleNumber,i.note,...Object.values(i.properties||{})].join(' ').toLocaleLowerCase('de-AT').includes(query.toLocaleLowerCase('de-AT')));
+  const current=items.filter(i=>matchesItem(i,query));
   list.innerHTML=current.length?current.map(card).join(''):'<p class="lager-hint">Keine passenden Artikel gefunden.</p>';
   bindCards(list);
  });
  bindCards(el.querySelector('#lagerItemList'));
 }
 function bindCards(el){
- el?.querySelectorAll('[data-stock-open]').forEach(btn=>btn.addEventListener('click',()=>{stockItemId=btn.dataset.stockOpen;stockKind=btn.dataset.kind;formOpen=false;editId=null;draw();document.getElementById('lagerStockForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
- el?.querySelectorAll('[data-item-edit]').forEach(btn=>btn.addEventListener('click',()=>{stockItemId=null;editId=btn.dataset.itemEdit;formOpen=true;draw();document.getElementById('lagerItemForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
+ el?.querySelectorAll('[data-track-open]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=btn.dataset.trackOpen;trackingRecordId=null;trackingOperation=null;stockItemId=null;formOpen=false;editId=null;draw();document.querySelector('.lager-tracking-panel')?.scrollIntoView({block:'start',behavior:'smooth'});}));
+ el?.querySelectorAll('[data-stock-open]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=null;stockItemId=btn.dataset.stockOpen;stockKind=btn.dataset.kind;formOpen=false;editId=null;draw();document.getElementById('lagerStockForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
+ el?.querySelectorAll('[data-item-edit]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=null;stockItemId=null;editId=btn.dataset.itemEdit;formOpen=true;draw();document.getElementById('lagerItemForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-item-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
   const id=btn.dataset.itemDelete,item=items.find(i=>i.id===id);if(!item)return;
   if(!confirm(`Artikel „${item.name}“ endgültig löschen?`))return;
@@ -182,9 +212,41 @@ function bindCards(el){
   catch(e){status('Löschen fehlgeschlagen: '+e.message);btn.disabled=false;}
  }));
 }
+function bindTracking(el,preselect){
+ const save=async make=>modify((records,sequence,currentRooms,currentAreas,history)=>{
+  const ids=new Set(locationChoices(currentRooms,currentAreas).map(x=>x.id));
+  const result=make(records,ids);
+  return {items:result.items,sequence,...(result.event?{movements:[...history,result.event].slice(-3000)}:{})};
+ });
+ const formSubmit=(selector,fn)=>el.querySelector(selector)?.addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.currentTarget,btn=f.querySelector('[type="submit"]');btn.disabled=true;
+  const values=Object.fromEntries(new FormData(f).entries());const id=trackingItemId;
+  try{await save((records,ids)=>fn(records,id,values,ids));trackingRecordId=null;trackingOperation=null;draw(preselect);status('Einzelbestand erfolgreich gespeichert.');}
+  catch(err){status('Einzelbestand: '+err.message);btn.disabled=false;}
+ });
+ formSubmit('#lagerContainerAdd',(records,id,v,ids)=>addContainer(records,id,v,ids,{makeId:newid,makeEventId:newid}));
+ formSubmit('#lagerDeviceAdd',(records,id,v,ids)=>addDevice(records,id,v,ids,{makeId:newid,makeEventId:newid}));
+ formSubmit('#lagerTrackActionForm',(records,id,v,ids)=>{
+  const item=records.find(r=>r.id===id),rid=trackingRecordId,op=trackingOperation;
+  if((item?.containers||[]).some(c=>c.id===rid))return updateContainer(records,id,rid,op,v,ids,{makeEventId:newid});
+  return updateDevice(records,id,rid,op,v,ids,{makeEventId:newid});
+ });
+ el.querySelector('#lagerTrackClose')?.addEventListener('click',()=>{trackingItemId=null;trackingRecordId=null;trackingOperation=null;draw(preselect);});
+ el.querySelector('#lagerTrackCancelAction')?.addEventListener('click',()=>{trackingRecordId=null;trackingOperation=null;draw(preselect);});
+ el.querySelectorAll('[data-track-action]').forEach(b=>b.addEventListener('click',async()=>{
+  const id=trackingItemId,rid=b.dataset.trackId,act=b.dataset.trackAction;
+  const isContainer=(items.find(x=>x.id===id)?.containers||[]).some(x=>x.id===rid);
+  if(['consume','move','condition'].includes(act)){trackingRecordId=rid;trackingOperation=act;draw(preselect);document.getElementById('lagerTrackActionForm')?.scrollIntoView({block:'center',behavior:'smooth'});return;}
+  if(act==='untrack'&&!confirm('Einzelkennzeichnung aufheben? Die vorhandene Menge bleibt im Gesamtbestand.'))return;
+  if(act==='issue'&&!confirm('Dieses Einzelgerät endgültig aus dem Bestand ausbuchen?'))return;
+  b.disabled=true;
+  try{await save((records,ids)=>isContainer?updateContainer(records,id,rid,act,{},ids,{makeEventId:newid}):updateDevice(records,id,rid,act,{},ids,{makeEventId:newid}));draw(preselect);status('Änderung erfolgreich gespeichert.');}
+  catch(err){status('Einzelbestand: '+err.message);b.disabled=false;}
+ }));
+}
 export function renderLagerartikel(){return `<div class="lager-heading"><span class="eyebrow">MEIN ALLTAG · LAGERHAUS</span><h1>Meine Artikel</h1><p>Artikel, Mengen und mehrere Lagerorte verwalten – lokal und offline.</p></div><div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Lagerbereiche</a></div><div class="lager-status" id="lagerItemStatus" role="status" aria-live="polite">Artikel werden geladen …</div><div id="lagerItemContent"></div>`;}
 export async function mountLagerartikel(preselectRoomId=''){
- editId=null;formOpen=false;stockItemId=null;stockKind='receive';query='';try{await load();if(!document.getElementById('lagerItemContent'))return;
+ editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;query='';try{await load();if(!document.getElementById('lagerItemContent'))return;
   draw(rooms.some(r=>r.id===preselectRoomId)?preselectRoomId:'');status(`${items.length} Artikel geladen · offline gespeichert.`);
  }catch(e){status('Artikel konnten nicht geladen werden: '+e.message);}
 }

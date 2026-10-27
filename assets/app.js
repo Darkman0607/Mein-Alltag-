@@ -7,7 +7,7 @@ import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
 
-export const APP_VERSION='0.7.0';
+export const APP_VERSION='0.8.0';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');

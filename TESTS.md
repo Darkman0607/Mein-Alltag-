@@ -90,3 +90,6 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - PASS: `release-check-l07.mjs` – Gesamt-/Teilbestände, Lagerorte, Buchungen, Packungsgrößen, Mindestbestände, Präzision, Negativschutz, Rollback, Bestandsschutz, Altartikel, Cache-Manifest.
 - PASS: ZIP-Struktur, App-Version, SW-Präcache und aktualisierte Word-Checkliste (nach Erstellung).
 - **OFFEN:** interaktiver Chromium-End-to-End-Test; Headless-Chromium lief lokal in einen Timeout. Keine Behauptung, dass Touch-Praxistest/Cache-Umstieg am Android durchgeführt wurden.
+
+## L08 · Teststatus 27.10.2026
+Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs`, `node release-check-l06.mjs`, `node release-check-l07.mjs`, `node release-check-l08.mjs` – PASS. Zusätzlich `node --check` für alle produktiven JS-Dateien – PASS. Geprüft: Gebinde anlegen/öffnen/teilverbrauchen/leer, Umlagerungen, Einzelgeräte-Seriennummern, Zustand/Ausbuchung, parallele Arten von Beständen, Artikel-/Lagerort-Löschschutz, Kennungen nach Löschung, alte Artikel und Versions-/SW-Abgleich. Echter Chromium-Aufruf wurde von Admin-Policy blockiert, Android-Praxistest offen.

@@ -1,0 +1,29 @@
+MEIN ALLTAG | LAGERHAUS L08 | BETA V0.8.0 | 27.10.2026
+
+Funktionen
+- Einzelgebinde eines Verbrauchsartikels erfassen, auch aus bereits vorhandenem Bestand (ohne Doppelbuchung).
+- Gebinde mit eigener stabiler Kennung, Kapazität, Restmenge, Lagerort und Status voll / angebrochen / leer.
+- Gebinde öffnen, verbrauchen (auch Teilmengen), zwischen Orten umlagern oder Kennzeichnung aufheben.
+- Einzelgeräte mit individueller Kennung, Pflicht-Seriennummer, Zustand und Lagerort registrieren.
+- Geräte einzeln umlagern, Zustand ändern, ausbuchen oder Kennzeichnung entfernen.
+- Neue Gebinde/Geräte optional als Zugang erfassen; vorhandene Bestände können ohne Mengenerhöhung eindeutig gekennzeichnet werden.
+- Trennung von freien Mengen und einzeln reservierten Mengen, Schutz vor Überbuchung.
+- Eindeutige Kennungen werden nach Löschung nicht wiederverwendet.
+- Geräte-Seriennummern sind unter allen erfassten Einzelgeräten eindeutig (Groß-/Kleinschreibung wird ignoriert).
+- Suche nach Gebinde- und Gerätekennung sowie Seriennummer.
+
+Datenhaltung
+- Nur bestehender Lagerhaus-Store in IndexedDB 'mein-alltag-v0'; kein Reset, keine Änderung der Store-Version.
+- Zusätzliche optionale Felder containers[], devices[], containerSequence, deviceSequence im Artikel.
+- Buchungen erfolgen über vorhandene atomare mutateModuleValues-Transaktion.
+- L07-Lagerpositionen bleiben maßgeblich; gekennzeichnete Bestände sind Teilmengen, keine Extra-Bestände.
+- L05-L07-Artikel ohne L08-Daten bleiben unverändert lesbar.
+
+Bewusst nicht Teil von L08
+- Fotografieren/Dateianhänge: später L10.
+- Vollständige grafische Browser-/Android-E2E-Abnahme: noch offen.
+
+Prüfungen
+node release-check.mjs / release-check-l05.mjs / release-check-l06.mjs / release-check-l07.mjs / release-check-l08.mjs: PASS.
+node --check alle assets/*.js und modules/*.js: PASS.
+Real-Device-/Browser-E2E noch offen. Browser-Start in Testumgebung administrativ blockiert.

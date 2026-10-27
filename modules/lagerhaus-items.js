@@ -55,6 +55,7 @@ export function upsertItem(items,values,{id=null,rooms=[],areas=[],now=new Date(
  if(id){
   const idx=result.findIndex(x=>x.id===id);if(idx<0)throw new Error('Artikel existiert nicht mehr.');
   const prior=result[idx];
+  if(((prior.containers||[]).length||(prior.devices||[]).length)&&prior.type!==data.type)throw new Error('Artikeltyp mit erfassten Gebinden/Geräten nicht ändern.');
   if(stockTotal(prior)>0&&prior.unit!==data.unit)throw new Error('Bei vorhandenem Bestand kann die Einheit nicht geändert werden.');
   // Article metadata edits never change multi-location stock. Use bookings instead.
   if(Array.isArray(prior.stockLocations)){
@@ -82,9 +83,9 @@ export function locationsInNode(kind,object){
 }
 export function assertNodeHasNoItems(items,kind,object){
  const ids=new Set(locationsInNode(kind,object));
- if(items.some(item=>stockPositions(item).some(pos=>ids.has(pos.locationId))))throw new Error('Dort liegen noch Artikel. Bitte Artikel zuerst einem anderen Lagerort zuordnen.');
+ if(items.some(item=>stockPositions(item).some(pos=>ids.has(pos.locationId))||[...(item.containers||[]),...(item.devices||[])].some(r=>ids.has(r.locationId))))throw new Error('Dort liegen noch Artikel. Bitte Artikel zuerst einem anderen Lagerort zuordnen.');
 }
 export function assertLocationsRetained(items,rooms){
  const present=new Set(rooms.flatMap(r=>locationsInNode('room',r)));
- if(items.some(item=>stockPositions(item).some(pos=>pos.locationId&&!present.has(pos.locationId))))throw new Error('Änderung würde einen Artikel-Lagerort löschen. Artikel zuerst verschieben.');
+ if(items.some(item=>stockPositions(item).some(pos=>pos.locationId&&!present.has(pos.locationId))||[...(item.containers||[]),...(item.devices||[])].some(r=>r.locationId&&!present.has(r.locationId))))throw new Error('Änderung würde einen Artikel-Lagerort löschen. Artikel zuerst verschieben.');
 }

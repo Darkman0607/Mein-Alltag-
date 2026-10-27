@@ -7,9 +7,9 @@ import {validateItem,upsertItem,deleteItem} from './modules/lagerhaus-items.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const v=JSON.parse(read('version.json'));
-assert.deepEqual([v.version,v.build],['0.7.0','L07']);
-assert.match(read('assets/app.js'),/APP_VERSION='0.7.0'/);
-assert.match(read('sw.js'),/CACHE='mein-alltag-v0-7-0'/);
+assert.deepEqual([v.version,v.build],['0.8.0','L08']);
+assert.match(read('assets/app.js'),/APP_VERSION='0.8.0'/);
+assert.match(read('sw.js'),/CACHE='mein-alltag-v0-8-0'/);
 assert.match(read('sw.js'),/lagerhaus-templates.js/);
 for(const type of ['geraet','verbrauch','einzel','sonstiges']){
  assert(Array.isArray(templatesFor(type)));

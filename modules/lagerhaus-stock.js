@@ -39,7 +39,7 @@ export function stockAlert(item){
  return {total,minimumStock:limit,low:limit>0&&total<=limit,empty:total===0};
 }
 /** A transfer is conservation: sources shrink by exactly what destinations gain. */
-export function bookStock(item,booking,validLocationIds,{now=new Date().toISOString(),makeId=()=>globalThis.crypto.randomUUID()}={}){
+export function bookStock(item,booking,validLocationIds,{now=new Date().toISOString(),makeId=()=>globalThis.crypto.randomUUID(),releaseRecordId=null}={}){
  const kind=String(booking.type||'');
  if(!Object.hasOwn(STOCK_ACTIONS,kind))throw new Error('Unbekannte Buchungsart.');
  const entered=milli(booking.quantity);
@@ -54,6 +54,17 @@ export function bookStock(item,booking,validLocationIds,{now=new Date().toISOStr
  if(kind!=='issue'&&!valid(toId))throw new Error('Ziellagerort ist nicht mehr vorhanden.');
  if(kind==='transfer'&&fromId===toId)throw new Error('Quelle und Ziel müssen unterschiedlich sein.');
  const positions=new Map(stockPositions(item).map(x=>[x.locationId,milli(x.quantity,{allowZero:true})]));
+ if(kind!=='receive'){
+  const containers=item.containers||[],devices=item.devices||[];
+  const reserved=containers.filter(c=>c.locationId===fromId).reduce((n,c)=>n+milli(c.remaining,{allowZero:true}),0)+devices.filter(d=>d.locationId===fromId).length*1000;
+  const own=releaseRecordId?[...containers,...devices].find(r=>r.id===releaseRecordId):null;
+  if(releaseRecordId&&(!own||own.locationId!==fromId))throw new Error('Gebinde/Gerät wurde verschoben oder existiert nicht mehr.');
+  const reservedOwn=own?(Object.hasOwn(own,'remaining')?milli(own.remaining,{allowZero:true}):1000):0;
+  if(own&&units>reservedOwn)throw new Error('Buchung übersteigt das ausgewählte Gebinde/Gerät.');
+  const free=(positions.get(fromId)||0)-reserved;
+  if(free<0)throw new Error('Inkonsistente Bestände und Einzelkennungen.');
+  if(units>free+reservedOwn)throw new Error('Nicht genügend frei verfügbarer Bestand: Gebinde oder Einzelgeräte sind separat reserviert.');
+ }
  if(kind!=='receive'){
   const available=positions.get(fromId)||0;
   if(available<units)throw new Error(`Nicht genügend Bestand am gewählten Lagerort (verfügbar: ${unmilli(available)}).`);
