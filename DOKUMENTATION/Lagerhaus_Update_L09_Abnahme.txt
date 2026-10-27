@@ -1,0 +1,8 @@
+Mein Alltag · Lagerhaus L09 · V0.9.0 · 27.10.2026
+GitHub main – Code-Commit: 72b4a74c9bdb5cb10c7f6c324886e775d9a3aa87
+Versionsabgleich nach Veröffentlichung: assets/app.js 0.9.0, version.json 0.9.0, sw.js mein-alltag-v0-9-0, neues Fachmodul im Service-Worker Precache.
+Erledigt: anklickbare 3D-Fachmarkierungen, Fachkarte und Volltextsuche, Einlagerung/Entnahme/Umlagerung in Fächern, identische stabile Fachkennungen, atomare Bestandsbuchungen, Reservierungsschutz und Bewegungshistorie.
+Tests: Node release-check.mjs und release-check-l05.mjs bis release-check-l09.mjs PASS. Node --check aller JS-Dateien PASS. Service-Worker-Dateiliste vollständig.
+OFFEN: echter Browser-End-to-End-Test in Chrome und Android-Touch-/Offline-/Update-Praxistest.
+Hinweis: Schematische 3D-Darstellung – kein geometrisch exakter 3D-Lagereditor (L34 geplant).
+Die Browserdaten/IndexedDB dürfen nicht gelöscht werden.
