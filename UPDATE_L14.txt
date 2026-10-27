@@ -1,0 +1,30 @@
+MEIN ALLTAG · LAGERHAUS · L14 · V0.14.0 · 27.10.2026
+
+NEU
+- Neuer Lager-Navigator mit Artikel- und Lagerplatzsuche, Raumfilter und separater Raum-/Regal-/Fach-Liste.
+- Präzise 3D-Direktlinks aus der Liste und aus jeder Artikel-Bestandsposition. Raum, Möbel und konkretes Fach werden per stabiler ID aufgelöst.
+- Gesuchtes Regal erhält eine farbige 3D-Markierung; das Fach wird zusätzlich als ausgewählte Fachmarkierung angezeigt. Schaltfläche „Regal groß öffnen“ für die bestehende vergrößerte Inventaransicht.
+- Mehrere Lagerorte desselben Artikels werden einzeln angezeigt, mit ihrem realen Teilbestand – keine Doppelzählung separat erfasster Gebinde.
+- Fehlende und nicht zugewiesene Lagerorte sind sichtbar, aber ohne ungültigen 3D-Link.
+- Kategorien, Artikel, Fotos, Bestände und die fünf App-Module bleiben im bisherigen IndexedDB-Speicher unverändert.
+
+TECHNIK
+- Neu: modules/lagerhaus-navigator.js (pure Ziellogik), modules/lagerhaus-navigator-view.js (Listen-/Suchansicht).
+- APP_VERSION, version.json und Offline-Service-Worker-Cache V0.14.0.
+- Haupt-URL #/lagerhaus/navigator; Raum-Fokus via #/lagerhaus/room/<room-ID>/focus/<regal-ID>/fach/<fach-ID>.
+- Keinerlei Backend-Zwang, API-Anfrage oder Datenübertragung. Alle Daten bleiben lokal im Browser.
+
+TESTSTATUS
+- PASS: L14 Logiktest (Pfadauflösung, 3D-Routen, Fachmarkierung, Mehrfachlagerorte, Such-/Raumfilter, Erhalt echter Bestände, URL-Encoding, Offline-Precache, Version).
+- PASS: 12 vorhandene Node-Regressionstests mit an die neue Version angepassten Versions-Erwartungen.
+- PASS: produktive JavaScript-Syntaxprüfungen, Versions-/Service-Worker-Konsistenz.
+- OFFEN: Vollständiger lokaler Browser-End-to-End-Test. Chromium verweigert lokale Seite mit net::ERR_BLOCKED_BY_ADMINISTRATOR; kein Bestanden vorgetäuscht.
+- OFFEN: Reale Android-Prüfung von Touch, Layout, Offlinebetrieb und GitHub-Pages-Aktualisierung durch Nutzer.
+
+BETRIEB
+GitHub Pages verwendet main /(root), kein Unterordner beim Hochladen.
+Es ist keine lokale Bestandsdatenmigration erforderlich. Gespeicherte Chrome-Website-Daten NICHT löschen.
+Die ZIP enthält das aktualisierte bauhaus.docx im Hauptordner und in DOKUMENTATION/.
+
+PLANUNG
+Vor Beginn der letzten beiden Pakete L35 (Zubehör/Ersatzteile) und L36 (QR-System) erfolgt die verlangte gesonderte Ankündigung; L36 bleibt das allerletzte Update.
