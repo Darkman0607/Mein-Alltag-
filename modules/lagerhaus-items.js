@@ -1,6 +1,7 @@
 /** L05–L07 – article records, templates and stable location references. */
 import {normalizeProperties} from './lagerhaus-templates.js';
 import {stockPositions,stockTotal,stockSettings} from './lagerhaus-stock.js';
+import {cleanTags} from './lagerhaus-categories.js';
 export const ITEM_KEY='items.v1';
 export const ITEM_SEQ_KEY='items.sequence.v1';
 export const ITEM_TYPES=Object.freeze({geraet:'Gerät',verbrauch:'Verbrauchsmaterial',einzel:'Einzelstück',sonstiges:'Sonstiges'});
@@ -42,7 +43,8 @@ export function validateItem(values,rooms,areas){
  return {name,category,type,condition,unit,quantity:Math.round(amount*1000)/1000,locationId,minimumStock,packSize,
    pairCounting:['auto','yes','no'].includes(values.pairCounting)?values.pairCounting:'auto',
    brand:clean(values.brand,80),articleNumber:clean(values.articleNumber,80),note:clean(values.note,2000),
-   properties:normalizeProperties(type,values.properties)};
+   properties:normalizeProperties(type,values.properties),
+   categoryId:clean(values.categoryId,100),tags:cleanTags(values.tags),favorite:values.favorite===true||values.favorite==='on'};
 }
 export function nextArticleCode(items,sequence){
  const previous=Math.max(Number.isSafeInteger(sequence)&&sequence>=0?sequence:0,...items.map(i=>Number(/^A-(\d+)$/.exec(i.code)?.[1]||0)));
@@ -50,8 +52,12 @@ export function nextArticleCode(items,sequence){
  const next=previous+1;
  return {sequence:next,code:`A-${String(next).padStart(4,'0')}`};
 }
-export function upsertItem(items,values,{id=null,rooms=[],areas=[],now=new Date().toISOString(),makeId=()=>crypto.randomUUID(),sequence=0}={}){
+export function upsertItem(items,values,{id=null,rooms=[],areas=[],now=new Date().toISOString(),makeId=()=>crypto.randomUUID(),sequence=0,categories=null}={}){
  const data=validateItem(values,rooms,areas);
+ if(Array.isArray(categories)){
+  if(data.categoryId){const cat=categories.find(c=>c.id===data.categoryId);if(!cat)throw Error('Ausgewählte Kategorie existiert nicht mehr.');data.category=cat.name;}
+  else data.category='Allgemein';
+ }
  const result=items.map(i=>({...i}));
  if(id){
   const idx=result.findIndex(x=>x.id===id);if(idx<0)throw new Error('Artikel existiert nicht mehr.');
