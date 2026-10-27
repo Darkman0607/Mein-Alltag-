@@ -13,7 +13,7 @@ Bestanden:
 [x] Gesamtbestand und reservierte Mengen korrekt
 [x] Bestandssperre bei Entnahme oder Umlagerung gebundener Stücke
 [x] Kein unbemerkter Verlust der Lagerzuordnung beim Hierarchie-Löschen
-[x] L04–L07 Regessionsprüfungen und L08 Logiktests
+[x] L04–L07 Regressionsprüfungen und L08 Logiktests
 [x] JavaScript-Syntax und Offline-Dateiliste
 
 Offen:
@@ -21,3 +21,9 @@ Offen:
 [ ] Android-Praxistest inkl. Touch-, Offline- und Upgrade-Verhalten
 
 GitHub-Veröffentlichungs- und ZIP-Nachweise werden nach erfolgreicher Veröffentlichung ergänzt.
+
+Veröffentlichung auf GitHub main erfolgreich:
+Code-Commit: 62789369dde74cedccf24c64f955226ecd6ecca4
+GitHub V0.8.0, Offline-Cache mein-alltag-v0-8-0 und L08-Modul erneut abgerufen.
+Abnahmedokument und bauhaus.docx werden zusätzlich als eigener Dokumentations-Commit veröffentlicht.
+[x] Vollständige L08-ZIP einschließlich aktualisierter bauhaus.docx vorbereitet; ZIP-Integrität und Regression im entpackten Paket separat erneut geprüft.
