@@ -168,3 +168,9 @@ GitHub-Codeveröffentlichung L12-HF02: https://github.com/Darkman0607/Mein-Allta
 - Vorhandenes L01–L12-Lagerhaus, 3D-Raum, Regalzuordnung und volle/angebrochene Gebinde bleiben erhalten.
 - Prüfungen: L13-Logiktest, 11 alte Regressionen und JS-Syntax PASS; Android-/Browser-E2E offen.
 - GitHub main: https://github.com/Darkman0607/Mein-Alltag-/commit/db43a02366d8bd0e8f2ca0e11cb5ff13228f0344 (Commit veröffentlicht und Quelldateien geprüft, GitHub Pages-Livebereitstellung nicht bestätigt).
+
+## L14 – Lager-Navigator (V0.14.0)
+Der Lager-Navigator ist auf der Lagerhaus-Startseite und unter „Meine Artikel“ erreichbar.
+Er zeigt Bestandspositionen als Suchliste oder die Raum-/Regal-/Fach-Struktur. Jeder gültige Lagerort erhält einen Link zur passenden 3D-Raumansicht; Regal oder Fach werden dort optisch markiert. Die Lagerortanzeige basiert auf den bestehenden `stockLocations` und verändert keine gespeicherten Mengen. Näheres steht in `UPDATE_L14.txt`.
+
+Die Browser-End-to-End-Prüfung ist in der Testumgebung durch die Chromium-Sicherheitsrichtlinie blockiert. Android-Praxistest bleibt offen. Die letzten beiden Entwicklungspakete sind L35 und L36; vor L35 erfolgt eine ausdrückliche Ankündigung.
