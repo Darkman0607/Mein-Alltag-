@@ -125,17 +125,35 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - PASS: `node --check` aller produktiven JS-Dateien.
 - OFFEN: volle lokale Browsernavigation: `net::ERR_BLOCKED_BY_ADMINISTRATOR` bei `http://127.0.0.1:8765/`.
 - OFFEN: realer Android-Chrome-Test für Pinch-Zoom, Vollbild, Touch-Auswahl, Lagerorte und Offline-Verhalten; Benutzerdaten liegen nur auf dem jeweiligen Gerät.
-## L12-HF01 V0.12.1 (27.10.2026)
-- [x] Lokale Node-Regressionssuite L04–L12-HF01 und Syntaxprüfungen PASS.
-- [x] Paar/Stück-Umrechnung, Gebinde mit Restmengen, Zuordnungsschutz und Cache geprüft.
-- [ ] Chrome-End-to-End (gesperrt: ERR_BLOCKED_BY_ADMINISTRATOR).
-- [ ] Echtes Android-Touch-/Offline-/Update-Testing.
 
-## L12-HF02 · V0.12.2 · Regal-Detaildialog
-- [x] HTML-dialog/showModal: Top-Layer verhindert Überdeckung durch App-Header.
-- [x] Reaktionsfähige Kopfzeile: Text und Schließen-Button auf 320/360/412/768px ohne Kollision.
-- [x] Isolierter Chromium-Dialogtest: ✕ klickbar; Escape funktioniert; keine horizontale Überbreite.
-- [x] L04–L12-HF01 Node-Regressionen, HF02-Version/Modalprüfung und produktive JavaScript-Syntax PASS.
-- [x] App-Version 0.12.2 / SW-Cache mein-alltag-v0-12-2.
-- [ ] Vollständiger Browser-App-E2E: Netzaufruf in Testumgebung durch ERR_BLOCKED_BY_ADMINISTRATOR verhindert.
-- [ ] Echtes Android-Handy, Offline-/Versionswechsel-Bedienung bestätigt.
+## L12-HF01 V0.12.1 – Prüfprotokoll 27.10.2026
+- [x] Logik-/Regressionstests `node release-check.mjs`, `node release-check-l05.mjs` bis `node release-check-l12.mjs` sowie `node release-check-l12-hf01.mjs` erfolgreich.
+- [x] Quelltexte mit Node-Syntaxcheck geprüft, PWA-Version 0.12.1 und Service-Worker-V0.12.1 konsistent; neue Offline-Moduldatei enthalten.
+- [x] H04: 100 Handschuhe = 50 Paar, Verbrauch 3 Paar reduziert um 6 Stück, Einzelhandschuh bleibt berücksichtigt, keine Doppelzählung.
+- [x] H03: Unzugeordnete Raumartikel nicht fiktiv im Regal gezeigt; Regal-Positionen aus tatsächlich erfassten Standorten.
+- [x] H01/H02: JavaScript-DOM-Verkabelung, 3D-Zoom-Handler und direkte Detailroute statisch geprüft.
+- [ ] Visueller Chrome-End-to-End-Test: lokaler Playwright-Chromium-Aufruf endet mit `ERR_BLOCKED_BY_ADMINISTRATOR`.
+- [ ] Echter Android-Touch- und Offline-/Cache-Test auf dem Vivo X300 Pro durch Nutzer.
+
+- [x] GitHub main V0.12.1 veröffentlicht und version.json, sw.js sowie lagerhaus-consumption.js erneut vom Branch abgerufen (Commit 8efcd5b).
+
+
+## L12-HF02 · V0.12.2 · Regal-Detaildialog (27.10.2026)
+- [x] Modal ist natives `<dialog>` mit `showModal()` im Top Layer; App-Titelleiste kann nicht überlagern.
+- [x] Responsiver Kopf: Titel/Untertitel und Schließen-Knopf bleiben getrennt; Test bei 320, 360, 412, 768 CSS-Pixeln.
+- [x] Chromium-Komponententest: Button wird getroffen, schließt Dialog, Escape schließt ebenfalls; kein Horizontalüberlauf.
+- [x] Node-Regressionen L04–L12-HF01 und HF02 sowie Produktiv-JavaScript-Syntax PASS.
+- [x] Version APP_VERSION/version.json v0.12.2, Service Worker Cache v0-12-2.
+- [ ] Realer Voll-App-Browser-End-to-End-Test (Chromium-URL-Zugriff lokal durch `ERR_BLOCKED_BY_ADMINISTRATOR` gesperrt).
+- [ ] Bedienung und App-Update auf dem echten Android-Gerät vom Nutzer bestätigt.
+- [x] GitHub main V0.12.2 hochgeladen und Quell-/Versionsdateien danach erneut von main gelesen (Commit 61eb3f16b).
+
+
+## L13 – Kategorien / Suche / Filter / Favoriten V0.13.0
+- [x] `node release-check-l13.mjs`: Kategorie-Migration/ID-Erhalt, Kindkategorien, Umbenennen, Löschen gesperrter Kategorien, Schlagwörter, Synonymsuche und Favoriten.
+- [x] Sammelkategorie und Realbestand, angebrochene 100er-Packung mit 37 Stück nach Kategorieänderung unverändert.
+- [x] 11 frühere Node-Prüfsuiten L04–L12 mit ausschließlich aktualisierter Versions-Assertion PASS.
+- [x] Node-Syntax aller 19 produktiven JavaScript-Quelldateien PASS.
+- [x] GitHub `main` veröffentlicht; Release-Dateien nach Upload nochmals per GitHub-API abgerufen. Letzter Release-Commit `db43a02366d8bd0e8f2ca0e11cb5ff13228f0344`.
+- [ ] Vollständige Browser-E2E- und IndexedDB-Neuladeprüfung – Chromium `ERR_BLOCKED_BY_ADMINISTRATOR`.
+- [ ] Android Chrome/PWA mit bestehenden realen Benutzerdaten, Favoriten/Filter, Touch und Offline-/Update-Mechanismus testen.
