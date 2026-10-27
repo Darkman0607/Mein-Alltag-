@@ -87,3 +87,13 @@ Browser-End-to-End-Test lokal durch Umgebungsrichtlinie blockiert; echter Androi
 - IndexedDB `mein-alltag-v0` und Schema `1` bleiben bestehen; beide Lagerhaus-Keys werden gemeinsam in einer Transaktion geschrieben.
 - Code- und Migrationstests bestanden. Browser-E2E lokal blockiert; echte Android-Tests offen.
 - Neue Version: `0.4.0` in App, `sw.js`, `version.json`; Offline-Shell umfasst `lagerhaus-hierarchy.js`.
+
+
+## Update L05 · Beta V0.5.0 (27.10.2026)
+Im Modul **Lagerhaus** gibt es die Seite **Artikel verwalten**. Dort kannst du lokale Artikelkarten anlegen, anzeigen, bearbeiten, suchen und löschen. Felder: Bezeichnung, Typ, Kategorie, Menge, Einheit, Marke, Artikelnummer, Zustand, Notizen sowie optional ein Raum, Möbel oder Fach. Ein Fotoplatzhalter ist vorhanden; echte Fotofunktion erst L10.
+
+Artikel bleiben in `lagerhaus/items.v1` und der fortlaufende Kennungszähler in `lagerhaus/items.sequence.v1`. Alte Räume/Möbel/Fächer bleiben in `rooms.v1`, `areas.v1` unverändert; ebenso alle anderen App-Module. Standortreferenzen verwenden beständige IDs: wenn ein Fach oder Möbel verschoben wird, zeigt die Artikelkarte automatisch den neuen Pfad. Das Löschen belegter Lagerorte und Undo mit dadurch verlorenen Artikelorten wird verhindert.
+
+Lagerbestand-Buchungsjournal, mehrere Orte pro Artikel, echte Bilder, Geräte-Serviceintervalle und Scanner folgen in ihren geplanten Updates. **Keine Synchronisation oder Cloud-Sicherung.**
+
+Test: `node release-check.mjs && node release-check-l05.mjs`. Browser-/Android-Praxistest ausstehend, da lokale Chromium-Navigation durch Richtlinie blockiert.

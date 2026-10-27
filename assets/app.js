@@ -1,12 +1,13 @@
 import {openDatabase,getModuleValue,setModuleValue,getStoreNames,getModuleCount,DB_NAME,DB_VERSION,MODULE_STORES} from './database.js';
 import lagerhaus from '../modules/lagerhaus.js';
 import {renderLagerhaus,mountLagerhaus,renderLagerraum,mountLagerraum} from '../modules/lagerhaus-app.js';
+import {renderLagerartikel,mountLagerartikel} from '../modules/lagerhaus-items-view.js';
 import frauengesundheit from '../modules/frauengesundheit.js';
 import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
 
-export const APP_VERSION='0.4.0';
+export const APP_VERSION='0.5.0';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -17,6 +18,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const icon=m=>`./assets/icons/${m.icon}`;
 function hashRoute(){
   const part=(location.hash || '#/home').replace(/^#\/?/,'').split('/').filter(Boolean);
+  if(part[0]==='lagerhaus' && part[1]==='items') return {page:'lagerartikel',roomId:part[2]?decodeURIComponent(part[2]):''};
   if(part[0]==='lagerhaus' && part[1]==='room' && part[2]) return {page:'lagerraum',roomId:decodeURIComponent(part[2])};
   if(part[0]==='module' && byId[part[1]]) return {page:'module',id:part[1]};
   if(['home','calendar','search','more'].includes(part[0])) return {page:part[0]};
@@ -99,6 +101,7 @@ function bindView(route){
    else { document.getElementById('saveNote')?.addEventListener('click',()=>saveNote(route.id)); loadNote(route.id); }
  }
  if(route.page==='lagerraum') mountLagerraum(route.roomId);
+ if(route.page==='lagerartikel') mountLagerartikel(route.roomId);
  if(route.page==='calendar'){
    document.getElementById('prevMonth').addEventListener('click',()=>{calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()-1,1);render();});
    document.getElementById('nextMonth').addEventListener('click',()=>{calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+1,1);render();});
@@ -133,11 +136,11 @@ function bindView(route){
 export function render(){
  const route=hashRoute();
  const labels={home:['Mein Alltag','STRUKTURIERT. EINFACH. DEIN.'],calendar:['Kalender','DEINE ÜBERSICHT'],search:['Suche','SCHNELL ZUM BEREICH'],more:['Mein Alltag','MEHR & EINSTELLUNGEN']};
- const [title,sub]=route.page==='lagerraum'?['Lagerhaus','3D-LAGERRAUM']:route.page==='module'?[byId[route.id].name,'DEIN EIGENER BEREICH']:labels[route.page];
+ const [title,sub]=route.page==='lagerartikel'?['Lagerhaus','ARTIKELVERWALTUNG']:route.page==='lagerraum'?['Lagerhaus','3D-LAGERRAUM']:route.page==='module'?[byId[route.id].name,'DEIN EIGENER BEREICH']:labels[route.page];
  appTitle.textContent=title;appSubtitle.textContent=sub;
  backButton.hidden=route.page==='home';
  document.querySelectorAll('.nav-item').forEach(item=>{const active=item.dataset.route===route.page;item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});
- view.innerHTML=route.page==='home'?renderHome():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():renderModule(byId[route.id])):route.page==='lagerraum'?renderLagerraum():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
+ view.innerHTML=route.page==='home'?renderHome():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
  view.scrollTop=0;bindView(route);
  document.getElementById('installAction')?.addEventListener('click',requestInstall);
  refreshInstallUI();

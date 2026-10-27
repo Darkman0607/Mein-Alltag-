@@ -65,3 +65,11 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - [ ] Echter Browser-E2E-Test: lokales Chromium `ERR_BLOCKED_BY_ADMINISTRATOR`.
 - [ ] Android: Bereiche anlegen, Fach umbenennen, Möbel/Fächer zwischen Räumen bewegen und nach Neustart prüfen.
 - [ ] App offline aktualisieren und gespeicherte V0.3.1-Daten am Gerät kontrollieren.
+
+
+## L05 (27.10.2026) – Artikelkarte V0.5.0
+- [x] Node-Logiktests: Anlage, Änderung, Anzeige der Lagerpfade, Entfernung, Mengen-/Standortvalidierung und konstante Artikelcodes nach Löschen.
+- [x] Referenztests: Fachverschiebung bei unveränderter Artikelzuordnung; Sperre beim Löschen belegter Lagerorte; bestehende Raum-IDs bleiben erhalten.
+- [x] JavaScript-Syntax und Service-Worker-Precache vollständig, getrennte Modulspeicher, Version konsistent.
+- [ ] Echtes Chrome-/Android-End-to-End: lokale Chromium-Navigation `ERR_BLOCKED_BY_ADMINISTRATOR`; auf deinem Handy nachprüfen.
+- [ ] Datenmigration mit echten Bestandsdaten auf dem Androidgerät nachprüfen; technische L04/L05-Datenstruktur bleibt gleich.

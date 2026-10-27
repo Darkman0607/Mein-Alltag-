@@ -1,0 +1,9 @@
+MEIN ALLTAG · L05 · V0.5.0
+
+1. Vorhandene App nicht deinstallieren, Browserdaten nicht löschen.
+2. GitHub Pages über Chrome öffnen, auf neues Update prüfen und ggf. Aktualisieren antippen.
+3. In Lagerhaus > Artikel verwalten neue Artikel speichern.
+4. Zum Raum/Möbel/Fach passende Lagerorte im Dropdown auswählen.
+5. Erweiterte Bestandsbuchungen und echte Bilder folgen später.
+
+Bei Fehlern Screenshot senden, nicht Browserdaten löschen.
