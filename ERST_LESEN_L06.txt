@@ -1,0 +1,13 @@
+Mein Alltag · Lagerhaus Update L06 · Beta 0.6.0
+
+Vollständige App zur Veröffentlichung über GitHub Pages: Branch main, Verzeichnis /(root).
+Falls die App schon installiert ist, in den Einstellungen "Auf Updates prüfen" verwenden. Nach Aktualisierung soll BETA V0.6.0 erscheinen.
+
+Neu: Artikeltypen, 8 Vorlagen, optionale typabhängige Eigenschaften, schnelle Eingabe.
+Bereits erfasste Artikel bleiben im bisherigen lokalen IndexedDB-Speicher. Bitte KEINE Browserdaten löschen.
+Die App ist weiterhin offlinefähig. Neue Funktionen müssen nach dem ersten Online-Update vollständig vorgeladen worden sein.
+
+Technische Checks: Node-Logiktests und JavaScript-Syntax bestanden. Realer Android-/Browser-End-to-End-Test offen.
+GitHub-Code-Commit: 47e9629756e5c5a7ce925da8f6a1b4c07326c207
+
+Mastercheckliste bauhaus.docx ist im ZIP enthalten; L06 ist angekreuzt.

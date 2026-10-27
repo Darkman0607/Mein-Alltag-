@@ -9,5 +9,5 @@ Stand: 27.10.2026
 [x] Cacheliste, Manifest, Versionsdatei und App-Version überprüft
 [ ] Realer Chrome-/Android-Test: nicht abgeschlossen
 [ ] Offline- und Touchprüfung auf Vivo X300 Pro: noch ausstehend
-[ ] GitHub main veröffentlicht: Nachweis folgt im endgültigen Protokoll
-[ ] ZIP inklusive aktualisierter bauhaus.docx: Nachweis folgt im endgültigen Protokoll
+[x] GitHub main veröffentlicht: Code-Commit 47e9629756e5c5a7ce925da8f6a1b4c07326c207; Dateiabgleich 0.6.0 nach Veröffentlichung bestanden
+[x] ZIP inklusive aktualisierter bauhaus.docx erstellt und auf Vollständigkeit geprüft
