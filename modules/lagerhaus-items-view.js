@@ -1,6 +1,7 @@
 /** L05–L07 – touch-oriented cards, quick entry, templates and dynamic properties. */
 import {getModuleValue,mutateModuleValuesWithDeletes,mutateModuleValues} from '../assets/database.js';
 import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoices,resolveItemLocation,upsertItem,deleteItem} from './lagerhaus-items.js';
+import {navigationHref} from './lagerhaus-navigator.js';
 import {templatesFor,propertiesFor,templateById,detailedProperties} from './lagerhaus-templates.js';
 import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock} from './lagerhaus-stock.js';
 import {addContainer,updateContainer,addDevice,updateDevice,containerState,CONTAINER_STATES,DEVICE_STATES,trackedSummary} from './lagerhaus-tracking.js';
@@ -87,7 +88,7 @@ function stockPanel(item){
 }
 function positionsHtml(item){
  const positions=stockPositions(item);
- return positions.length?`<div class="lager-stock-positions">${positions.map(pos=>`<div><span>${esc(resolveItemLocation(pos.locationId,rooms,areas).label)}</span><strong>${esc(stockQuantity(pos.quantity))}</strong></div>`).join('')}</div>`:'<p class="lager-stock-empty">Kein Bestand auf Lager</p>';
+ return positions.length?`<div class="lager-stock-positions">${positions.map(pos=>{const location=resolveItemLocation(pos.locationId,rooms,areas),href=navigationHref(pos.locationId,rooms,areas);return `<div class="lager-l14-position"><span>${esc(location.label)}${href?`<a class="lager-l14-jump" href="${esc(href)}" aria-label="${esc(item.name)} am Lagerort ${esc(location.label)} in der 3D-Ansicht anzeigen">📍 3D anzeigen</a>`:'<small class="lager-l14-no-place">Kein 3D-Ziel</small>'}</span><strong>${esc(stockQuantity(pos.quantity))} ${esc(item.unit)}</strong></div>`;}).join('')}</div>`:'<p class="lager-stock-empty">Kein Bestand auf Lager</p>';
 }
 function templateSelect(type){
  return `<option value="">Ohne Vorlage – selbst erfassen</option>${templatesFor(type).map(t=>option(t.id,t.title,'')).join('')}`;
@@ -439,7 +440,7 @@ function bindTracking(el,preselect){
   catch(err){status('Einzelbestand: '+err.message);b.disabled=false;}
  }));
 }
-export function renderLagerartikel(){return `<div class="lager-heading"><span class="eyebrow">MEIN ALLTAG · LAGERHAUS</span><h1>Meine Artikel</h1><p>Artikel, Mengen und mehrere Lagerorte verwalten – lokal und offline.</p></div><div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Lagerbereiche</a></div><div class="lager-status" id="lagerItemStatus" role="status" aria-live="polite">Artikel werden geladen …</div><div id="lagerItemContent"></div>`;}
+export function renderLagerartikel(){return `<div class="lager-heading"><span class="eyebrow">MEIN ALLTAG · LAGERHAUS</span><h1>Meine Artikel</h1><p>Artikel, Mengen und mehrere Lagerorte verwalten – lokal und offline.</p></div><div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Lagerbereiche</a><a class="secondary-button" href="#/lagerhaus/navigator">📍 Lager-Navigator</a></div><div class="lager-status" id="lagerItemStatus" role="status" aria-live="polite">Artikel werden geladen …</div><div id="lagerItemContent"></div>`;}
 export async function mountLagerartikel(preselectRoomId=''){
  editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;photoOpen=false;photoType='item';photoTarget='';resetPhotoSelection();query='';categoryManagerOpen=false;categoryEditId='';categoryFilter='';itemTypeFilter='';favoriteFilter=false;itemSort='name';tagFilter='';selectedItems.clear();try{await load();if(!document.getElementById('lagerItemContent'))return;
   draw(rooms.some(r=>r.id===preselectRoomId)?preselectRoomId:'');status(`${items.length} Artikel geladen · offline gespeichert.`);
