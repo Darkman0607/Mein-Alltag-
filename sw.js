@@ -1,10 +1,10 @@
 /* Mein Alltag – offline shell cache; increment version when updating assets. */
-const CACHE='mein-alltag-v0-8-0';
+const CACHE='mein-alltag-v0-9-0';
 const ASSETS=[
  './','./index.html','./version.json','./manifest.webmanifest','./assets/styles.css','./assets/app.js','./assets/database.js',
  './assets/icons/app-192.png','./assets/icons/app-512.png',
  './assets/icons/lagerhaus.png','./assets/icons/frauengesundheit.png','./assets/icons/familienplaner.png','./assets/icons/putzmanager.png','./assets/icons/hausservice.png',
- './modules/lagerhaus.js','./modules/lagerhaus-app.js','./modules/lagerhaus-hierarchy.js','./modules/lagerhaus-items.js','./modules/lagerhaus-templates.js','./modules/lagerhaus-items-view.js','./modules/lagerhaus-stock.js','./modules/lagerhaus-tracking.js','./modules/frauengesundheit.js','./modules/familienplaner.js','./modules/putzmanager.js','./modules/hausservice.js'
+ './modules/lagerhaus.js','./modules/lagerhaus-app.js','./modules/lagerhaus-hierarchy.js','./modules/lagerhaus-items.js','./modules/lagerhaus-templates.js','./modules/lagerhaus-items-view.js','./modules/lagerhaus-stock.js','./modules/lagerhaus-tracking.js','./modules/lagerhaus-fach.js','./modules/frauengesundheit.js','./modules/familienplaner.js','./modules/putzmanager.js','./modules/hausservice.js'
 ];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([

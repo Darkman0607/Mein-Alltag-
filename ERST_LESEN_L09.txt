@@ -1,0 +1,10 @@
+MEIN ALLTAG · V0.9.0 · L09
+1. ZIP-Inhalt direkt in GitHub Repository Mein-Alltag- nach main / (root) hochladen, falls du es manuell brauchst.
+2. Link: https://darkman0607.github.io/Mein-Alltag-/
+3. Chrome / installierte PWA vollständig schließen und erneut öffnen; auf Updatehinweis reagieren.
+4. Auf Startseite BETA V0.9.0 kontrollieren.
+5. Lagerhaus > Lagerraum mit Möbel und Fächern öffnen. Eine gelbe/blaugrüne Fachnummer im 3D-Modell antippen.
+6. Im Abschnitt "Fächer im 3D-Lager" Bestand prüfen und Artikel ein-/auslagern oder in anderes Fach umstellen.
+7. Suchfeld testen: z.B. Fachnummer, Regalname oder Artikel.
+WICHTIG: Browserdaten nicht löschen – dort liegen deine lokalen Lagerdaten.
+Praxistest auf Android und wirkliche Cache-Aktualisierung stehen bis zu deiner Bestätigung aus.

@@ -7,9 +7,9 @@ import {ensureHierarchy,relocateCompartment} from './modules/lagerhaus-hierarchy
 import {ITEM_KEY,ITEM_SEQ_KEY,locationChoices,resolveItemLocation,validateItem,upsertItem,deleteItem,assertNodeHasNoItems,assertLocationsRetained,nextArticleCode} from './modules/lagerhaus-items.js';
 const root=path.dirname(fileURLToPath(import.meta.url));const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const version=JSON.parse(read('version.json'));
-assert.equal(version.version,'0.8.0');assert.equal(version.build,'L08');
-assert.match(read('assets/app.js'),/APP_VERSION='0.8.0'/);assert.match(read('assets/app.js'),/page:'lagerartikel'/);
-assert.match(read('sw.js'),/CACHE='mein-alltag-v0-8-0'/);assert.match(read('sw.js'),/lagerhaus-items-view.js/);
+assert.equal(version.version,'0.9.0');assert.equal(version.build,'L09');
+assert.match(read('assets/app.js'),/APP_VERSION='0.9.0'/);assert.match(read('assets/app.js'),/page:'lagerartikel'/);
+assert.match(read('sw.js'),/CACHE='mein-alltag-v0-9-0'/);assert.match(read('sw.js'),/lagerhaus-items-view.js/);
 assert.match(read('assets/app.js'),/renderLagerartikel\(\)/);assert.match(read('modules/lagerhaus-app.js'),/assertLocationsRetained/);
 assert.equal(furnitureModelCount(),15);assert.equal(read('assets/database.js').includes("DB_NAME = 'mein-alltag-v0'"),true);
 for(const quote of read('sw.js').split('const ASSETS=[')[1].split('];')[0].match(/'\.\/[^']+'/g)||[]){const file=quote.slice(1,-1).replace(/^\.\//,'');assert(fs.existsSync(path.join(root,file)),`SW missing ${file}`);}

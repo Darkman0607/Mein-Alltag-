@@ -1,0 +1,17 @@
+MEIN ALLTAG · LAGERHAUS · L09 · BETA 0.9.0 · 27.10.2026
+
+3D-Fachverwaltung
+- Interaktive und per Tastatur erreichbare Fachmarkierungen im 3D-Raum (alle 30 Fächer pro Möbel möglich).
+- Große, durchsuchbare Fachkarten pro Raum, einschließlich Artikelmenge und Kennung.
+- Live-Suche nach Fachbezeichnung, Kennung, Möbel und Artikelname.
+- Einlagern/Zuordnen, Entnehmen und Umlagern zwischen Fächern direkt im Raumeditor.
+- Fachkarte und 3D-Markierung verwenden dieselbe stabile Fach-ID.
+- Alle Bestandsbuchungen laufen atomar über die bestehenden IndexedDB-Storewerte, inklusive Bewegungshistorie.
+- Schutz für separat erfasste Gebinde/Seriengeräte gegen versehentliches Ausbuchen/Umlagern.
+- Bestehende Räume, Artikel, Lagerpositionen und Geräte-IDs bleiben unverändert.
+
+Einschränkungen: Die 3D-Ansicht bleibt schematisch; vollständiger interaktiver CAD-Editor ist L34.
+Eine neue Artikelkarte wird über Meine Artikel angelegt; die Fachbuchung arbeitet mit bestehenden Artikelkarten.
+Gebinde/Seriengeräte müssen weiterhin über Meine Artikel einzeln umgelagert werden.
+Prüfungen: release-check.mjs und release-check-l05.mjs bis release-check-l09.mjs + Syntax.
+Browser-/Android-End-to-End ist separat vor Ort zu prüfen.

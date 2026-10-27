@@ -112,3 +112,22 @@
 .lager-track-list .secondary-button,.lager-track-main-button{min-height:44px}
 .lager-track-status{display:inline-block;padding:.22rem .45rem;margin-left:.3rem;border-radius:9px;background:rgba(40,167,132,.16);color:#a8f1d0;font-size:.85em}
 .lager-track-main-button{width:100%;margin:.7rem 0}
+/* L09 – large-touch compartment navigator synchronized with schematic 3D room */
+.lager-fach-pin{cursor:pointer;outline:none;touch-action:manipulation}
+.lager-fach-pin:focus-visible circle{stroke:#ffdf9a;stroke-width:4}
+.lager-fach-overview{border:1px solid rgba(96,192,216,.37);border-radius:18px;padding:16px;margin:18px 0;background:linear-gradient(155deg,#142d38,#091a26);box-shadow:0 6px 18px #0005}
+.lager-fach-overview h2{margin:0;font-size:19px;color:#f5d8a3}
+.lager-fach-search-label,.lager-fach-booking label{display:block;margin:13px 0 5px;color:#dcebf5;font-size:13px;font-weight:650}
+.lager-fach-search,.lager-fach-booking input,.lager-fach-booking select{display:block;width:100%;min-height:48px;border:1px solid #678699;border-radius:11px;background:#081a26;color:#f7fbff;padding:10px;font-size:15px;margin:6px 0}
+.lager-fach-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:12px 0}
+.lager-fach-card{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:6px;padding:14px;min-height:76px;background:#19333e;border:1px solid #5c8597;border-radius:14px;color:#f4fbff;overflow-wrap:anywhere;touch-action:manipulation}
+.lager-fach-card[hidden]{display:none!important}
+.lager-fach-card.is-selected{border:2px solid #f1c776;background:#283a3d}
+.lager-fach-card:focus-visible{outline:3px solid #f1c776}
+.lager-fach-card-top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.lager-fach-card small{color:#b2cada;font-size:12px}.lager-fach-articles{color:#e7d3ab;font-size:12px;line-height:1.55}
+.lager-fach-booking{border-top:1px solid #668b9c;margin-top:15px;padding-top:14px}
+.lager-fach-booking h3{font-size:17px;margin:0;color:#f5d8a3}
+.lager-fach-booking button{min-height:49px;width:100%;margin:12px 0 3px}
+.lager-fach-booking label[hidden]{display:none}
+@media(max-width:430px){.lager-fach-list{grid-template-columns:1fr}.lager-fach-overview{padding:12px}}

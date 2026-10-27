@@ -93,3 +93,11 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 
 ## L08 · Teststatus 27.10.2026
 Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs`, `node release-check-l06.mjs`, `node release-check-l07.mjs`, `node release-check-l08.mjs` – PASS. Zusätzlich `node --check` für alle produktiven JS-Dateien – PASS. Geprüft: Gebinde anlegen/öffnen/teilverbrauchen/leer, Umlagerungen, Einzelgeräte-Seriennummern, Zustand/Ausbuchung, parallele Arten von Beständen, Artikel-/Lagerort-Löschschutz, Kennungen nach Löschung, alte Artikel und Versions-/SW-Abgleich. Echter Chromium-Aufruf wurde von Admin-Policy blockiert, Android-Praxistest offen.
+
+## L09 – Fachverwaltung im 3D-Lager V0.9.0
+- [x] SVG-Fachmarkierungen in der Raumansicht; Vorschaubilder ohne Bedienmarkierungen.
+- [x] Liste und 3D nutzen dieselben Fach-IDs; Suche nach Fachcode, -name, Möbel, Artikel.
+- [x] Fachbuchungen (Einlagern/Entnehmen/Umlagern) und Reservierungsschutz im L09-Logiktest.
+- [x] JavaScript-Syntax, Versions- und Offline-Precache-Prüfung.
+- [x] L04–L08-Logiktests erneut ausgeführt.
+- [ ] Interaktive Chrome-/Android-Touch- und Offline-Prüfung am Endgerät.

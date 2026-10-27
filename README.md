@@ -114,3 +114,10 @@ Die Artikelseite im Lagerhaus bietet jetzt drei Buchungsarten: Einlagern, Entneh
 
 ## L08 · Beta V0.8.0 – Gebinde und Einzelgeräte
 Über „Meine Artikel“ können bei Verbrauchsmaterialien einzelne Gebinde (voll / angebrochen / leer) und bei Maschinen mit Einheit „Stück“ Einzelgeräte samt eindeutiger Seriennummer geführt werden. Bereits vorhandene Mengen können ohne Erhöhung des Bestands gekennzeichnet werden. Neue Zugänge erhöhen die Gesamtmenge. Jede Umlagerung/Entnahme beachtet separat gebundene Mengen; Buchungen sind atomar. Alte Artikel bleiben ohne Migration verfügbar. Details siehe `UPDATE_L08.txt`.
+
+## L09 – Fachverwaltung im schematischen 3D-Lager (0.9.0)
+- Sichtbare, antippbare Fachmarkierungen auf Möbeln der Raumansicht, per Tastatur aktivierbar.
+- Durchsuchbare Fachliste mit Artikelbeständen und gleicher Fach-ID wie in 3D.
+- Atomare Bestandsbuchungen für Einlagerung, Entnahme, Fach-zu-Fach-Umlagerung; gegen reservierte Gebinde/Geräte geschützt.
+- Keine Änderung des Datenbankschemas oder der bestehenden IDs.
+- Tests: `node release-check.mjs`, `node release-check-l05.mjs` bis `node release-check-l09.mjs`.
