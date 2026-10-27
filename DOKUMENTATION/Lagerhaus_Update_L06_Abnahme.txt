@@ -1,0 +1,13 @@
+Mein Alltag · Lagerhaus L06 · Artikeltypen und Feldvorlagen · 0.6.0
+Stand: 27.10.2026
+[x] Typauswahl Gerät, Verbrauchsmaterial, Einzelstück, Sonstiges
+[x] Acht Artikelvorlagen auf Basis des Typs
+[x] Erweiterte Felder typabhängig, optional und validiert
+[x] Schnellerfassung mit minimalen Pflichtfeldern
+[x] Bestehende L05-Artikeldaten und IDs erhalten (automatische Logiktests)
+[x] L04/L05-Regression und JS-Syntax bestanden
+[x] Cacheliste, Manifest, Versionsdatei und App-Version überprüft
+[ ] Realer Chrome-/Android-Test: nicht abgeschlossen
+[ ] Offline- und Touchprüfung auf Vivo X300 Pro: noch ausstehend
+[ ] GitHub main veröffentlicht: Nachweis folgt im endgültigen Protokoll
+[ ] ZIP inklusive aktualisierter bauhaus.docx: Nachweis folgt im endgültigen Protokoll

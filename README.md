@@ -97,3 +97,12 @@ Artikel bleiben in `lagerhaus/items.v1` und der fortlaufende Kennungszähler in 
 Lagerbestand-Buchungsjournal, mehrere Orte pro Artikel, echte Bilder, Geräte-Serviceintervalle und Scanner folgen in ihren geplanten Updates. **Keine Synchronisation oder Cloud-Sicherung.**
 
 Test: `node release-check.mjs && node release-check-l05.mjs`. Browser-/Android-Praxistest ausstehend, da lokale Chromium-Navigation durch Richtlinie blockiert.
+
+### L06 V0.6.0 – Artikeltypen und Feldvorlagen (27.10.2026)
+
+- Unter **Lagerhaus → Meine Artikel → + Artikel** kann eine passende Vorlage gewählt werden.
+- Eine neue Artikelkarte benötigt nur Name und Menge; Typ/Einheit/Lagerort werden einfach ausgewählt.
+- Unter **Weitere Angaben und typabhängige Eigenschaften** lassen sich Geräte-, Verbrauchs- und Einzelstückfelder ergänzen.
+- Alte L05-Artikel bleiben bearbeitbar; App-Datenbank, Datenbankversion und lokaler Schlüssel `items.v1` bleiben unverändert.
+- Änderungen aus L07 (Bestandsbuchung/Mehrfachlagerort) gehören nicht zu diesem Update.
+- Android- und echtes Browser-End-to-End-Verhalten ist noch nicht nachgewiesen.

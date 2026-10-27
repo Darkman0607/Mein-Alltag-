@@ -73,3 +73,13 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - [x] JavaScript-Syntax und Service-Worker-Precache vollständig, getrennte Modulspeicher, Version konsistent.
 - [ ] Echtes Chrome-/Android-End-to-End: lokale Chromium-Navigation `ERR_BLOCKED_BY_ADMINISTRATOR`; auf deinem Handy nachprüfen.
 - [ ] Datenmigration mit echten Bestandsdaten auf dem Androidgerät nachprüfen; technische L04/L05-Datenstruktur bleibt gleich.
+
+## L06 (27.10.2026) – Artikeltypen und Feldvorlagen V0.6.0
+- [x] Alle Dateien mit `node --check` syntaktisch geprüft.
+- [x] `node release-check.mjs` und `node release-check-l05.mjs`: L04/L05-Regressionsprüfung bestanden.
+- [x] `node release-check-l06.mjs`: 8 Vorlagen, drei typabhängige Eigenschaftsgruppen und Schnellerfassung geprüft.
+- [x] Altartikel ohne `properties` geladen/editiert; unveränderte ID, Artikelcode und Erstellungsdatum.
+- [x] Datums- und Zeichenlängenprüfung, Datenbereinigung, Typwechsel, fehlende Vorlagen abgefangen.
+- [x] Versionskonstante, `version.json`, Service-Worker-Cache und Cache-Dateiliste abgestimmt.
+- [ ] Realer Browser-End-to-End-Test: lokaler Headless-Chromium-Aufruf endet mit Timeout; nicht als bestanden bewertet.
+- [ ] Auf Android: Auswahlliste/Vorlage testen, Pflichtfelder, Öffnen der erweiterten Angaben, Speichern/Offline und alte Artikel prüfen.

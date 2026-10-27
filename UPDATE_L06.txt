@@ -1,0 +1,19 @@
+Mein Alltag · Lagerhaus L06 · Beta V0.6.0 · 27.10.2026
+
+NEU
+1. Drei fachbezogene Artikeltypen mit eigenen Feldern: Gerät, Verbrauchsmaterial, Einzelstück; „Sonstiges“ bleibt möglich.
+2. Acht Vorlagen zur schnellen Erfassung (Gartengeräte/Werkzeuge/Reinigung/Kleinteile/Ersatzteile).
+3. Schnellerfassung: nur Typ, Name, Menge, Einheit und Lagerort; zusätzliche Eigenschaften sind optional einblendbar.
+4. Typabhängige Zusatzinformationen: bei Geräten Modell/Seriennummer/Kaufdatum/Wartung, Verbrauchsmaterial Inhalt/Haltbarkeit/Lagerhinweis, Einzelstücke Farbe/Material/Maße/eigene Kennzeichnung.
+5. Zusatzinfos auf Artikelkarten durchsuchbar und sichtbar; Pflege beim Artikelbearbeiten; Datumseingaben validiert.
+6. Bestehende L05-Artikel bleiben kompatibel: IDs, Codes und bisherige Werte erhalten. IndexedDB-Datenbank und Schlüssel unverändert.
+
+SPÄTER
+Bestandsbuchungen, mehrere gleichzeitige Lagerorte und Mindestbestand (L07); Einzelgeräte/Gebinde (L08); echte Fotos (L10).
+
+TESTS
+node release-check.mjs
+node release-check-l05.mjs
+node release-check-l06.mjs
+node --check für alle JavaScript-Dateien
+Browser-E2E lokal nicht bestanden/verifiziert (Chromium-Terminierung nach Timeout); Android- und Offline-Praxistest offen.

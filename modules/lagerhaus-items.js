@@ -1,4 +1,5 @@
-/** L05 – article records and stable location references. Pure functions; no network or shared module data. */
+/** L05/L06 – article records, templates and stable location references. */
+import {normalizeProperties} from './lagerhaus-templates.js';
 export const ITEM_KEY='items.v1';
 export const ITEM_SEQ_KEY='items.sequence.v1';
 export const ITEM_TYPES=Object.freeze({geraet:'Gerät',verbrauch:'Verbrauchsmaterial',einzel:'Einzelstück',sonstiges:'Sonstiges'});
@@ -37,7 +38,8 @@ export function validateItem(values,rooms,areas){
  const locationId=clean(values.locationId,100);
  if(!resolveItemLocation(locationId,rooms,areas).valid)throw new Error('Ausgewählter Lagerort existiert nicht mehr.');
  return {name,category,type,condition,unit,quantity:Math.round(amount*1000)/1000,locationId,
-   brand:clean(values.brand,80),articleNumber:clean(values.articleNumber,80),note:clean(values.note,2000)};
+   brand:clean(values.brand,80),articleNumber:clean(values.articleNumber,80),note:clean(values.note,2000),
+   properties:normalizeProperties(type,values.properties)};
 }
 export function nextArticleCode(items,sequence){
  const previous=Math.max(Number.isSafeInteger(sequence)&&sequence>=0?sequence:0,...items.map(i=>Number(/^A-(\d+)$/.exec(i.code)?.[1]||0)));

@@ -1,6 +1,7 @@
-/** L05 – touch-oriented item cards and article form. */
+/** L05/L06 – touch-oriented cards, quick entry, templates and dynamic properties. */
 import {getModuleValue,setModuleValues} from '../assets/database.js';
 import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoices,resolveItemLocation,upsertItem,deleteItem} from './lagerhaus-items.js';
+import {templatesFor,propertiesFor,templateById,detailedProperties} from './lagerhaus-templates.js';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const newid=()=>globalThis.crypto?.randomUUID?.()||`item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -22,33 +23,70 @@ async function modify(fn){
  });
  operation=task;return task;
 }
+function templateSelect(type){
+ return `<option value="">Ohne Vorlage – selbst erfassen</option>${templatesFor(type).map(t=>option(t.id,t.title,'')).join('')}`;
+}
+function propertyFields(type,values={}){
+ const fields=propertiesFor(type);
+ if(!fields.length)return '<p class="lager-hint">Dieser Artikeltyp hat keine zusätzlichen Felder.</p>';
+ return `<p class="lager-item-props-caption">Weitere Eigenschaften für ${esc(ITEM_TYPES[type]||'Artikel')}</p>`+fields.map(field=>{
+  const value=values?.[field.key]??'';
+  return `<label>${esc(field.label)} <span class="lager-optional">(optional)</span><input name="property.${esc(field.key)}" type="${field.kind==='date'?'date':'text'}" ${field.max?`maxlength="${field.max}"`:''} ${field.hint?`placeholder="${esc(field.hint)}"`:''} value="${esc(value)}"></label>`;
+ }).join('');
+}
 function form(item,requestedLocation=''){
- const a=item||{name:'',type:'geraet',category:'',quantity:1,unit:'stk',condition:'gut',locationId:requestedLocation,brand:'',articleNumber:'',note:''};
+ const a=item||{name:'',type:'geraet',category:'',quantity:1,unit:'stk',condition:'gut',locationId:requestedLocation,brand:'',articleNumber:'',note:'',properties:{}};
  const location=resolveItemLocation(a.locationId,rooms,areas);
  return `<form id="lagerItemForm" class="lager-item-form">
  <div class="lager-item-form-title"><h2>${item?'Artikel bearbeiten':'Neuen Artikel erfassen'}</h2><button type="button" class="secondary-button" id="lagerItemCancel">Abbrechen</button></div>
  ${item?`<span class="lager-identifier">${esc(item.code)}</span>`:''}
+ <div class="lager-item-grid"><label>Artikeltyp<select name="type" id="lagerItemType">${choices(ITEM_TYPES,a.type)}</select></label><label>Vorlage (optional)<select id="lagerItemTemplate" aria-label="Artikelvorlage">${templateSelect(a.type)}</select></label></div>
+ <p class="lager-item-quick-tip">Schnellerfassung: Name, Menge und Lagerort genügen. Weitere Angaben sind freiwillig.</p>
  <label>Artikelname *<input name="name" required maxlength="100" autocomplete="off" placeholder="z. B. Akkuschrauber" value="${esc(a.name)}"></label>
- <div class="lager-item-grid"><label>Typ<select name="type">${choices(ITEM_TYPES,a.type)}</select></label><label>Kategorie<input name="category" maxlength="55" placeholder="z. B. Werkzeuge" value="${esc(a.category)}"></label></div>
  <div class="lager-item-grid"><label>Menge *<input name="quantity" type="number" inputmode="decimal" min="0" max="1000000" step="0.001" required value="${esc(a.quantity)}"></label><label>Einheit<select name="unit">${choices(ITEM_UNITS,a.unit)}</select></label></div>
  <label>Lagerort<select name="locationId">${locationSelect(location.valid?a.locationId:'')}</select></label>
  ${!location.valid?'<p class="lager-item-alert">Der bisherige Lagerort existiert nicht mehr. Bitte neu zuordnen.</p>':''}
- <div class="lager-item-grid"><label>Marke (optional)<input name="brand" maxlength="80" value="${esc(a.brand)}" placeholder="z. B. Bosch"></label><label>Artikelnummer (optional)<input name="articleNumber" maxlength="80" value="${esc(a.articleNumber)}"></label></div>
- <label>Zustand<select name="condition">${choices(ITEM_CONDITIONS,a.condition)}</select></label>
- <label>Notiz<textarea name="note" rows="3" maxlength="2000" placeholder="Eigene Informationen zum Artikel">${esc(a.note)}</textarea></label>
+ <details class="lager-item-details" id="lagerItemDetails" ${item?'open':''}>
+  <summary>Weitere Angaben und typabhängige Eigenschaften</summary>
+  <div class="lager-item-details-body">
+   <label>Kategorie <span class="lager-optional">(optional)</span><input name="category" maxlength="55" placeholder="z. B. Werkzeuge" value="${esc(a.category)}"></label>
+   <div class="lager-item-grid"><label>Marke (optional)<input name="brand" maxlength="80" value="${esc(a.brand)}" placeholder="z. B. Bosch"></label><label>Artikelnummer (optional)<input name="articleNumber" maxlength="80" value="${esc(a.articleNumber)}"></label></div>
+   <label>Zustand<select name="condition">${choices(ITEM_CONDITIONS,a.condition)}</select></label>
+   <div id="lagerItemProperties">${propertyFields(a.type,a.properties)}</div>
+   <label>Notiz<textarea name="note" rows="3" maxlength="2000" placeholder="Eigene Informationen zum Artikel">${esc(a.note)}</textarea></label>
+  </div>
+ </details>
  <div class="lager-photo-placeholder" aria-label="Fotofunktion für späteres Update vorgesehen">▧ <span>Artikelfoto – Platzhalter. Kamera und Galerie folgen mit L10.</span></div>
  <button class="primary-button" type="submit">${item?'Änderungen speichern':'Artikel speichern'}</button></form>`;
 }
+function bindTemplates(el){
+ const formEl=el.querySelector('#lagerItemForm');if(!formEl)return;
+ const type=el.querySelector('#lagerItemType');const template=el.querySelector('#lagerItemTemplate');const properties=el.querySelector('#lagerItemProperties');
+ type?.addEventListener('change',()=>{
+  if(template)template.innerHTML=templateSelect(type.value);
+  if(properties)properties.innerHTML=propertyFields(type.value);
+ });
+ template?.addEventListener('change',()=>{
+  const t=templateById(type.value,template.value);if(!t)return;
+  for(const [key,value] of Object.entries(t.values)){
+   const field=formEl.elements.namedItem(key);
+   if(field && 'value' in field)field.value=String(value);
+  }
+  formEl.querySelector('[name="name"]')?.focus();
+ });
+}
+
 function card(item){
  const loc=resolveItemLocation(item.locationId,rooms,areas);
+ const props=detailedProperties(item);
  return `<article class="lager-item-card"><div class="lager-item-card-top"><span class="lager-identifier">${esc(item.code)}</span><span class="lager-item-type">${esc(ITEM_TYPES[item.type]||'Sonstiges')}</span></div>
  <h3>${esc(item.name)}</h3><p class="lager-item-path">⌖ ${esc(loc.label)}</p><div class="lager-item-facts"><span><strong>${esc(item.quantity)}</strong> ${esc(ITEM_UNITS[item.unit]||item.unit)}</span><span>${esc(item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
- ${(item.brand||item.articleNumber)?`<p class="lager-item-extra">${esc([item.brand,item.articleNumber].filter(Boolean).join(' · '))}</p>`:''}${item.note?`<p class="lager-item-note">${esc(item.note)}</p>`:''}
+ ${(item.brand||item.articleNumber)?`<p class="lager-item-extra">${esc([item.brand,item.articleNumber].filter(Boolean).join(' · '))}</p>`:''}${props.length?`<dl class="lager-item-properties-list">${props.map(p=>`<div><dt>${esc(p.label)}</dt><dd>${esc(p.value)}</dd></div>`).join('')}</dl>`:''}${item.note?`<p class="lager-item-note">${esc(item.note)}</p>`:''}
  <div class="lager-item-actions"><button type="button" class="secondary-button" data-item-edit="${esc(item.id)}">Bearbeiten</button><button type="button" class="secondary-button lager-delete" data-item-delete="${esc(item.id)}">Löschen</button></div></article>`;
 }
 function draw(preselect=''){
  const el=document.getElementById('lagerItemContent');if(!el)return;
- const filtered=items.filter(i=>[i.name,i.code,i.category,i.brand,i.articleNumber,i.note].join(' ').toLocaleLowerCase('de-AT').includes(query.toLocaleLowerCase('de-AT')));
+ const filtered=items.filter(i=>[i.name,i.code,i.category,i.brand,i.articleNumber,i.note,...Object.values(i.properties||{})].join(' ').toLocaleLowerCase('de-AT').includes(query.toLocaleLowerCase('de-AT')));
  const selected=items.find(i=>i.id===editId);
  el.innerHTML=`<div class="lager-item-head"><div><strong>${items.length}</strong> Artikel gespeichert</div><button type="button" id="lagerItemAdd" class="primary-button">+ Artikel</button></div>
  ${formOpen?form(selected,preselect):''}
@@ -56,9 +94,11 @@ function draw(preselect=''){
  <div id="lagerItemList">${filtered.length?filtered.map(card).join(''):'<p class="lager-hint">Keine Artikel vorhanden oder keine Treffer. Mit „+ Artikel“ kannst du deinen ersten Gegenstand erfassen.</p>'}</div>`;
  el.querySelector('#lagerItemAdd').addEventListener('click',()=>{editId=null;formOpen=true;draw(preselect);el.querySelector('[name="name"]')?.focus();});
  el.querySelector('#lagerItemCancel')?.addEventListener('click',()=>{editId=null;formOpen=false;draw(preselect);});
+ bindTemplates(el);
  el.querySelector('#lagerItemForm')?.addEventListener('submit',async event=>{
   event.preventDefault();const formEl=event.currentTarget,submit=formEl.querySelector('[type="submit"]');
   const f=new FormData(formEl);const value=Object.fromEntries(f.entries());
+  value.properties=Object.fromEntries(propertiesFor(value.type).map(prop=>[prop.key,f.get(`property.${prop.key}`)||'']));
   submit.disabled=true;
   try{await modify((records,sequence)=>upsertItem(records,value,{id:editId,rooms,areas,makeId:newid,sequence}));
    editId=null;formOpen=false;draw();status('Artikel erfolgreich gespeichert.');
@@ -66,7 +106,7 @@ function draw(preselect=''){
  });
  el.querySelector('#lagerItemSearch').addEventListener('input',event=>{
   query=event.target.value;const list=el.querySelector('#lagerItemList');
-  const current=items.filter(i=>[i.name,i.code,i.category,i.brand,i.articleNumber,i.note].join(' ').toLocaleLowerCase('de-AT').includes(query.toLocaleLowerCase('de-AT')));
+  const current=items.filter(i=>[i.name,i.code,i.category,i.brand,i.articleNumber,i.note,...Object.values(i.properties||{})].join(' ').toLocaleLowerCase('de-AT').includes(query.toLocaleLowerCase('de-AT')));
   list.innerHTML=current.length?current.map(card).join(''):'<p class="lager-hint">Keine passenden Artikel gefunden.</p>';
   bindCards(list);
  });

@@ -65,3 +65,16 @@
 .lager-item-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lager-photo-placeholder{background:#0a1c29;border:1px dashed #657d90;border-radius:12px;padding:15px;color:#a1b6c5;font-size:12px;display:flex;gap:10px;align-items:center;margin-top:12px}.lager-photo-placeholder:first-letter{font-size:24px}
 .lager-item-card h3{font-size:18px;color:#f8fafc;margin:10px 0;overflow-wrap:anywhere}.lager-item-card-top{display:flex;justify-content:space-between;align-items:center;gap:9px}.lager-item-type{font-size:12px;color:#a5c6d9}.lager-item-path{font-size:12px;color:#bad0dc;overflow-wrap:anywhere}.lager-item-facts{display:flex;gap:8px;flex-wrap:wrap}.lager-item-facts span{border:1px solid #586e7b;background:#223743;border-radius:8px;padding:6px 8px;font-size:12px}.lager-item-extra,.lager-item-note{overflow-wrap:anywhere;color:#afc2cf;font-size:12px;margin:12px 0}.lager-item-note{white-space:pre-wrap}.lager-item-actions{display:flex;gap:9px;margin-top:13px}.lager-item-actions button{flex:1;min-height:45px}.lager-item-alert{color:#ffcd8a;font-size:12px}.lager-item-search-label{margin-top:18px}.lager-item-search{margin-bottom:12px}
 @media(max-width:385px){.lager-item-grid{grid-template-columns:1fr}.lager-item-actions{flex-direction:column}}
+
+/* L06: mobile article templates and optional type-dependent detail fields */
+.lager-item-quick-tip{font-size:.81rem;color:#a9c7d4;margin:0 0 13px;line-height:1.45}
+.lager-item-details{margin:15px 0;border:1px solid rgba(156,187,216,.22);border-radius:13px;background:rgba(10,22,32,.42);overflow:hidden}
+.lager-item-details summary{padding:15px 14px;cursor:pointer;font-weight:650;color:#e4f2f7;min-height:47px;touch-action:manipulation;list-style-position:inside}
+.lager-item-details[open] summary{border-bottom:1px solid rgba(156,187,216,.17)}
+.lager-item-details-body{padding:14px;display:grid;gap:13px}
+.lager-item-details-body label{display:grid;gap:6px}
+.lager-item-props-caption{font-size:.8rem;color:#83cde0;margin:8px 0}
+.lager-optional{font-size:.78rem;color:#9faeba;font-weight:400}
+.lager-item-properties-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:5px 15px;border-top:1px solid rgba(185,210,236,.15);padding-top:10px;margin:10px 0}
+.lager-item-properties-list>div{min-width:0}.lager-item-properties-list dt{font-size:.73rem;color:#90a5b3}.lager-item-properties-list dd{margin:0;overflow-wrap:anywhere;font-size:.87rem}
+@media(max-width:360px){.lager-item-form .lager-item-grid{grid-template-columns:1fr}}
