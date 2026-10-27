@@ -157,3 +157,10 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - [x] GitHub `main` veröffentlicht; Release-Dateien nach Upload nochmals per GitHub-API abgerufen. Letzter Release-Commit `db43a02366d8bd0e8f2ca0e11cb5ff13228f0344`.
 - [ ] Vollständige Browser-E2E- und IndexedDB-Neuladeprüfung – Chromium `ERR_BLOCKED_BY_ADMINISTRATOR`.
 - [ ] Android Chrome/PWA mit bestehenden realen Benutzerdaten, Favoriten/Filter, Touch und Offline-/Update-Mechanismus testen.
+
+## L14 (V0.14.0)
+- PASS: `node release-check-l14.mjs` – reine Ziellogik, Suche/Filter, Mehrfachbestände ohne Doppelzählung, Routen zu Raum/Regal/Fach, Offlinecache, Version.
+- PASS: 12 vorhandene Node-Regressionen (temporär an Versionsstand V0.14.0 angepasst; Produktionsdateien unverändert).
+- PASS: JavaScript-Syntaxprüfungen aller produktiven JS-Dateien; JSON-Manifest und version.json gültig.
+- OFFEN: Browser-End-to-End via Playwright. Chromium blockiert `http://127.0.0.1` mit `net::ERR_BLOCKED_BY_ADMINISTRATOR`.
+- OFFEN: Android-Praxistests für Touch, Scrolling, Regal-Markierung, Offline und installierte GitHub-Pages-Version.
