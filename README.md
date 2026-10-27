@@ -1,4 +1,4 @@
-# Mein Alltag – Beta V0.12.0 (Lagerhaus L12)
+# Mein Alltag – Beta V0.13.0 (Lagerhaus L13)
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -140,16 +140,31 @@ Alle Bilder bleiben lokal in IndexedDB; die ZIP archiviert **keine** persönlich
 - Frühere Kategorien-&-Tags-Roadmap L12 wurde nach Nutzerwunsch verschoben, siehe bauhaus.docx.
 - Datenschema und bestehende IDs bleiben unverändert; kein Import/Export oder automatischer Datenabgleich.
 - Tests: Modell- und Regressionsprüfungen bestanden; interaktive End-to-End-Navigation in lokalem Chromium durch ERR_BLOCKED_BY_ADMINISTRATOR verhindert.
-## L12-HF01 V0.12.1 – Lagerhaus-Hotfix (27.10.2026)
-- Touch-Pinch betrifft nur die 3D-Skizze; Regal per Tippen in der Übersicht direkt vergrößern.
-- Echte Artikel/Fachpositionen, kein erfundener Bestand. Nicht eingeräumte Artikel bleiben sichtbar.
-- Paarverbrauch bei Handschuhen (1 Paar = 2 Stück), volle/angebrochene Packungen, reale Restmengen.
-- Ohne Datenbankmigration; bestehende Daten und IDs bleiben bestehen.
-- Node-Regressionen bestanden; echter Android-Test offen.
+
+## L12-HF01 – Hotfix V0.12.1 (27.10.2026)
+- 3D-Raum: Finger-Pinch und Verschieben bleiben innerhalb der SVG-Zeichnung, kein Programmzoom im Bühnenbereich.
+- Aus der Bereichsvorschau kann ein Regal durch direktes Tippen geöffnet werden; das Regal zeigt Fächer und echte Artikelpositionen in einer bildschirmfüllenden Detailansicht.
+- Nicht eingeräumte Raumartikel werden separat angezeigt und können gezielt einem Regal/Fach zugeordnet werden; die App erfindet keine Lagerorte.
+- Für Handschuhe: automatische oder konfigurierbare Paarzählung (1 Paar = 2 einzelne Handschuhe), Paar-Quickbuttons, Restmenge pro Packung, Einzelstückentnahmen.
+- Andere Verbrauchsmaterialien behalten ihre Artikel-Grundeinheiten und Packungsgrößen. Ohne Datenbankmigration.
+- Bekannte Grenze: echte Android-/Browser-E2E-Tests auf Nutzergerät noch offen.
+
 
 ## L12-HF02 · Hotfix V0.12.2 (27.10.2026)
-- Titel und Schließen-Schaltfläche im Regal-Detailfenster überlagerten die App-Kopfzeile: behoben mit nativem HTML-Dialog im Browser-Top-Layer.
-- Responsiver zweispaltiger Kopf mit Umbruch, mindestens 44px großer Schließen-Schaltfläche.
-- ✕, Escape/Android-Zurückaktion und Rücknavigation nach Regal-Direktlink korrigiert.
-- Bestands-, Fach- und Packungsdaten unverändert; keine Datenbankmigration.
-- Chromium-Komponententests bei 320/360/412/768px und JS-/Node-Regressionen bestanden; Android-Praxistest noch offen.
+- Fix der Überlagerung von Regaldetail-Überschrift und App-Header: natives Top-Layer-Dialogfenster statt verschachteltem `position:fixed`.
+- Getrennter responsiver Regalkopf und mindestens 44px große Touch-Fläche zum Schließen.
+- Schließen via X und Escape, Direktlink führt zurück zum 3D-Raum, ohne doppeltes Zurück-Navigieren.
+- Offline-Cache + App-Version hochgesetzt; alle bestehenden Artikel-, Fach- und Packungsdaten bleiben unverändert.
+- Chromium-Test des isolierten Dialogs bei vier Viewport-Größen sowie Regression/JS-Syntax bestanden. Vollständige App-Browser/Android-Abnahme noch offen.
+
+GitHub-Codeveröffentlichung L12-HF02: https://github.com/Darkman0607/Mein-Alltag-/commit/61eb3f16b6fe361ebec27e3533793fe25d9f1d78
+
+
+## Lagerhaus Update L13 – Version 0.13.0 (27.10.2026)
+- Kategorien und Unterkategorien verwalten, umbenennen, mit Symbol/Farbe versehen und mit Suchbegriffen ergänzen.
+- Vorhandene Legacy-Kategorien werden einmalig beim Öffnen übernommen, ohne Artikel-/Bestandsmengen zu verändern.
+- Kategorie-/Typ-/Favoriten-/Schlagwortfilter, Volltextsuche, Sortierung, Favoriten direkt auf der Artikelkarte.
+- Artikel-Tags erfassen, Artikel auswählen und kategorisiert gesammelt umordnen.
+- Vorhandenes L01–L12-Lagerhaus, 3D-Raum, Regalzuordnung und volle/angebrochene Gebinde bleiben erhalten.
+- Prüfungen: L13-Logiktest, 11 alte Regressionen und JS-Syntax PASS; Android-/Browser-E2E offen.
+- GitHub main: https://github.com/Darkman0607/Mein-Alltag-/commit/db43a02366d8bd0e8f2ca0e11cb5ff13228f0344 (Commit veröffentlicht und Quelldateien geprüft, GitHub Pages-Livebereitstellung nicht bestätigt).
