@@ -5,7 +5,7 @@ import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
 
-export const APP_VERSION='0.0.1';
+export const APP_VERSION='0.0.2';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -27,7 +27,7 @@ export function navigate(page,id){
 }
 function section(title,subtitle=''){return `<div class="section-heading"><span class="eyebrow">Mein Alltag · V0</span><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>`;}
 function renderHome(){
-  return `<div class="home-intro">Fünf Bereiche. Ein Ort für deinen Alltag.</div><div class="module-grid">${MODULES.map((m,i)=>`<button type="button" class="module-tile ${i===4?'wide':''}" data-open="${m.id}" data-id="${m.id}" aria-label="${esc(m.name)} öffnen"><img src="${icon(m)}" alt="" draggable="false"/><div class="tile-copy"><div class="tile-title">${esc(m.name)}</div><div class="tile-desc">${esc(m.subtitle)}</div></div></button>`).join('')}</div><div class="home-footer">MEIN ALLTAG · BETA V${APP_VERSION}</div>`;
+  return `<div class="home-intro">Fünf Bereiche. Ein Ort für deinen Alltag.</div><div class="module-grid">${MODULES.map((m,i)=>`<button type="button" class="module-tile ${i===4?'wide':''}" data-open="${m.id}" data-id="${m.id}" aria-label="${esc(m.name)} öffnen"><img src="${icon(m)}" alt="" draggable="false"/><div class="tile-copy"><div class="tile-title">${esc(m.name)}</div><div class="tile-desc">${esc(m.subtitle)}</div></div></button>`).join('')}</div><div class="home-footer"><button class="install-link" id="installAction" type="button">App installieren – Anleitung</button><p id="installHelp" class="install-help" aria-live="polite"></p>MEIN ALLTAG · BETA V${APP_VERSION}</div>`;
 }
 function renderModule(m){return `<div class="module-hero" data-id="${m.id}"><img src="${icon(m)}" alt=""/><div><h1>${esc(m.name)}</h1><p>${esc(m.subtitle)}</p></div></div><span class="status-pill">Grundgerüst eingerichtet</span><div class="glass-card"><h2>Dein Bereich</h2><p>${esc(m.description)}</p><label class="field-label" for="moduleNote">Meine Startnotiz (nur auf diesem Gerät)</label><textarea maxlength="2000" class="note-input" id="moduleNote" placeholder="Optional: Hier kannst du eine kurze Notiz speichern."></textarea><div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px"><button type="button" class="primary-button" id="saveNote">Notiz speichern</button><span class="inline-message" id="saveMessage" role="status"></span></div></div><div class="glass-card"><h2>Für spätere Updates vorgesehen</h2>${m.features.map(s=>`<p>✓ ${esc(s)}</p>`).join('')}<p class="module-privacy">Diese Funktionen sind noch nicht umgesetzt. V0 liefert Navigation und getrennten lokalen Datenspeicher.</p></div>`;}
 function monthMatrix(date){
@@ -36,11 +36,57 @@ function monthMatrix(date){
  const count=Math.ceil((offset+days)/7)*7;
  return Array.from({length:count},(_,i)=>{const d=new Date(date.getFullYear(),date.getMonth(),i-offset+1);return {date:d,other:d.getMonth()!==date.getMonth()};});
 }
+// Chrome on Android only permits the native prompt after beforeinstallprompt.
+// Do not pretend that a normal click can force installation when Chrome does not offer it.
+let deferredInstallPrompt=null;
+let installedByEvent=false;
+function installedMode(){
+  return installedByEvent || window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
+}
+const installInstructions='Öffne diese Adresse direkt in Google Chrome. Tippe rechts oben auf \"⋮\" → \"Zum Startbildschirm hinzufügen\" → \"Installieren\". Falls nur \"Verknüpfung erstellen\" angeboten wird, ist die richtige App-Installation auf diesem Gerät aktuell nicht verfügbar.';
+function refreshInstallUI(){
+  const button=document.getElementById('installAction');
+  const status=document.getElementById('installStatus');
+  if(button){
+    button.disabled=Boolean(installedMode());
+    button.textContent=installedMode()?'Bereits installiert':deferredInstallPrompt?'App jetzt installieren':'App installieren – Anleitung';
+  }
+  if(status){
+    status.textContent=installedMode()?'Die App läuft im eigenen App-Fenster.':deferredInstallPrompt?'Chrome bietet die Installation jetzt direkt an.':'Falls Chrome keine Installationsaufforderung anbietet, verwende die Browser-Menüfunktion.';
+  }
+}
+async function requestInstall(){
+  const info=document.getElementById('installHelp');
+  if(installedMode()){if(info)info.textContent='Die App ist bereits als eigenständige App geöffnet.';return;}
+  if(!deferredInstallPrompt){if(info)info.textContent=installInstructions;return;}
+  const event=deferredInstallPrompt;
+  deferredInstallPrompt=null;
+  refreshInstallUI();
+  try{
+    await event.prompt();
+    const choice=await event.userChoice;
+    if(info){
+      info.textContent=choice?.outcome==='accepted'?'Installationsanfrage angenommen. Prüfe deinen Startbildschirm.':'Installation nicht bestätigt. '+installInstructions;
+    }
+  }catch(e){if(info)info.textContent='Direkte Installation nicht möglich. '+installInstructions;}
+}
+window.addEventListener('beforeinstallprompt',event=>{
+  event.preventDefault();
+  deferredInstallPrompt=event;
+  refreshInstallUI();
+});
+window.addEventListener('appinstalled',()=>{
+  installedByEvent=true;
+  deferredInstallPrompt=null;
+  refreshInstallUI();
+  const info=document.getElementById('installHelp');
+  if(info)info.textContent='App installiert. Du kannst Mein Alltag jetzt über den Startbildschirm öffnen.';
+});
 let calendarDate=new Date();
 function renderCalendar(){const now=new Date();const fmt=new Intl.DateTimeFormat('de-AT',{month:'long',year:'numeric'});return `${section('Kalender','Monatsübersicht – Termine kommen in einem späteren Update.')}<div class="glass-card"><div class="calendar-head"><button type="button" id="prevMonth" aria-label="Vorheriger Monat">‹</button><h2>${esc(fmt.format(calendarDate))}</h2><button type="button" id="nextMonth" aria-label="Nächster Monat">›</button></div><div class="calendar-grid">${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<span class="day-label">${d}</span>`).join('')}${monthMatrix(calendarDate).map(d=>`<span class="day-cell ${d.other?'other':''} ${d.date.toDateString()===now.toDateString()?'today':''}">${d.date.getDate()}</span>`).join('')}</div></div><div class="glass-card"><h2>Noch keine Termine</h2><p>Der Kalender ist bereits bedienbar. Die Verknüpfung mit dem Familienplaner ist für ein späteres Update vorgesehen.</p></div>`;}
 function renderSearch(){return `${section('Suche','Finde deine fünf Bereiche.')}<label class="field-label" for="searchInput">App-Bereiche durchsuchen</label><input class="search-input" id="searchInput" autocomplete="off" type="search" placeholder="z. B. Lager oder Familie"/><div class="search-results" id="searchResults"></div>`;}
 function searchResults(q){const x=q.trim().toLocaleLowerCase('de-AT');const items=MODULES.filter(m=>`${m.name} ${m.subtitle} ${m.description}`.toLocaleLowerCase('de-AT').includes(x));return items.length?items.map(m=>`<button type="button" class="row-link" data-open="${m.id}"><span>${esc(m.name)}<small style="display:block;color:#9aaab8;font-size:11px;margin-top:3px">${esc(m.subtitle)}</small></span><span>›</span></button>`).join(''):'<p class="empty-state">Kein passender Bereich gefunden.</p>';}
-function renderMore(){return `${section('Mehr & Einstellungen','Informationen zu deinem App-Grundgerüst.')}<div class="glass-card"><h2>App-Version</h2><p>Mein Alltag · Beta V${APP_VERSION}</p><p>Alle Module laufen lokal auf diesem Gerät. Kein Konto, kein Cloud-Sync, keine automatische Datenübertragung.</p></div><div class="glass-card"><h2>Lokaler Datenspeicher</h2><div id="storageStatus" role="status"><p>Prüfe Datenbank …</p></div></div><div class="glass-card"><h2>App installieren</h2><p>Android: In Chrome das Browsermenü öffnen und „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ auswählen.</p><p>Die App kann nach dem ersten vollständigen Laden auch offline verwendet werden.</p></div><button type="button" class="row-link" id="checkUpdate"><span>Auf Updates prüfen</span><span>↻</span></button><p id="moreMessage" class="module-privacy" role="status"></p>`;}
+function renderMore(){return `${section('Mehr & Einstellungen','Informationen zu deinem App-Grundgerüst.')}<div class="glass-card"><h2>App-Version</h2><p>Mein Alltag · Beta V${APP_VERSION}</p><p>Alle Module laufen lokal auf diesem Gerät. Kein Konto, kein Cloud-Sync, keine automatische Datenübertragung.</p></div><div class="glass-card"><h2>Lokaler Datenspeicher</h2><div id="storageStatus" role="status"><p>Prüfe Datenbank …</p></div></div><div class="glass-card"><h2>App installieren</h2><p id="installStatus">Installation prüfen …</p><button type="button" class="primary-button" id="installAction">App installieren – Anleitung</button><p id="installHelp" aria-live="polite" class="install-help"></p><p>Alternativ: Chrome-Menü ⋮ → Zum Startbildschirm hinzufügen. Der Android-Browser entscheidet, ob eine App oder eine Verknüpfung erstellt wird.</p></div><button type="button" class="row-link" id="checkUpdate"><span>Auf Updates prüfen</span><span>↻</span></button><p id="moreMessage" class="module-privacy" role="status"></p>`;}
 async function loadStorage(){const node=document.getElementById('storageStatus');if(!node)return;try{const names=await getStoreNames();const sizes=await Promise.all(MODULE_STORES.map(getModuleCount));if(!node.isConnected)return;node.innerHTML=`<div class="storage-line"><span>Datenbank</span><strong>${esc(DB_NAME)} · v${DB_VERSION}</strong></div>${MODULES.map((m,i)=>`<div class="storage-line"><span>${esc(m.name)}</span><strong>${sizes[i]} Eintrag${sizes[i]===1?'':'e'}</strong></div>`).join('')}<p style="margin-top:13px">Getrennte Speicherbereiche: ${names.length} (5 Module + technische Metadaten)</p>`;}catch(e){if(node.isConnected)node.textContent=`Speicher nicht verfügbar: ${e.message}`;}}
 async function loadNote(id){const field=document.getElementById('moduleNote');if(!field)return;try{const data=await getModuleValue(id,'startNote');if(field.isConnected)field.value=typeof data==='string'?data:'';}catch(e){const msg=document.getElementById('saveMessage');if(msg)msg.textContent=`Speicherfehler: ${e.message}`;}}
 async function saveNote(id){const field=document.getElementById('moduleNote');const msg=document.getElementById('saveMessage');if(!field||!msg)return;const value=field.value;try{await setModuleValue(id,'startNote',value);if(msg.isConnected)msg.textContent='Gespeichert ✓';}catch(e){if(msg.isConnected)msg.textContent=`Fehler: ${e.message}`;}}
@@ -76,6 +122,8 @@ export function render(){
  document.querySelectorAll('.nav-item').forEach(item=>{const active=item.dataset.route===route.page;item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});
  view.innerHTML=route.page==='home'?renderHome():route.page==='module'?renderModule(byId[route.id]):route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
  view.scrollTop=0;bindView(route);
+ document.getElementById('installAction')?.addEventListener('click',requestInstall);
+ refreshInstallUI();
 }
 backButton.addEventListener('click',()=>{if(history.length>1)history.back();else navigate('home');});
 document.getElementById('settingsButton').addEventListener('click',()=>navigate('more'));

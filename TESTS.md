@@ -22,3 +22,11 @@
 - [ ] Neue Version wird nach einem Folge-Update erkannt
 
 Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X300 Pro.
+
+## V0.0.2 – Installationshilfe
+- [x] Installationsschaltfläche und Chrome-Menühilfe hinzugefügt
+- [x] Ereignisse `beforeinstallprompt` und `appinstalled` eingebunden
+- [x] `manifest.webmanifest` als JSON geprüft (192/512, start_url, scope, display, prefer_related_applications)
+- [x] Service-Worker-Cacheversion auf v0-0-2 erhöht
+- [ ] Auf Vivo X300 Pro: native Installationsdialoge, Google-Play-Dienste und Browsermenü prüfen
+- [ ] Nach Installation: Offline-Start, Datenbank und Updateverhalten auf Gerät prüfen

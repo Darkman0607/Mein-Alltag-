@@ -1,4 +1,4 @@
-# Mein Alltag – Beta V0.0.1
+# Mein Alltag – Beta V0.0.2
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -30,3 +30,9 @@ Die technische Testliste steht in `TESTS.md` und im separat mitgelieferten Word-
 
 ## Datenschutz
 Persönliche Daten werden nur im lokalen Browserprofil per IndexedDB gespeichert. Es gibt derzeit **keine Verschlüsselung, PIN, Datensicherung oder Synchronisierung**. Insbesondere sensible Gesundheitsdaten sollten erst nach Implementierung eines passenden Schutzkonzepts eingetragen werden. App deinstallieren oder Browserdaten löschen kann lokale Daten entfernen.
+
+## Installationshilfe V0.0.2
+- Native Chrome-Installation, soweit `beforeinstallprompt` vom Browser bereitgestellt wird, über **App installieren** auslösbar.
+- Andernfalls wird die korrekte Android-Chrome-Menüfolge angezeigt; eine WebAPK kann nicht erzwungen werden.
+- Installationsstatus in **Mehr**; aktualisierter Offline-Cache; eindeutig als `any` deklarierte App-Icons.
+- Kein Eingriff in die fünf Modulicons, Moduldaten oder die Kachelanordnung.
