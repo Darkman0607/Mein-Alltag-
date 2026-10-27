@@ -1,4 +1,4 @@
-# Mein Alltag – Beta V0.0.2
+# Mein Alltag – Beta V0.1.0
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -36,3 +36,18 @@ Persönliche Daten werden nur im lokalen Browserprofil per IndexedDB gespeichert
 - Andernfalls wird die korrekte Android-Chrome-Menüfolge angezeigt; eine WebAPK kann nicht erzwungen werden.
 - Installationsstatus in **Mehr**; aktualisierter Offline-Cache; eindeutig als `any` deklarierte App-Icons.
 - Kein Eingriff in die fünf Modulicons, Moduldaten oder die Kachelanordnung.
+
+
+## Lagerhaus Update L01 – Version 0.1.0 (27.10.2026)
+- Neues Lagerhaus: Garage, Kellerabteil, Lagerraum, Werkstatt und freie Räume erstellen, umbenennen und löschen.
+- Abmessungen optional: fertige kleine/mittlere/große Vorlagen oder eigene Länge/Breite/Höhe.
+- Schematische isometrische 3D-Vorschau (noch nicht maßstabsgetreu).
+- Fünf erste Möbeltypen: Metallregal, Holzregal, Schrank, Lagerbox, Werkbank.
+- Möbel auswählen, mit Pfeiltasten bewegen und in 90°-Schritten drehen. Finger-Drag-and-drop folgt in L03.
+- Die Daten bleiben getrennt im bisherigen lagerhaus-IndexedDB-Store erhalten.
+- Mastercheckliste: `DOKUMENTATION/bauhaus.docx` mit 36 nummerierten Updates, L01 angekreuzt.
+- Noch keine Artikel-/Fachverwaltung und noch keine externe Datensicherung!
+
+### Prüfstatus L01
+JavaScript-Syntax (`node --check`) sowie statische und gezielte Rendering-Unitprüfungen bestanden.
+Browser-End-to-End-Test lokal durch Umgebungsrichtlinie blockiert; echter Android/Chrome-Gerätetest nach GitHub-Veröffentlichung erforderlich.

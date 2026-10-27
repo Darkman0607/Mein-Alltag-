@@ -1,0 +1,19 @@
+MEIN ALLTAG – LAGERHAUS UPDATE L01 / VERSION 0.1.0
+27.10.2026
+
+INHALT
+- Getrennter Lagerhaus-Bereich in der bisherigen Mein-Alltag-PWA.
+- Lagerräume anlegen (Garage/Kellerabteil/Lagerraum/Werkstatt/Sonstige), bearbeiten und löschen.
+- Fertige Raumgrößen oder eigene Maße, Maße optional.
+- Eigenständige lokale Speicherung der Räume im bestehenden IndexedDB-Lagerhaus-Store.
+- Schematische 3D-Lagerraumansicht mit vierfach gerenderten Wänden/Boden/Gitter.
+- Fünf vorgefertigte Möbeltypen: Metallregal, Holzregal, Schrank, Lagerbox, Werkbank.
+- Möbel hinzufügen, auswählen, mit Pfeiltasten positionieren und um 90 Grad drehen.
+- Fünf bestehende App-Module und Installation bleiben erhalten.
+- Service Worker Cache auf 0.1.0 angehoben.
+
+WICHTIG
+- Schematische 3D-Darstellung, nicht maßstabsgetreu; freier 3D-Editor und QR-Code-System ganz am Schluss.
+- Noch keine Artikel-/Fächerverwaltung: in späteren Updates.
+- Lokale Daten des Browserprofils sind noch nicht extern gesichert; Backup folgt als separates Update.
+- Die ZIP enthält die gesamte aktualisierte App im Root; index.html direkt auf GitHub hochladen.

@@ -30,3 +30,10 @@ Wichtig: Automatisierte Tests sind kein Ersatz für reale Tests auf dem Vivo X30
 - [x] Service-Worker-Cacheversion auf v0-0-2 erhöht
 - [ ] Auf Vivo X300 Pro: native Installationsdialoge, Google-Play-Dienste und Browsermenü prüfen
 - [ ] Nach Installation: Offline-Start, Datenbank und Updateverhalten auf Gerät prüfen
+
+
+## L01 (27.10.2026) – Teststand
+- PASS: JS-Syntax aller Module (`node --check`).
+- PASS: SVG-Rendering, HTML-Escaping, Routing-/Offline-Cache-/DB-Store-Statischkonsistenz (`unit_test.mjs`).
+- NICHT AUSGEFÜHRT: Browser-End-to-End-Test (lokales Chromium ist durch Administratorrichtlinie für Navigation gesperrt).
+- NOCH OFFEN: Android-Gerätetest mit Installation und tatsächlicher Offline-Nutzung.
