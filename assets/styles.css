@@ -286,3 +286,36 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
 @media(max-width:520px){.lager-l13-filter-grid{grid-template-columns:1fr}.lager-l13-toolhead{align-items:flex-start;flex-wrap:wrap}.lager-l13-manager,.lager-l13-toolbar{padding:12px}.lager-l13-bulk button{flex:1 1 40%}.lager-l13-category-list article button{flex:0 1 auto}}
 
 .lager-l13-category-badge{border-left:3px solid var(--category-accent,#64748b);padding-left:7px!important}
+
+/* L14 – Lager-Navigator: separate mobile-first location list and precise 3D focus. */
+.lager-l14-panel,.lager-l14-card,.lager-l14-room,.lager-l14-focus{border:1px solid rgba(171,210,235,.20);background:linear-gradient(150deg,rgba(33,52,65,.92),rgba(10,24,32,.93));border-radius:18px;padding:15px;margin:13px 0}
+.lager-l14-controls{display:grid;grid-template-columns:1fr;gap:12px}
+.lager-l14-controls label{display:grid;gap:6px;color:#d3e2ed;font-size:13px;font-weight:650}
+.lager-l14-controls input,.lager-l14-controls select{min-height:47px;width:100%;min-width:0;background:#102431;color:#f5faff;border:1px solid #6a8295;border-radius:11px;padding:10px}
+.lager-l14-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:16px 0 10px}
+.lager-l14-switch button{min-height:49px;padding:9px 4px;border-radius:10px;border:1px solid #526f83;background:#1b3344;color:#d0e1ed;font-weight:700;font-size:12px}
+.lager-l14-switch button.is-active{background:#f0bf6e;color:#192732;border-color:#ffdc91}
+.lager-l14-counter{font-size:13px;color:#c4d4e0;margin:6px 0}
+.lager-l14-itemhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px;line-height:1.4}
+.lager-l14-itemhead strong{flex:1 1 145px;font-size:16px;overflow-wrap:anywhere}
+.lager-l14-itemhead b{font-size:14px;color:#ffd27b}
+.lager-l14-path{display:flex;gap:9px;margin:12px 0;color:#d5e2ea;font-size:13px;overflow-wrap:anywhere}
+.lager-l14-cta,.lager-l14-jump{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid #e2b76d;border-radius:11px;color:#ffdb99!important;font-size:13px;font-weight:700;text-align:center;text-decoration:none;padding:9px 12px;overflow-wrap:anywhere}
+.lager-l14-card>.lager-l14-cta{width:100%}
+.lager-l14-notfound,.lager-l14-no-place{color:#ffcc97;font-size:12px}
+.lager-l14-treehead,.lager-l14-treenode{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.lager-l14-treehead h2{font-size:19px;margin:3px 0}
+.lager-l14-treehead small,.lager-l14-treenode small{display:block;font-size:11px;color:#a7bccb;margin-top:4px}
+.lager-l14-furniture{padding:11px 0 10px 12px;margin-top:12px;border-left:2px solid #638294;border-top:1px solid #385365}
+.lager-l14-subnode{border-top:1px solid #384d5b;margin:9px 0 0 12px;padding:11px 0 1px 8px}
+.lager-l14-treenode>div{flex:1 1 135px;min-width:0;overflow-wrap:anywhere}
+.lager-l14-treenode .lager-l14-cta{flex:0 0 auto}
+.lager-l14-focus{border-color:#ffcd68;box-shadow:0 0 0 1px rgba(255,204,104,.27);display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.lager-l14-focus p{margin:5px 0 0;color:#f4dcb7;font-size:13px;overflow-wrap:anywhere}
+.lager-room-svg .room-object--selected{filter:drop-shadow(0 0 6px rgba(255,203,85,.95))}
+.lager-stock-positions .lager-l14-position{align-items:center;gap:8px}
+.lager-l14-position>span{min-width:0;overflow-wrap:anywhere}
+.lager-l14-position strong{white-space:nowrap}
+.lager-l14-jump{margin:7px 4px 4px 0;width:max-content;max-width:100%}
+@media(min-width:520px){.lager-l14-controls{grid-template-columns:1fr 165px}}
+@media(max-width:360px){.lager-l14-panel,.lager-l14-card,.lager-l14-room{padding:11px}.lager-l14-switch button{font-size:11px}.lager-l14-treehead>.lager-l14-cta{width:100%}.lager-l14-treenode .lager-l14-cta{font-size:12px}}
