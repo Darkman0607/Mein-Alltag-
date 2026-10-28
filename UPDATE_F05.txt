@@ -1,0 +1,7 @@
+F05 V0.16.7 – Symptome & Ausfluss
+Update 28.10.2026
+Ausfluss: Farbe, Konsistenz, Menge, Geruch, Juckreiz, Brennen, Schmerzen/Reizung.
+Tagebuch: Stimmung, Schmerzskala, Schmerzort, Übelkeit, Brustbeschwerden, Freitext.
+Datumsfilter, Textsuche, Bearbeiten/Löschen, lokale IndexedDB weiterhin kompatibel.
+Tests: F05 mobiler Chromium-Komponententest PASS, 18/18 historische Node-Regressionen PASS, AES-GCM Backup PASS.
+Offen: echter Android/PWA/Pages-Test; lokale Gesundheitsdaten ohne eigene App-Verschlüsselung.

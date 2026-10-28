@@ -538,3 +538,17 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-period-stat{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #e9d2db}
 .health-period-stat b{font-size:16px;color:#954d70}
 .health-period-summary p{line-height:1.6}
+
+/* F05 – Ausfluss und Symptome auf dem Smartphone */
+.health-f05-intro{padding:13px 15px;margin:12px 0;background:linear-gradient(135deg,#fff8fa,#f9e7ee);border:1px solid #edc8d8;border-radius:16px;color:#633a51}
+.health-f05-intro b{font:700 19px Georgia,serif}
+.health-f05-intro p,.health-f05-hint{font-size:12px;line-height:1.5;color:#845771;margin:7px 0}
+.health-observation-tools{border:1px solid #f1d3de;background:#fffafa;border-radius:16px;padding:14px;margin:12px 0;color:#6f3e59}
+.health-observation-tools>strong{display:block;font:700 17px Georgia,serif;margin-bottom:6px}
+.health-observation-tools label{display:block;font-size:12px;font-weight:600;margin:8px 0}
+.health-observation-tools input{display:block;margin-top:5px;width:100%;max-width:100%;min-height:42px;border:1px solid #dcb5c6;background:white;border-radius:10px;padding:8px;font:inherit;color:#613c52}
+.health-observation-dates{display:grid;grid-template-columns:1fr 1fr;gap:9px;min-width:0}
+.health-observation-dates label{min-width:0}.health-observation-dates input{min-width:0;font-size:13px}
+.health-observation-tools #healthObservationCount{font-size:12px;line-height:1.4;color:#81556e;margin:8px 0 0}
+.health-observation-tools .health-neutral{min-height:38px;padding:8px 12px}
+@media(max-width:350px){.health-observation-dates{grid-template-columns:1fr}}
