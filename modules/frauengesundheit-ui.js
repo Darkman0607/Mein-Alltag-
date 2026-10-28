@@ -20,16 +20,34 @@ const utcDay=d=>Date.UTC(Number(d.slice(0,4)),Number(d.slice(5,7))-1,Number(d.sl
 const days=(a,b)=>Math.floor((utcDay(b)-utcDay(a))/86400000);
 const datePlus=(d,n)=>fromUTC(new Date(utcDay(d)+n*86400000));
 const icon=n=>`./assets/health-icons/${n}.png`;
-let tab='start',category='',records=[],cycle={},pregnancy={},message='',formOpen=false,editId='',selectedDay='',calendarMonth=today().slice(0,7);
+let tab='start',category='',records=[],cycle={},pregnancy={},message='',formOpen=false,editId='',selectedDay='',calendarMonth=today().slice(0,7),periodMonth=today().slice(0,7),periodDay='';
 const field=(name,label,type='text',value='',attributes='')=>`<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" ${attributes}></label>`;
 const area=(name,label,value='',placeholder='')=>`<label>${label}<textarea name="${name}" rows="3" maxlength="8000" placeholder="${esc(placeholder)}">${esc(value)}</textarea></label>`;
 const choice=(name,label,options,value='')=>`<label>${label}<select name="${name}">${options.map(([v,t])=>`<option value="${esc(v)}" ${v===value?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
+// The start of a period is entered by the user. Spotting does not count as a new cycle.
+function periodStarts(items=records){return [...new Set(items.filter(r=>r.category==='periode'&&r.details?.periodEvent==='beginn'&&validDate(r.date)&&r.date<=today()).map(r=>r.date))].sort();}
+function getCycleStart(c=cycle,items=records){
+ const starts=periodStarts(items), manual=validDate(c.manualStart||'')?c.manualStart:'',
+ legacy=!manual&&validDate(c.start||'')&&!periodStarts(records).includes(c.start)?c.start:'';
+ return [manual,legacy,...starts].filter(d=>d<=today()).sort().at(-1)||'';
+}
+function updatedCycle(items,previous=cycle){const start=getCycleStart(previous,items);return {...previous,start};}
+function periodRanges(items=records){
+ const starts=periodStarts(items);
+ return starts.map((start,i)=>{
+  const next=starts[i+1]||'9999-12-31';
+  const end=items.filter(r=>r.category==='periode'&&r.details?.periodEvent==='ende'&&r.date>=start&&r.date<next).map(r=>r.date).sort()[0]||'';
+  return {start,end,span:end?days(start,end)+1:null};
+ }).reverse();
+}
+function observedCycleLengths(){const starts=periodStarts();return starts.slice(1).map((d,i)=>days(starts[i],d)).filter(n=>n>=18&&n<=60).slice(-6);}
 function cycleStats(){
- const start=cycle.start, len=Number(cycle.length);
+ const start=getCycleStart(), len=Number(cycle.length);
  if(!validDate(start)||!Number.isInteger(len)||len<18||len>60)return null;
  const diff=days(start,today());if(diff<0||diff>400)return null;
- const day=(diff%len)+1;return {day,len,next:datePlus(start,Math.floor(diff/len+1)*len)};
+ const day=(diff%len)+1;return {day,len,next:datePlus(start,Math.floor(diff/len+1)*len),start};
 }
+
 function cycleCard(){
  const v=cycleStats(), pct=v?Math.round(v.day/v.len*100):0;
  return `<button type="button" class="health-cycle-card" data-health-section="zyklus" aria-label="Zyklusübersicht öffnen"><div class="health-cycle-ring" style="--progress:${pct}%"><div class="health-cycle-num"><span>Zyklus Tag</span><strong>${v?v.day:'–'}</strong><span>${v?`von ${v.len}`:'noch offen'}</span></div></div><div class="health-phase"><span class="health-chip">Deine Übersicht</span><h2>${v?'Zyklusübersicht':'Noch nicht erfasst'}</h2><p>${v?'Nur eine Schätzung aus deinen Angaben.':'Letzten Periodenbeginn und Zykluslänge eintragen.'}</p><div class="health-next"><span aria-hidden="true">▣</span><div><b>Nächste Periode (geschätzt)</b><small>${v?fmt(v.next):'Noch kein Datum'}</small></div></div></div><img class="health-flower" src="${icon('blume')}" alt=""/><span class="health-cycle-chevron">›</span></button>`;
@@ -70,12 +88,31 @@ function pregnancyMarkup(){
  ${last?`<p><b>Letzter Test / Untersuchung:</b> ${fmt(last.date)} · ${esc(TEST_TYPE[last.details?.testType]||'Test')} · ${esc(TEST_RESULT[last.details?.testResult]||'Nicht eingetragen')}</p><button type="button" class="health-neutral" data-health-edit="${esc(last.id)}">Letzten Eintrag bearbeiten</button>`:'<p>Noch kein Schwangerschaftstest gespeichert.</p>'}
  <button class="health-save" type="button" data-health-newtest="1">+ Test oder Untersuchung erfassen</button><p>Ein positiver Test ist nicht dasselbe wie eine ärztliche Bestätigung. Ein negativer Test sehr früh im Zyklus kann eine Schwangerschaft nicht sicher ausschließen.</p></div>`;
 }
-function cycleMarkup(){return `<form class="health-cycle-form" id="healthCycleForm"><h3>Meine Zykluseinstellungen</h3>${field('start','Erster Tag der letzten Periode','date',cycle.start||'',`max="${today()}" required`)}${field('length','Übliche Zykluslänge (Tage)','number',cycle.length||'', 'min="18" max="60" required')}<button class="health-save" type="submit">Zyklus speichern</button><p>Schätzungen können stark abweichen und eignen sich nicht zur Verhütung.</p></form>`;}
+function cycleMarkup(){
+ const stats=cycleStats(),lengths=observedCycleLengths(),average=lengths.length?Math.round(lengths.reduce((a,b)=>a+b,0)/lengths.length):null;
+ return `<form class="health-cycle-form" id="healthCycleForm"><h3>Meine Zykluseinstellungen</h3>${field('start','Erster Tag der letzten Periode (manuelle Angabe)','date',cycle.manualStart||cycle.start||'',`max="${today()}" required`)}${field('length','Übliche Zykluslänge (Tage)','number',cycle.length||'', 'min="18" max="60" required')}<button class="health-save" type="submit">Zyklus speichern</button><p>Deine Eingaben und dokumentierten Periodenanfänge bestimmen den Zyklustag. Spätere Einträge werden automatisch berücksichtigt.</p></form>
+ <div class="health-info health-period-summary"><strong>Zyklusüberblick</strong>${stats?`<div class="health-period-stat"><span>Aktueller Zyklustag</span><b>${stats.day} von ${stats.len}</b></div><div class="health-period-stat"><span>Nächste Periode – nur Schätzung</span><b>${fmt(stats.next)}</b></div>`:'<p>Bitte Periodenbeginn und übliche Zykluslänge speichern, damit eine Schätzung möglich ist.</p>'}${average!==null?`<p>${lengths.length} dokumentierte(r) Zyklusabstand/-abstände: Durchschnitt ${average} Tage. Tatsächliche Zyklen können abweichen.</p>`:''}<p><b>Wichtig:</b> Die Vorhersage ist unsicher, insbesondere bei unregelmäßigen Zyklen, und eignet sich weder als Schwangerschaftstest noch zur Verhütung.</p></div>`;
+}
+function periodCalendarMarkup(){
+ const [y,m]=periodMonth.split('-').map(Number),first=new Date(Date.UTC(y,m-1,1)),offset=(first.getUTCDay()+6)%7,count=new Date(Date.UTC(y,m,0)).getUTCDate();
+ const ranges=periodRanges(),log=new Map(),pred=cycleStats()?.next||'';
+ for(const r of records.filter(x=>x.category==='periode'&&x.date.startsWith(periodMonth))){const x=log.get(r.date)||new Set();x.add(r.details?.periodEvent||'laufend');log.set(r.date,x);}
+ const withinRange=d=>ranges.some(r=>r.end&&d>=r.start&&d<=r.end);
+ const cells=Array.from({length:offset},()=>'<span class="health-calendar-blank"></span>').join('')+Array.from({length:count},(_,i)=>{
+  const d=`${periodMonth}-${String(i+1).padStart(2,'0')}`,ev=log.get(d)||new Set();
+  const period=withinRange(d)||ev.has('beginn')||ev.has('laufend')||ev.has('ende'),spot=ev.has('schmierblutung');
+  return `<button type="button" class="health-calendar-day health-period-day ${period?'period-recorded':''} ${spot?'spotting':''} ${pred===d?'period-predicted':''} ${periodDay===d?'selected':''}" data-health-period-day="${d}" aria-label="${fmt(d)}${period?' Periode':''}${spot?' Schmierblutung':''}${pred===d?' geschätzter nächster Beginn':''}"><b>${i+1}</b>${ev.has('beginn')?'<small>Beginn</small>':ev.has('ende')?'<small>Ende</small>':spot?'<small>Schmier</small>':pred===d?'<small>ca.</small>':period?'<small>●</small>':''}</button>`;
+ }).join('');
+ const selected=periodDay?records.filter(r=>r.category==='periode'&&r.date===periodDay):[];
+ const latest=periodRanges().slice(0,5);
+ return `<div class="health-period-calendar"><h3>Periodenkalender</h3><div class="health-calendar-head"><button type="button" data-health-period-month="-1" aria-label="Vorheriger Monat">‹</button><strong>${new Intl.DateTimeFormat('de-AT',{month:'long',year:'numeric',timeZone:'UTC'}).format(first)}</strong><button type="button" data-health-period-month="1" aria-label="Nächster Monat">›</button></div><div class="health-calendar-grid">${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<span class="health-calendar-weekday">${d}</span>`).join('')}${cells}</div><p class="health-period-legend"><span>● Eingetragene Periode</span><span>◌ Schmierblutung</span><span>◇ Voraussichtlicher Beginn</span></p>${periodDay?`<div class="health-period-selected"><b>${fmt(periodDay)}</b>${selected.length?listMarkup(selected):'<p>Für diesen Tag ist keine Blutung eingetragen.</p>'}${periodDay<=today()?`<button type="button" class="health-neutral" data-health-newperiod="${periodDay}">+ Eintrag für diesen Tag</button>`:''}</div>`:''}<h3>Letzte Perioden</h3>${latest.length?`<div class="health-period-history">${latest.map(r=>`<div><b>${fmt(r.start)}</b><span>${r.end?`Ende: ${fmt(r.end)} · ${r.span} Tag(e)`:'Ende noch nicht dokumentiert'}</span></div>`).join('')}</div>`:'<p class="health-empty">Noch kein Periodenbeginn dokumentiert.</p>'}<p class="health-period-note">Kalenderfarben stammen aus deinen Einträgen. Zwischen Beginn und dokumentiertem Ende markierte Tage sind rechnerisch verbunden – nicht täglich bestätigt. Ein geschätzter Termin ist keine gesicherte Vorhersage.</p></div>`;
+}
+
 function sectionMarkup(){
  const sec=SECTIONS.find(x=>x[0]===category);if(!sec)return startMarkup();
  if(category==='lernzentrum')return `<button type="button" class="health-breadcrumb" data-health-go="start">‹ Zur Übersicht</button><div class="health-section-heading"><img src="${icon(category)}" alt=""/><h2>Lernzentrum</h2></div><div class="health-info">Das Lernzentrum bleibt in dieser Basisversion zurückgestellt.</div>`;
  const list=records.filter(r=>r.category===category);const appointments=list.filter(r=>r.details?.kind==='frauenarzt'&&r.details?.visitStatus!=='abgeschlossen');
- return `<button type="button" class="health-breadcrumb" data-health-go="start">‹ Zur Übersicht</button><div class="health-section-heading"><img alt="" src="${icon(category)}"/><div><h2>${esc(sec[1])}</h2><p>${esc(sec[2])}</p></div></div>${category==='zyklus'?cycleMarkup():''}${category==='schwangerschaft'?pregnancyMarkup():''}
+ return `<button type="button" class="health-breadcrumb" data-health-go="start">‹ Zur Übersicht</button><div class="health-section-heading"><img alt="" src="${icon(category)}"/><div><h2>${esc(sec[1])}</h2><p>${esc(sec[2])}</p></div></div>${category==='zyklus'?cycleMarkup():''}${category==='schwangerschaft'?pregnancyMarkup():''}${['zyklus','periode'].includes(category)?periodCalendarMarkup():''}
  ${category==='untersuchungen'?`<div class="health-info"><strong>Vor und nach dem Termin</strong><p><b>Vorher:</b> Fragen, Beschwerden und gewünschte Themen notieren. <b>Nachher:</b> denselben Eintrag bearbeiten, Status auf „Durchgeführt“ ändern und Befunde sowie nächste Schritte ergänzen.</p><p>Bitte ärztliche Aussagen von eigenen Beobachtungen unterscheiden. Keine automatische Diagnose.</p></div>`:''}
  ${category==='untersuchungen'&&appointments.length?`<p class="health-appointment-count">${appointments.length} offene(r) Termin(e) – für den Termin bitte denselben Eintrag später weiterbearbeiten.</p>`:''}<div class="health-list-title"><h3>Meine Einträge (${list.length})</h3><button class="health-add" type="button" id="healthAdd">+ Eintrag</button></div>${formOpen?formMarkup():''}${listMarkup(list)}`;
 }
@@ -90,7 +127,7 @@ function extraFields(cat,d){
 }
 function formMarkup(){
  const item=records.find(r=>r.id===editId),d=item?.details||{};
- return `<form id="healthEntryForm" class="health-entry-form"><h3>${item?'Eintrag bearbeiten':'Neuer Eintrag'}</h3>${field('date','Datum','date',item?.date||today(),'required')}${field('title','Titel','text',item?.title||(category==='untersuchungen'?'Frauenarzttermin':category==='schwangerschaft'?'Schwangerschaftstest':''),'required maxlength="140"')}${extraFields(category,d)}${area('text','Weitere persönliche Notizen',item?.text||'','Optional')}
+ return `<form id="healthEntryForm" class="health-entry-form"><h3>${item?'Eintrag bearbeiten':'Neuer Eintrag'}</h3>${field('date','Datum','date',item?.date||(category==='periode'&&periodDay&&periodDay<=today()?periodDay:today()),category==='periode'?`required max="${today()}"`:'required')}${field('title','Titel','text',item?.title||(category==='untersuchungen'?'Frauenarzttermin':category==='schwangerschaft'?'Schwangerschaftstest':''),'required maxlength="140"')}${extraFields(category,d)}${area('text','Weitere persönliche Notizen',item?.text||'','Optional')}
  <label>Foto oder PDF (optional, maximal 4 MB pro Eintrag)<input name="attachment" type="file" accept="image/png,image/jpeg,image/webp,application/pdf"/></label>${item&&(item.attachment||item.photo)?`<div class="health-existing-file">Vorhandener Anhang: ${esc(item.attachment?.name||'Bild')} ${attachMarkup(item)}<label><input type="checkbox" name="removeAttachment" value="1"/> Vorhandenen Anhang entfernen</label></div>`:''}
  <div class="health-form-actions"><button type="submit" class="health-save">${item?'Änderungen speichern':'Eintrag speichern'}</button><button type="button" class="health-neutral" id="healthCancel">Abbrechen</button></div></form>`;
 }
@@ -112,21 +149,23 @@ async function saveForm(e){
  e.preventDefault();const f=e.currentTarget,data=new FormData(f),title=String(data.get('title')||'').trim(),date=String(data.get('date')||'');
  if(!title||!validDate(date))return setMsg('Bitte gültigen Titel und Datum eingeben.');
  if(category==='schwangerschaft'&&date>today())return setMsg('Ein Schwangerschaftstest kann nicht für ein zukünftiges Datum gespeichert werden.');
+ if(category==='periode'&&date>today())return setMsg('Blutungen lassen sich nur für heutige oder vergangene Tage dokumentieren.');
  const old=records.find(x=>x.id===editId),file=f.elements.attachment.files?.[0];let attachment=old?.attachment||null,photo=old?.photo||'';
  if(file){if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type)||file.size===0||file.size>4*1024*1024)return setMsg('Nur JPG/PNG/WebP/PDF bis maximal 4 MB möglich.');const raw=await readFile(file);attachment={name:file.name.slice(0,160),mime:file.type,data:raw};photo='';}
  else if(data.has('removeAttachment')){attachment=null;photo='';}
  const details={};for(const name of FORM_FIELDS[category]||[])details[name]=String(data.get(name)||'').slice(0,8000);
  const entry={id:old?.id||crypto.randomUUID(),category,date,title,text:String(data.get('text')||'').slice(0,8000),details,attachment,photo,created:old?.created||new Date().toISOString(),updated:new Date().toISOString()};
  const next=old?records.map(x=>x.id===old.id?entry:x):[...records,entry];
+ if(category==='periode'&&details.periodEvent==='ende'&&!next.some(r=>r.id!==entry.id&&r.category==='periode'&&r.details?.periodEvent==='beginn'&&r.date<=date))return setMsg('Bitte zuerst den Beginn der Periode dokumentieren.');
  try{
   const values=[[ENTRIES,next]];
-  if(category==='periode'&&details.periodEvent==='beginn'&&(!cycle.start||date>=cycle.start))values.push([CYCLE,{...cycle,start:date}]);
-  await setModuleValues(STORE,values);records=next;if(values.length>1)cycle={...cycle,start:date};formOpen=false;editId='';message='Eintrag gespeichert.';updateUI();
+  if(category==='periode'){const newCycle=updatedCycle(next);values.push([CYCLE,newCycle]);}
+  await setModuleValues(STORE,values);records=next;if(values.length>1)cycle=values[1][1];formOpen=false;editId='';message='Eintrag gespeichert.';updateUI();
  }catch(err){setMsg('Speichern fehlgeschlagen: '+err.message);}
 }
-async function saveCycle(e){e.preventDefault();const d=new FormData(e.currentTarget),length=Number(d.get('length')),start=String(d.get('start')||'');if(!validDate(start)||start>today()||!Number.isInteger(length)||length<18||length>60)return setMsg('Gültigen Periodenbeginn und 18–60 Tage eingeben.');try{await setModuleValue(STORE,CYCLE,{start,length});cycle={start,length};message='Zyklus gespeichert.';updateUI();}catch(err){setMsg(err.message);}}
+async function saveCycle(e){e.preventDefault();const d=new FormData(e.currentTarget),length=Number(d.get('length')),start=String(d.get('start')||'');if(!validDate(start)||start>today()||!Number.isInteger(length)||length<18||length>60)return setMsg('Gültigen Periodenbeginn und 18–60 Tage eingeben.');try{const changed=updatedCycle(records,{...cycle,manualStart:start,length});await setModuleValue(STORE,CYCLE,changed);cycle=changed;message='Zyklus gespeichert.';updateUI();}catch(err){setMsg(err.message);}}
 async function savePregnancy(e){e.preventDefault();const d=new FormData(e.currentTarget),status=String(d.get('status')||'unbekannt'),lastPeriod=String(d.get('lastPeriod')||''),physicianDue=String(d.get('physicianDue')||'');if(!['unbekannt','moeglich','test-positiv','bestaetigt','nicht-schwanger'].includes(status)||(lastPeriod&&(!validDate(lastPeriod)||lastPeriod>today()))||(physicianDue&&!validDate(physicianDue)))return setMsg('Bitte gültige Daten eingeben.');try{const value={status,lastPeriod,physicianDue};await setModuleValue(STORE,PREG,value);pregnancy=value;message='Schwangerschaftsangaben gespeichert.';updateUI();}catch(err){setMsg('Speichern fehlgeschlagen: '+err.message);}}
-async function deleteEntry(id){if(!window.confirm('Diesen Eintrag und seine Anhänge endgültig löschen?'))return;const next=records.filter(r=>r.id!==id);try{await setModuleValue(STORE,ENTRIES,next);records=next;message='Eintrag gelöscht.';updateUI();}catch(err){setMsg(err.message);}}
+async function deleteEntry(id){if(!window.confirm('Diesen Eintrag und seine Anhänge endgültig löschen?'))return;const removed=records.find(r=>r.id===id),next=records.filter(r=>r.id!==id);try{if(removed?.category==='periode'){const updated=updatedCycle(next);await setModuleValues(STORE,[[ENTRIES,next],[CYCLE,updated]]);cycle=updated;}else await setModuleValue(STORE,ENTRIES,next);records=next;message='Eintrag gelöscht.';updateUI();}catch(err){setMsg(err.message);}}
 function bindHealth(){const app=document.getElementById('healthApp');if(!app)return;
  app.querySelectorAll('[data-health-section]').forEach(b=>b.addEventListener('click',()=>{tab='start';category=b.dataset.healthSection;formOpen=false;editId='';message='';updateUI();}));
  app.querySelectorAll('[data-health-quick]').forEach(b=>b.addEventListener('click',()=>{tab='start';category=b.dataset.healthQuick;formOpen=true;editId='';message='';updateUI();}));
@@ -138,6 +177,9 @@ function bindHealth(){const app=document.getElementById('healthApp');if(!app)ret
  app.querySelector('[data-health-settings]')?.addEventListener('click',()=>{location.hash='#/more';});
  app.querySelectorAll('[data-health-month]').forEach(b=>b.addEventListener('click',()=>{const [y,m]=calendarMonth.split('-').map(Number),date=new Date(Date.UTC(y,m-1+Number(b.dataset.healthMonth),1));calendarMonth=fromUTC(date).slice(0,7);selectedDay='';updateUI();}));
  app.querySelectorAll('[data-health-day]').forEach(b=>b.addEventListener('click',()=>{selectedDay=b.dataset.healthDay;updateUI();}));
+ app.querySelectorAll('[data-health-period-month]').forEach(b=>b.addEventListener('click',()=>{const [y,m]=periodMonth.split('-').map(Number);periodMonth=fromUTC(new Date(Date.UTC(y,m-1+Number(b.dataset.healthPeriodMonth),1))).slice(0,7);periodDay='';updateUI();}));
+ app.querySelectorAll('[data-health-period-day]').forEach(b=>b.addEventListener('click',()=>{periodDay=b.dataset.healthPeriodDay;updateUI();}));
+ app.querySelector('[data-health-newperiod]')?.addEventListener('click',b=>{periodDay=b.currentTarget.dataset.healthNewperiod;category='periode';formOpen=true;editId='';updateUI();document.getElementById('healthEntryForm')?.scrollIntoView({block:'start'});});
  app.querySelector('[data-health-resetday]')?.addEventListener('click',()=>{selectedDay='';updateUI();});
  app.querySelector('#healthAdd')?.addEventListener('click',()=>{formOpen=true;editId='';updateUI();document.getElementById('healthEntryForm')?.scrollIntoView({block:'start'});});
  app.querySelector('[data-health-newtest]')?.addEventListener('click',()=>{formOpen=true;editId='';message='';updateUI();document.getElementById('healthEntryForm')?.scrollIntoView({block:'start'});});
@@ -146,4 +188,4 @@ function bindHealth(){const app=document.getElementById('healthApp');if(!app)ret
  app.querySelector('#healthCycleForm')?.addEventListener('submit',saveCycle);
  app.querySelector('#healthPregnancyForm')?.addEventListener('submit',savePregnancy);
 }
-export async function mountHealth(){tab='start';category='';formOpen=false;editId='';message='';calendarMonth=today().slice(0,7);selectedDay='';try{const [items,c,p]=await Promise.all([getModuleValue(STORE,ENTRIES),getModuleValue(STORE,CYCLE),getModuleValue(STORE,PREG)]);records=Array.isArray(items)?items:[];cycle=c||{};pregnancy=p||{};}catch(e){message='Speicher nicht verfügbar: '+e.message;}updateUI();}
+export async function mountHealth(){tab='start';category='';formOpen=false;editId='';message='';calendarMonth=today().slice(0,7);selectedDay='';periodMonth=today().slice(0,7);periodDay='';try{const [items,c,p]=await Promise.all([getModuleValue(STORE,ENTRIES),getModuleValue(STORE,CYCLE),getModuleValue(STORE,PREG)]);records=Array.isArray(items)?items:[];cycle=c||{};pregnancy=p||{};}catch(e){message='Speicher nicht verfügbar: '+e.message;}updateUI();}

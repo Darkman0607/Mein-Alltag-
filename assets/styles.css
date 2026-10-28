@@ -521,3 +521,20 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-preg-dates b{font-size:16px;color:#622e4b;line-height:1.4}
 .health-preg-latest>.health-save,.health-preg-latest>.health-neutral{margin:7px 7px 4px 0}
 .health-preg-hint{font-size:12px;line-height:1.5;color:#7b5368}
+
+/* F04 – mobile period history, calendar and prediction */
+.health-period-calendar{margin:16px 0;padding:14px;border:1px solid #f2cede;border-radius:18px;background:#fff8f7de;color:#633a51}
+.health-period-calendar>h3{font:700 20px Georgia,serif;margin:7px 0 12px}
+.health-period-day.period-recorded{background:#edafc5;border-color:#d77eaa;color:#6e264a}
+.health-period-day.spotting:not(.period-recorded){background:#fce7ce;border-color:#e6c198}
+.health-period-day.period-predicted:not(.period-recorded){border:2px dashed #9f6699;background:#f6ebf9}
+.health-period-legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:11px;line-height:1.5;margin:12px 3px;color:#6e465d}
+.health-period-history{display:grid;gap:7px;margin:12px 0}
+.health-period-history>div{background:white;border:1px solid #f2dfe7;border-radius:12px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:5px 12px;justify-content:space-between}
+.health-period-history span{font-size:12px;color:#785d6c}
+.health-period-selected{border-radius:13px;border:1px solid #edd0dd;background:#fff;margin:12px 0;padding:12px}
+.health-period-selected>.health-entries{margin-top:9px}
+.health-period-note{font-size:12px;line-height:1.6;color:#795869}
+.health-period-stat{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #e9d2db}
+.health-period-stat b{font-size:16px;color:#954d70}
+.health-period-summary p{line-height:1.6}
