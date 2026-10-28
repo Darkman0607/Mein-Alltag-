@@ -392,3 +392,29 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
 .room-floor-object{cursor:grab;touch-action:none}
 .room-floor-object:focus-visible polygon{stroke:#f7d281;stroke-width:3}
 @media(max-width:370px){.lager-floor-dialog{width:97vw;padding:10px}.lager-floor-dialog-head{flex-wrap:wrap}}
+/* L16.2 – mobile, collapsible room tools. Defaults are compact, without changing inventory. */
+.lager-stage-quick{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 12px}
+.lager-stage-quick button{min-height:48px;padding:9px 8px;white-space:normal;font-size:13px;border-radius:12px}
+.lager-room-folds{display:grid;gap:10px;margin:12px 0 18px}
+.lager-room-fold{border:1px solid #61758588;border-radius:16px;background:linear-gradient(140deg,#1c303c,#101d28);overflow:clip;scroll-margin-top:76px}
+.lager-room-fold[open]{border-color:#e6b869ad}
+.lager-room-fold-head{display:flex;align-items:center;gap:12px;cursor:pointer;list-style:none;min-height:67px;padding:11px 14px;touch-action:manipulation}
+.lager-room-fold-head::-webkit-details-marker,.lager-stage-control-fold>summary::-webkit-details-marker{display:none}
+.lager-room-fold-icon{display:grid;place-items:center;flex:none;width:35px;height:35px;border:1px solid #728c9766;border-radius:10px;color:#f7cf83;background:#203543;font-size:19px}
+.lager-room-fold-label{display:grid;gap:3px;min-width:0;flex:1}
+.lager-room-fold-label strong{font-size:14px;color:#f6e1b8;line-height:1.3}
+.lager-room-fold-label small{font-size:11px;color:#aebfc9;line-height:1.35}
+.lager-room-fold-chevron{color:#f4cb85;font-size:23px;transition:transform .2s}
+.lager-room-fold[open] .lager-room-fold-chevron{transform:rotate(180deg)}
+.lager-room-fold-body{padding:4px 12px 13px;border-top:1px solid #ffffff1d}
+.lager-room-fold-body>.lager-floor-chooser,.lager-room-fold-body>.lager-chooser,.lager-room-fold-body>.lager-unassigned,.lager-room-fold-body>.lager-fach-overview{margin:10px 0 0}
+.lager-room-fold-body>.lager-editor,.lager-room-fold-body>.lager-compartments{margin:10px 0}
+.lager-stage-tools{align-items:flex-start;gap:9px}
+.lager-stage-control-fold{flex:1;min-width:0;border:1px solid #687c8b77;background:#192c38;border-radius:12px;overflow:hidden}
+.lager-stage-control-fold>summary{list-style:none;padding:11px 12px;font-size:13px;color:#f4d29a;cursor:pointer;min-height:44px}
+.lager-stage-control-body{padding:0 10px 10px}
+.lager-stage-control-body .lager-stage-buttons{display:flex;width:100%}
+.lager-fullscreen-toggle{min-height:44px;white-space:nowrap}
+.lager-stage--fullscreen~.lager-stage-tools{align-items:start}
+.lager-stage--fullscreen~.lager-stage-tools>.lager-stage-control-fold{max-width:200px}
+@media(max-width:380px){.lager-stage-quick{gap:6px}.lager-stage-quick button{font-size:12px}.lager-room-fold-head{padding:10px}.lager-room-fold-label strong{font-size:13px}}

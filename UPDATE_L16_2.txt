@@ -1,0 +1,2 @@
+MEIN ALLTAG – UPDATE L16.2 / V0.16.2
+Kompakte 3D-Lagerbedienung mit aufklappbaren Bereichen, direkten Bodenobjekt-/Möbel-Schnellaktionen und einklappbaren 3D-Werkzeugen. Keine Änderung an Datenbank oder Beständen. Tests: Node-Regressionen 16/16, UI-Test mit mobiler Chromium-Ansicht erfolgreich; echter Android-Test offen.
