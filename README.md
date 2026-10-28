@@ -201,3 +201,44 @@ Die Browser-End-to-End-Prüfung ist in der Testumgebung durch die Chromium-Siche
 - Bodenstellplätze mit Bestand können nicht gelöscht werden. Das Entfernen eines reinen 3D-Artikelsymbols löscht keine Artikel oder Bestände. Alte Raumsätze werden verlustfrei um ein leeres `floorObjects`-Feld ergänzt.
 - Die Datenbank bleibt `mein-alltag-v0`, Version 1; der Offline-Cache heißt `mein-alltag-v0-16-1` und enthält `modules/lagerhaus-floor.js`.
 - **Prüfstatus:** Neuer L16.1-Logiktest und 15 historische Node-Regressionstests bestanden. 25/25 produktive JS-Dateien syntaktisch geprüft. Chromium- und echte Android-/Touch-/IndexedDB-Praxistests **nicht bestanden gemeldet**, weil Chromium alle lokalen Testseiten per Admin-Richtlinie blockiert und kein Zugriff auf das persönliche Android-Gerät besteht.
+
+## L16.2 – Kompakte 3D-Lagerbedienung (Beta V0.16.2, 28.10.2026)
+
+- Die 3D-Raumansicht ist weiterhin prominent. Darunter bleiben Gruppen für Bodenlager, Möbelbibliothek, Fachübersicht, nicht eingeräumte Artikel, Möbelbearbeitung und Raumeinstellungen zunächst eingeklappt (`<details>`).
+- Zwei Schnellknöpfe oberhalb des 3D-Raums öffnen und fokussieren Bodenlager bzw. Möbelbibliothek. Die Zoom-/Raster-/Rückgängig-Steuerung ist ebenfalls einklappbar; Vollbild bleibt separat erreichbar.
+- Vorhandene Dialoge für das Regal und das Bodenobjekt bleiben im nativen Top-Layer, unabhängig vom Klappzustand.
+- **Datenerhalt:** `mein-alltag-v0`/IndexedDB-Schema 1 unverändert, keine neuen Schlüssel und keine Datenmigration. Der Klappzustand ist flüchtige UI-Sitzungsinformation. Offline-Cache: `mein-alltag-v0-16-2`.
+- Prüfungen: 16/16 ältere Node-Regressionstests, L16.2-Logiktest, zusätzlicher HTML-Strukturtest und Syntaxcheck bestanden. Kein echter Android-Touch-/Persistenztest auf diesem Gerät durchgeführt.
+- Solange noch kein vollständiger Export/Backup vorhanden ist, bitte zunächst nur mit Testdaten arbeiten.
+
+- GitHub `main` wurde als Commit `0174c425391fccb182204917136e71c9a34438ff` aktualisiert und Dateiversion/Import/Cache nochmals geprüft. Die Veröffentlichung auf GitHub Pages kann getrennt verzögert sein.
+
+## F01 Datenschutz + Frauengesundheit · 0.16.3
+
+Die neue Gesundheits-Hauptseite verwendet die vom Benutzer bereitgestellte rosafarbene
+Designvorlage und enthält acht interaktive Themenkacheln sowie die Unterbereiche
+Start, Kalender, Einträge und Mehr. Gesundheitseinträge bleiben ausschließlich
+im IndexedDB-Store `frauengesundheit` (Zyklus: `health.cycle.v1`, Einträge:
+`health.entries.v1`). Ohne eigenen Zyklusstart werden keine personenbezogenen
+Zyklusphasen oder Periodendaten erfunden. Persönliche medizinische Lerntexte sind
+noch nicht Bestandteil dieser Version.
+
+Verschlüsseltes Gesamtbackup: Hauptnavigation → Mehr → Verschlüsseltes Gesamtbackup.
+1. Sichere ein mindestens zwölfstelliges, eigenes Backup-Passwort. Eingabe zweimal.
+2. Gesamtbackup herunterladen; danach die `.meinalltag`-Datei manuell zu Google
+   Drive hochladen. Die App sendet niemals selbst eine Sicherung zu Google.
+3. Auf dem PC `Mein Alltag` über die GitHub-Pages-App-Adresse öffnen, im Backup-Manager
+   die heruntergeladene Datei auswählen, Backup-Passwort eingeben, bisherige Daten
+   vorher separat sichern und die Wiederherstellung ausdrücklich bestätigen.
+4. Die Wiederherstellung ersetzt ALLE fünf Modulbereiche auf dem Zielgerät.
+   Kein Live-Sync; nach neuen Änderungen ein neues Gesamtbackup erstellen.
+
+Technik: Web Crypto AES-256-GCM / PBKDF2-SHA256 310.000 Iterationen mit zufälligem
+Salt und IV. Vor Download werden alle sechs IndexedDB-Stores (inkl. Meta) und alle
+zugrundeliegenden File- und Blob-Werte serialisiert. Der Import ist über eine einzelne
+atomare IndexedDB-Transaktion gegen Teilimporte abgesichert. Backup-Passwort wird
+nicht gespeichert. Keine allgemeine App-Sperre und keine Frauengesundheit-PIN;
+lokale Daten sind NICHT verschlüsselt. App-Programmcode ist nicht Teil des Datenbackups.
+
+Bewusste Testgrenze: GitHub-Pages-/Android-E2E und die Veröffentlichung sind in dieser
+Auslieferung noch nicht bestätigt. Bis zum echten Gerätetest nur Testdaten eingeben.

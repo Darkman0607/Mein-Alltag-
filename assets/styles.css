@@ -392,6 +392,7 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
 .room-floor-object{cursor:grab;touch-action:none}
 .room-floor-object:focus-visible polygon{stroke:#f7d281;stroke-width:3}
 @media(max-width:370px){.lager-floor-dialog{width:97vw;padding:10px}.lager-floor-dialog-head{flex-wrap:wrap}}
+
 /* L16.2 – mobile, collapsible room tools. Defaults are compact, without changing inventory. */
 .lager-stage-quick{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 12px}
 .lager-stage-quick button{min-height:48px;padding:9px 8px;white-space:normal;font-size:13px;border-radius:12px}
@@ -418,3 +419,68 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
 .lager-stage--fullscreen~.lager-stage-tools{align-items:start}
 .lager-stage--fullscreen~.lager-stage-tools>.lager-stage-control-fold{max-width:200px}
 @media(max-width:380px){.lager-stage-quick{gap:6px}.lager-stage-quick button{font-size:12px}.lager-room-fold-head{padding:10px}.lager-room-fold-label strong{font-size:13px}}
+
+/* F01 · Frauengesundheit – 28.10.2026 · Soft rose/glass reference design. */
+body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
+.health-mode .app-shell{background:radial-gradient(circle at 10% 6%,#fff8f5 0,#f9e9e7 38%,#ead0cc 100%);max-width:600px}
+.health-mode .app-shell::before,.health-mode .topbar,.health-mode .bottom-nav{display:none!important}
+.health-mode main#view{padding:0!important;color:#563049;overflow-y:auto}
+.health-app{min-height:100%;display:flex;flex-direction:column;position:relative;padding:19px 12px 0;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;color:#51243d}
+.health-heading{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:8px 9px 14px}
+.health-heading h1{font:700 clamp(29px,7.8vw,43px)/1.03 Georgia,'Times New Roman',serif;letter-spacing:-1.6px;color:#682a48;margin:0;white-space:nowrap}
+.health-heading h1 span{font:400 1.15em cursive;color:#d87994;vertical-align:middle}
+.health-heading p{font-size:clamp(12px,3.4vw,16px);letter-spacing:.05px;margin:8px 0 0;color:#66495b;white-space:nowrap}
+.health-profile{display:flex;align-items:center;justify-content:center;flex:none;width:36px;height:36px;border-radius:50%;background:#ead0d5;color:#845267;opacity:.87}
+.health-content{flex:1}
+.health-cycle-card{display:grid;grid-template-columns:41% 59%;position:relative;align-items:center;width:100%;min-height:149px;border-radius:23px;padding:15px 12px;background:linear-gradient(148deg,#fff9f8f2,#f8dfdff0);border:1px solid #fff;box-shadow:0 8px 18px #ad7d8650,inset 0 1px 2px #fff;color:#5b2943;text-align:left;overflow:hidden}
+.health-cycle-ring{width:100%;max-width:135px;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:conic-gradient(#d992a9 var(--progress),#e4c3d4 var(--progress),#e4c3d4 100%);transform:rotate(-112deg);padding:10px;box-shadow:inset 0 1px 6px #ffffff94}
+.health-cycle-ring:before{content:"";position:absolute;inset:8px;border-radius:50%;background:linear-gradient(143deg,#fff9f8,#f9e5e4)}
+.health-cycle-num{position:relative;z-index:1;transform:rotate(112deg);text-align:center;display:flex;flex-direction:column;align-items:center;color:#5f4053}
+.health-cycle-num span{font-size:13px;white-space:nowrap}
+.health-cycle-num strong{font-family:Georgia,serif;font-size:37px;font-weight:500;color:#732d4a;line-height:1.06;margin:2px 0}
+.health-phase{position:relative;z-index:2;align-self:center;min-width:0;padding-right:4px}
+.health-chip{display:inline-block;background:#efd0d4;border-radius:18px;color:#71374f;font-size:12px;padding:5px 11px;max-width:80%}
+.health-phase h2{font-family:Georgia,serif;font-size:clamp(21px,5.9vw,31px);line-height:1.02;color:#6c2d4d;margin:9px 0 4px;max-width:90%}
+.health-phase p{font-size:12px;line-height:1.25;color:#655162;min-height:31px;max-width:88%;margin:5px 0}
+.health-next{display:flex;align-items:center;gap:8px;border-top:1px solid #e9ced0;padding-top:8px;margin-top:8px}
+.health-next>span{font-size:25px;line-height:1;color:#ab6280;border-radius:50%;background:#f9e5e7;padding:3px 5px}
+.health-next div{display:flex;flex-direction:column;gap:2px;min-width:0}.health-next b{font-size:11px;font-weight:500;line-height:1.1}.health-next small{font-size:11px;color:#91788a}
+.health-flower{position:absolute;right:9px;top:2px;width:70px;height:92px;object-fit:contain;opacity:.75;pointer-events:none;z-index:0}
+.health-cycle-chevron{position:absolute;right:5px;top:40%;font-size:26px;color:#6a3d55}
+.health-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 8px;margin:12px 0 10px}
+.health-tile{min-height:90px;display:flex;align-items:center;gap:3px;position:relative;overflow:hidden;background:linear-gradient(130deg,#fff9f7,#f7e0df);border:1px solid #fff;border-radius:20px;padding:7px 7px 7px 4px;box-shadow:0 7px 12px #ad77844b, inset 0 1px 1px #fff;text-align:left;color:#54243b}
+.health-tile:active,.health-cycle-card:active{transform:scale(.987)}
+.health-tile img{flex:0 0 38%;min-width:0;height:79px;object-fit:contain;filter:drop-shadow(0 5px 4px #b77f8c44)}
+.health-tile-text{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;padding-right:8px}
+.health-tile-text strong{font:700 clamp(15px,4.0vw,21px)/1.06 Georgia,serif;overflow-wrap:break-word;color:#58213c}
+.health-tile:nth-child(5) .health-tile-text strong,.health-tile:nth-child(8) .health-tile-text strong{font-size:clamp(12px,3.35vw,17px);letter-spacing:-.4px}.health-tile-text span{font-size:clamp(10.5px,2.7vw,13px);line-height:1.38;color:#66586a}
+.health-chevron{position:absolute;right:7px;top:43%;font-size:20px;color:#603c53;line-height:1}
+.health-nav{position:sticky;bottom:0;z-index:10;margin:4px -12px 0;padding:10px 14px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,minmax(0,1fr));min-height:68px;border-radius:26px 26px 0 0;border-top:1px solid #fff;background:#fff0edeb;box-shadow:0 -6px 22px #a8737c25;backdrop-filter:blur(14px)}
+.health-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:transparent;border:0;color:#55556d;font-size:11px;min-height:47px}
+.health-tab span{display:grid;place-items:center;min-width:50px;height:33px;font-size:25px;line-height:1;border-radius:15px}
+.health-tab b{font-weight:400;font-size:12px;line-height:1.35}
+.health-tab.on{color:#974365}.health-tab.on span{background:#f5d5e0;color:#a24e75}
+.health-tab:focus-visible,.health-tile:focus-visible,.health-cycle-card:focus-visible{outline:2px solid #a24e75}
+.health-alert{font-size:12px;margin:7px 8px;color:#854762;min-height:0}
+.health-alert:empty{display:none}
+.health-subhead{font:700 30px Georgia,serif;color:#682a48;margin:14px 8px 6px}.health-subtext{font-size:13px;margin:0 8px 20px;color:#6d5665}
+.health-breadcrumb{border:0;background:transparent;color:#8c4565;margin:6px 0 10px;font-size:14px;min-height:37px}
+.health-section-heading{display:flex;gap:15px;align-items:center;margin:0 0 16px}.health-section-heading img{width:95px;height:104px;object-fit:contain}.health-section-heading h2{font:700 29px/1.05 Georgia,serif;color:#6b2c4b;margin:0 0 9px}.health-section-heading p{font-size:13px;line-height:1.4;color:#6d5361;margin:0}
+.health-cycle-form,.health-entry-form,.health-info{background:#fff8f7de;border:1px solid #fff;border-radius:19px;padding:16px;margin:12px 0;box-shadow:0 4px 14px #ad778433;color:#623b50}
+.health-cycle-form h3,.health-entry-form h3{margin:0 0 12px;font:700 22px Georgia,serif}
+.health-cycle-form label,.health-entry-form label{display:block;font-size:13px;margin:12px 0;color:#5e3f52}
+.health-cycle-form input,.health-entry-form input,.health-entry-form textarea{display:block;width:100%;padding:10px 12px;margin-top:6px;min-height:47px;border:1px solid #dcb3c0;border-radius:11px;background:#fff;color:#422538;font-size:15px;max-width:100%}
+.health-cycle-form p,.health-info p{font-size:12px;line-height:1.5;color:#755868}.health-info strong{font-family:Georgia,serif;font-size:20px}
+.health-list-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:15px 0}.health-list-title h3{font:700 22px Georgia,serif;margin:0}
+.health-add,.health-save{border:0;border-radius:12px;background:#973f68;color:white;padding:11px 15px;min-height:43px;font-weight:600;font-size:13px}
+.health-neutral,.health-more-btn{border:1px solid #d6a7bc;border-radius:12px;background:#f8e6e9;color:#6d3651;padding:11px 14px;min-height:43px;font-weight:600;font-size:13px}
+.health-form-actions{display:flex;gap:9px;flex-wrap:wrap}
+.health-entries{display:grid;gap:10px;margin:11px 0}.health-entry{display:flex;flex-direction:column;gap:6px;padding:15px;background:#fff9f7de;border:1px solid #fff;border-radius:18px;box-shadow:0 5px 13px #ac778129;overflow-wrap:anywhere}
+.health-entry small{color:#9e607e}.health-entry h3{margin:4px 0 5px;color:#60304a;font:700 19px Georgia,serif}.health-entry p{white-space:normal;line-height:1.5;color:#5b4854;font-size:13px;margin:0}.health-photo{width:100%;max-height:360px;object-fit:contain;border-radius:10px;margin-top:8px}
+.health-delete{align-self:end;background:transparent;color:#9a3b62;border:1px solid #dbb2c4;border-radius:10px;min-height:37px;padding:7px 11px}.health-empty{background:#fff8f5b9;padding:20px;border-radius:15px;color:#825269;font-size:13px}
+.health-date-row{border:1px solid #fdf8f8;background:#fff9f7;border-radius:13px;padding:13px;display:flex;justify-content:space-between;color:#674054;min-height:48px}
+.backup-card{border-color:#9f8dbd!important}.backup-card h3{margin:12px 0}.backup-card .backup-main{min-height:47px;margin:14px 0 0;width:100%}.backup-card hr{border:0;border-top:1px solid #ffffff2e;margin:20px 0}.backup-card .backup-file{color:#e9eff7;max-width:100%;width:100%;font-size:12px;padding:9px 0}.backup-check{display:flex;align-items:start;gap:9px;font-size:13px;line-height:1.5;margin:13px 0;color:#f1e8e1}.backup-check input{width:21px;height:21px;flex:none;accent-color:#d2a75b}.backup-card .backup-result{font-size:13px;color:#ffe5ad;min-height:14px;line-height:1.5}
+@media(min-width:480px){.health-app{padding-left:25px;padding-right:25px}.health-nav{margin-left:-25px;margin-right:-25px}.health-tile{min-height:124px}.health-tile img{height:108px}.health-cycle-card{min-height:180px}.health-flower{width:95px;height:115px}}
+@media(max-width:365px){.health-heading h1{font-size:26px}.health-heading p{font-size:11px}.health-profile{width:29px;height:29px}.health-tile-text strong{font-size:14px}.health-tile img{height:67px}.health-tile{min-height:83px}.health-cycle-ring{max-width:113px}}
+.health-profile{border:0;cursor:pointer;min-width:36px;min-height:36px}
+.health-more-btn{display:block;width:100%;margin:8px 0}
