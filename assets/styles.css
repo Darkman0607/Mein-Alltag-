@@ -603,3 +603,20 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .drive-select{display:block;width:100%;max-width:100%;min-height:49px;margin:8px 0;color:#f2f5fb;background:#172538}
 .drive-select option{background:#172538;color:#f2f5fb}
 @media(max-width:360px){.drive-button-row{grid-template-columns:1fr}}
+
+/* D02 – Direkte Rückmeldungen für Google Drive (mobil + Screenreader). */
+.drive-action-inline:empty{display:none}
+.drive-action-inline{margin:12px 0 3px!important;padding:11px 12px;border:1px solid #6887a4;border-radius:12px;background:#152638;color:#eff6ff!important;line-height:1.55;font-size:13px;overflow-wrap:anywhere}
+.drive-action-inline[data-kind="success"]{border-color:#4a9476;background:#153529;color:#d7ffe8!important}
+.drive-action-inline[data-kind="error"]{border-color:#d28a71;background:#3a231f;color:#ffe4d9!important}
+.backup-feedback-toast[hidden]{display:none!important}
+.backup-feedback-toast{position:fixed;z-index:300;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));max-width:540px;margin-inline:auto;display:flex;align-items:center;gap:11px;padding:13px 12px;border-radius:16px;border:2px solid #6f91af;background:#172b3c;box-shadow:0 12px 35px #000a;color:#f5faff;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.backup-feedback-toast[data-kind="success"]{border-color:#50c993;background:#143d30;color:#f4fff9}
+.backup-feedback-toast[data-kind="error"]{border-color:#eaa081;background:#4a2824;color:#fff3ed}
+.backup-feedback-toast[data-kind="progress"]{border-color:#efbc69;background:#3b3020;color:#fff6df}
+.backup-toast-mark{flex:0 0 25px;display:grid;place-items:center;width:25px;height:25px;border-radius:50%;border:1px solid currentColor;font-weight:800}
+.backup-toast-text{flex:1;min-width:0}
+.backup-toast-close{flex:none;align-self:center;min-width:40px;min-height:44px;padding:5px;border:0;border-radius:9px;color:inherit;background:#ffffff17;font-size:24px}
+.backup-result[data-kind="success"]{color:#a6f3c5!important}
+.backup-result[data-kind="error"]{color:#ffc5b0!important}
+@media(max-width:370px){.backup-feedback-toast{font-size:13px;left:8px;right:8px;padding:10px}}

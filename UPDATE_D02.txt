@@ -1,0 +1,22 @@
+MEIN ALLTAG – UPDATE D02 · Beta V0.17.1 · 28.10.2026
+
+NEU
+✓ Direkt nach dem Speichern der OAuth-Client-ID erscheint eine grüne Bestätigung beim Button.
+✓ Alle Backup-Aktionen zeigen eine mobile Statusmeldung über der unteren Navigation.
+✓ Unterscheidung: Erfolg (grün), Fortschritt (gold), Fehler (rot).
+✓ Fehlgeschlagene Anmeldung, Listenaktualisierung, Sicherung und Wiederherstellung werden konkret erklärt.
+✓ Erfolgreiches Upload-Ergebnis bleibt erhalten, auch wenn Drive-Liste danach nicht geladen werden kann.
+✓ Google-Anmeldung wird nur nach bestätigtem OAuth-Token als erfolgreich bezeichnet.
+✓ Leere/ungültige Client-ID wird abgewiesen.
+✓ Offline-/lokales Backup bleibt erhalten; bestehende App-Daten werden nicht verändert.
+
+PRÜFUNG
+✓ Chromium 390 px: 6 Interaktionsabläufe inkl. Fehlerfall bestanden.
+✓ Node Regressionen: 18/18 bestanden.
+✓ JavaScript-Syntax, Version- und Cache-Kennung geprüft.
+
+OFFEN
+☐ Echter Drive Upload/Restore auf dem Gerät des Nutzers testen.
+☐ Android-PWA aktualisieren und Versionsanzeige prüfen.
+
+ZIP enthält App, D02_Checkliste.docx und DOKUMENTATION/bauhaus.docx.

@@ -12,7 +12,7 @@ import {renderHealth,mountHealth,confirmHealthExit} from '../modules/frauengesun
 import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapshot,validateSnapshot} from './backup.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.17.0';
+export const APP_VERSION='0.17.1';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -102,7 +102,7 @@ function renderMore(){return `${section('Mehr & Einstellungen','Lokaler Speicher
 <label class="field-label" for="backupPassword">Backup-Passwort (mindestens 12 Zeichen)</label><input class="search-input" id="backupPassword" type="password" autocomplete="new-password" minlength="12" placeholder="Eigenes sicheres Backup-Passwort"/>
 <label class="field-label" for="backupPasswordConfirm">Passwort für neue Sicherung wiederholen</label><input class="search-input" id="backupPasswordConfirm" type="password" autocomplete="new-password" minlength="12" placeholder="Passwort erneut eingeben"/>
 <h3>📁 Google Drive</h3><p>Manuell in deinem Google Drive im sichtbaren Ordner <strong>Mein Alltag Backups</strong> sichern und von dort wiederherstellen. Google erhält nur verschlüsselte Dateien.</p>
-<details class="drive-setup" id="googleDriveSetup"><summary>Google Drive einmalig einrichten</summary><p>Für die Anmeldung über GitHub Pages benötigt Mein Alltag eine kostenlose Google-Cloud-OAuth-Client-ID für Webanwendungen. Google Drive API aktivieren; als autorisierte JavaScript-Quelle <code>${esc(location.origin)}</code> eintragen. Anleitung: <a href="./GOOGLE_DRIVE_EINRICHTUNG.md" target="_blank" rel="noopener">GOOGLE_DRIVE_EINRICHTUNG.md</a></p><label class="field-label" for="googleClientId">Google OAuth-Client-ID (kein Passwort)</label><input class="search-input" id="googleClientId" type="text" autocomplete="off" spellcheck="false" placeholder="123456789-abc.apps.googleusercontent.com"/><button type="button" class="primary-button backup-main" id="googleSaveClientId">Client-ID auf diesem Gerät speichern</button></details>
+<details class="drive-setup" id="googleDriveSetup"><summary>Google Drive einmalig einrichten</summary><p>Für die Anmeldung über GitHub Pages benötigt Mein Alltag eine kostenlose Google-Cloud-OAuth-Client-ID für Webanwendungen. Google Drive API aktivieren; als autorisierte JavaScript-Quelle <code>${esc(location.origin)}</code> eintragen. Anleitung: <a href="./GOOGLE_DRIVE_EINRICHTUNG.md" target="_blank" rel="noopener">GOOGLE_DRIVE_EINRICHTUNG.md</a></p><label class="field-label" for="googleClientId">Google OAuth-Client-ID (kein Passwort)</label><input class="search-input" id="googleClientId" type="text" autocomplete="off" spellcheck="false" placeholder="123456789-abc.apps.googleusercontent.com"/><button type="button" class="primary-button backup-main" id="googleSaveClientId">Client-ID auf diesem Gerät speichern</button><p class="drive-action-inline" id="googleSetupFeedback" role="status" aria-live="polite"></p></details>
 <p class="drive-connect-status" id="googleConnection" role="status">Google Drive: nicht verbunden.</p><div class="drive-button-row"><button class="primary-button" type="button" id="googleLogin">Mit Google anmelden</button><button class="primary-button drive-secondary" type="button" id="googleLogout" disabled>Abmelden</button></div>
 <button class="primary-button backup-main" type="button" id="driveSave" disabled>Verschlüsseltes Backup in Google Drive speichern</button>
 <button class="primary-button backup-main drive-secondary" type="button" id="driveRefresh" disabled>Backups in Drive anzeigen / aktualisieren</button>
@@ -168,6 +168,24 @@ function bindBackup(){
  const refresh=document.getElementById('driveRefresh'),restore=document.getElementById('driveRestore');
  const list=document.getElementById('driveBackupList'),connection=document.getElementById('googleConnection');
  const clientInput=document.getElementById('googleClientId');clientInput.value=getGoogleClientId();
+ const setupFeedback=document.getElementById('googleSetupFeedback');
+ // Diese Meldung erscheint auch dann sofort, wenn das Ergebnisfeld unten nicht sichtbar ist.
+ let toast=document.getElementById('backupFeedbackToast');
+ if(!toast){toast=document.createElement('div');toast.id='backupFeedbackToast';toast.className='backup-feedback-toast';toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.hidden=true;
+  toast.innerHTML='<span class="backup-toast-mark" aria-hidden="true"></span><span class="backup-toast-text"></span><button type="button" class="backup-toast-close" aria-label="Meldung schließen">×</button>';
+  document.body.appendChild(toast);
+ }
+ toast.querySelector('.backup-toast-close').onclick=()=>{toast.hidden=true;clearTimeout(toast._feedbackTimer);};
+ function announce(message,kind='info',setup=false){
+  status.textContent=message;status.dataset.kind=kind;
+  if(setup){setupFeedback.textContent=message;setupFeedback.dataset.kind=kind;}
+  clearTimeout(toast._feedbackTimer);
+  toast.dataset.kind=kind;toast.querySelector('.backup-toast-mark').textContent=kind==='success'?'✓':kind==='error'?'!':'…';
+  toast.querySelector('.backup-toast-text').textContent=message;
+  toast.hidden=false;
+  // Eine laufende Aktion bleibt angezeigt. Erfolg / Fehler kann zusätzlich unten nachgelesen werden.
+  if(kind!=='progress')toast._feedbackTimer=setTimeout(()=>{toast.hidden=true;},kind==='error'?9500:6500);
+ }
  let busyNow=false;
  function connectedUI(){
   const connected=isDriveConnected();
@@ -179,8 +197,8 @@ function bindBackup(){
  }
  function busy(active){busyNow=active;exportButton.disabled=active;importButton.disabled=active;document.getElementById('googleSaveClientId').disabled=active;connectedUI();}
  function validNewPassword(){
-  if(password.value.length<12){status.textContent='Für ein neues Backup mindestens 12 Zeichen als Passwort eingeben.';return false;}
-  if(password.value!==confirmPass.value){status.textContent='Passwort und Bestätigung stimmen nicht überein.';return false;}
+  if(password.value.length<12){announce('Für ein neues Backup mindestens 12 Zeichen als Passwort eingeben.','error');return false;}
+  if(password.value!==confirmPass.value){announce('Passwort und Bestätigung stimmen nicht überein.','error');return false;}
   return true;
  }
  async function driveList(){
@@ -194,29 +212,36 @@ function bindBackup(){
  }
  const currentId=getGoogleClientId();if(currentId&&validateGoogleClientId(currentId))prepareGoogleIdentity().catch(()=>{});
  document.getElementById('googleSaveClientId').addEventListener('click',()=>{
-  try{saveGoogleClientId(clientInput.value);list.replaceChildren(new Option('Erst mit Google anmelden',''));connectedUI();
-   status.textContent='Client-ID gespeichert. Jetzt „Mit Google anmelden“ auswählen.';prepareGoogleIdentity().catch(e=>{status.textContent=e.message;});
-  }catch(e){status.textContent='Einrichtung fehlgeschlagen: '+e.message;}
+  try{
+   if(!validateGoogleClientId(clientInput.value))throw Error('Bitte eine gültige OAuth-Client-ID eintragen.');
+   saveGoogleClientId(clientInput.value);list.replaceChildren(new Option('Erst mit Google anmelden',''));connectedUI();
+   announce('✓ Client-ID auf diesem Gerät gespeichert. Du kannst dich jetzt mit Google anmelden.','success',true);
+   prepareGoogleIdentity().catch(e=>announce('Google-Anmeldung ist derzeit nicht verfügbar: '+e.message,'error',true));
+  }catch(e){announce('Client-ID nicht gespeichert: '+e.message,'error',true);}
  });
  login.addEventListener('click',async()=>{
-  if(!validateGoogleClientId(getGoogleClientId())){document.getElementById('googleDriveSetup').open=true;status.textContent='Bitte zuerst Google Drive einrichten und eine OAuth-Client-ID speichern.';return;}
+  if(!validateGoogleClientId(getGoogleClientId())){document.getElementById('googleDriveSetup').open=true;announce('Bitte zuerst Google Drive einrichten und eine OAuth-Client-ID speichern.','error');return;}
   // requestAccessToken is invoked synchronously in connectGoogleDrive(), directly from this user click.
-  let pending;try{pending=connectGoogleDrive();}catch(e){status.textContent=e.message;prepareGoogleIdentity().catch(()=>{});return;}
-  busy(true);status.textContent='Google-Anmeldung geöffnet …';
-  try{await pending;status.textContent='Google Drive verbunden. Lade deine Sicherungen …';const n=await driveList();status.textContent=`Google Drive verbunden. ${n} Backup(s) gefunden.`;}
-  catch(e){status.textContent='Google-Anmeldung/Drive-Liste fehlgeschlagen: '+e.message;}
+  let pending;try{pending=connectGoogleDrive();}catch(e){announce(e.message,'error');prepareGoogleIdentity().catch(()=>{});return;}
+  busy(true);announce('Google-Anmeldung wird geöffnet …','progress');
+  try{
+   await pending;connectedUI();announce('✓ Google angemeldet. Lade deine Backups …','progress');
+   try{const n=await driveList();announce(`✓ Google angemeldet und Drive verbunden. ${n} Backup(s) gefunden.`,'success');}
+   catch(e){announce('✓ Google angemeldet, aber Backup-Liste konnte nicht geladen werden: '+e.message,'error');}
+  }catch(e){announce('Google-Anmeldung fehlgeschlagen: '+e.message,'error');}
   finally{busy(false);}
  });
- logout.addEventListener('click',()=>{disconnectGoogleDrive();list.replaceChildren(new Option('Erst mit Google anmelden',''));status.textContent='Google Drive abgemeldet. Lokale Daten bleiben erhalten.';connectedUI();});
+ logout.addEventListener('click',()=>{disconnectGoogleDrive();list.replaceChildren(new Option('Erst mit Google anmelden',''));announce('✓ Von Google Drive abgemeldet. Deine lokalen Daten bleiben erhalten.','success');connectedUI();});
  list.addEventListener('change',connectedUI);
- refresh.addEventListener('click',async()=>{busy(true);status.textContent='Lade Drive-Backups …';try{const n=await driveList();status.textContent=`${n} Backup(s) in Google Drive gefunden.`;}catch(e){status.textContent='Drive-Liste fehlgeschlagen: '+e.message;}finally{busy(false);}});
+ refresh.addEventListener('click',async()=>{busy(true);announce('Lade deine Backups aus Google Drive …','progress');try{const n=await driveList();announce(`✓ Backup-Liste aktualisiert: ${n} Backup(s) gefunden.`,'success');}catch(e){announce('Drive-Liste konnte nicht geladen werden: '+e.message,'error');}finally{busy(false);}});
  save.addEventListener('click',async()=>{
   if(!validNewPassword())return;
-  busy(true);status.textContent='Verschlüssele alle lokalen Daten auf diesem Gerät …';
-  try{const data=await createEncryptedBackup(password.value);status.textContent='Lade verschlüsseltes Backup nach Google Drive hoch …';
-   const result=await uploadDriveBackup(data);confirmPass.value='';status.textContent=`✓ In Google Drive gespeichert: ${result.name}.`;
-   await driveList();
-  }catch(e){status.textContent='Drive-Sicherung fehlgeschlagen: '+e.message+' Lokale Daten wurden nicht verändert.';}
+  busy(true);announce('Verschlüssele alle lokalen Daten auf diesem Gerät …','progress');
+  try{const data=await createEncryptedBackup(password.value);announce('Lade das verschlüsselte Backup nach Google Drive hoch …','progress');
+   const result=await uploadDriveBackup(data);confirmPass.value='';
+   try{await driveList();announce(`✓ Backup erfolgreich in Google Drive gespeichert: ${result.name}.`,'success');}
+   catch{announce(`✓ Backup erfolgreich in Google Drive gespeichert: ${result.name}. Die Liste konnte noch nicht aktualisiert werden.`,'success');}
+  }catch(e){announce('Drive-Sicherung fehlgeschlagen: '+e.message+' Deine lokalen Daten wurden nicht verändert.','error');}
   finally{busy(false);}
  });
  async function importEnvelope(data){
@@ -228,29 +253,29 @@ function bindBackup(){
   setTimeout(()=>location.reload(),950);return count;
  }
  restore.addEventListener('click',async()=>{
-  if(!list.value){status.textContent='Bitte zuerst eine Drive-Sicherung auswählen.';return;}
-  if(!document.getElementById('backupUnderstand').checked){status.textContent='Bitte den Datenersatz zuerst bestätigen.';return;}
-  if(!password.value){status.textContent='Passwort für die gewählte Sicherung eingeben.';return;}
-  busy(true);status.textContent='Lade verschlüsselte Datei aus Google Drive und prüfe das Passwort …';
+  if(!list.value){announce('Bitte zuerst eine Drive-Sicherung auswählen.','error');return;}
+  if(!document.getElementById('backupUnderstand').checked){announce('Bitte den Datenersatz zuerst bestätigen.','error');return;}
+  if(!password.value){announce('Passwort für die gewählte Sicherung eingeben.','error');return;}
+  busy(true);announce('Lade verschlüsselte Datei aus Google Drive und prüfe das Passwort …','progress');
   try{const envelope=await downloadDriveBackup(list.value);const count=await importEnvelope(envelope);
-   status.textContent=count===null?'Wiederherstellung abgebrochen. Keine Daten geändert.':`✓ ${count} Datensätze wiederhergestellt. App wird neu geladen.`;
-  }catch(e){status.textContent='Drive-Wiederherstellung fehlgeschlagen: '+e.message+' Lokale Daten bleiben unverändert.';}
+   announce(count===null?'Wiederherstellung abgebrochen. Keine Daten geändert.':`✓ ${count} Datensätze wiederhergestellt. App wird neu geladen.`,count===null?'info':'success');
+  }catch(e){announce('Drive-Wiederherstellung fehlgeschlagen: '+e.message+' Lokale Daten bleiben unverändert.','error');}
   finally{busy(false);}
  });
  exportButton.addEventListener('click',async()=>{
   if(!validNewPassword())return;
-  busy(true);status.textContent='Erstelle und verschlüssele lokale Sicherungsdatei …';
-  try{const data=await createEncryptedBackup(password.value);const file=triggerBackupDownload(data);confirmPass.value='';status.textContent=`✓ Verschlüsselte Datei heruntergeladen: ${file}.`;}
-  catch(e){status.textContent='Sicherung fehlgeschlagen: '+e.message;}
+  busy(true);announce('Erstelle und verschlüssele lokale Sicherungsdatei …','progress');
+  try{const data=await createEncryptedBackup(password.value);const file=triggerBackupDownload(data);confirmPass.value='';announce(`✓ Verschlüsselte Datei heruntergeladen: ${file}.`,'success');}
+  catch(e){announce('Sicherung fehlgeschlagen: '+e.message,'error');}
   finally{busy(false);}
  });
  importButton.addEventListener('click',async()=>{
   const file=document.getElementById('backupFile').files[0];
-  if(!file){status.textContent='Bitte eine .meinalltag-Datei auswählen.';return;}
-  if(file.size>180*1024*1024){status.textContent='Backup-Datei zu groß (maximal 180 MB).';return;}
-  busy(true);status.textContent='Prüfe und entschlüssele die lokale Sicherungsdatei …';
-  try{const count=await importEnvelope(JSON.parse(await file.text()));status.textContent=count===null?'Import abgebrochen. Keine Daten geändert.':`✓ ${count} Datensätze wiederhergestellt. App wird neu geladen.`;}
-  catch(e){status.textContent='Wiederherstellung fehlgeschlagen: '+e.message+' Lokale Daten wurden nicht verändert.';}
+  if(!file){announce('Bitte eine .meinalltag-Datei auswählen.','error');return;}
+  if(file.size>180*1024*1024){announce('Backup-Datei zu groß (maximal 180 MB).','error');return;}
+  busy(true);announce('Prüfe und entschlüssele die lokale Sicherungsdatei …','progress');
+  try{const count=await importEnvelope(JSON.parse(await file.text()));announce(count===null?'Import abgebrochen. Keine Daten geändert.':`✓ ${count} Datensätze wiederhergestellt. App wird neu geladen.`,count===null?'info':'success');}
+  catch(e){announce('Wiederherstellung fehlgeschlagen: '+e.message+' Lokale Daten wurden nicht verändert.','error');}
   finally{busy(false);}
  });
  connectedUI();

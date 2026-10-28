@@ -247,3 +247,10 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 Technische Tests: `node --check assets/google-drive.js`, `node --check assets/app.js`, `node --check modules/lagerhaus-app.js`, `node --check sw.js`; `node test-d01-drive.mjs`; `node test-f01-backup.mjs`; `python test-d01-ui.py`; `python test-f07-ui.py`; `python run-regressions-d01.py`.
 
 Noch auf realem Android-Chrome mit demselben Google-Cloud-OAuth-Client zu prüfen (ausdrücklich NICHT als bestanden markieren): Google-Popup öffnen; Drive-Zugriff autorisieren; verschlüsseltes Backup erstellen; Datei im sichtbaren Drive-Ordner kontrollieren; vorhandene lokale Daten separat sichern; auf einem anderen Gerät das Backup laden, entschlüsseln und importieren; bei falschem Passwort darf nichts verändert werden; Offline-Export weiter möglich; Service-Worker lädt V0.17.0 korrekt.
+
+
+## D02 – Sichtbare Bestätigungen V0.17.1
+
+- `python test-d02-feedback.py`: echte mobile Chromium-Oberfläche (390 × 844), simuliertes OAuth/Drive-Backend. Testet ungültige Client-ID, erfolgreiches Speichern mit Inline-Meldung, erfolgreiche Anmeldung, Backup-Upload, fehlgeschlagenen Upload, Abmeldung, sichtbare Statusmeldung und horizontale Überläufe.
+- `python run-regressions-d02.py`: 18/18 historische Regressionstests bestanden (Versionsprüfungen auf D02 normalisiert).
+- Keine echten Zugangsdaten oder Live-Drive-Inhalte verwendet. Nutzer-Screenshot mit Status „verbunden“ belegt keine erfolgreich hochgeladene Sicherung.

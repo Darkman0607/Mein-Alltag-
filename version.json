@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.17.0",
-  "build": "D01 Google Drive Anmeldung und verschlüsseltes Backup",
+  "version": "0.17.1",
+  "build": "D02 Sichtbare Rückmeldungen bei Google Drive",
   "release_date": "2026-10-28"
 }

@@ -297,3 +297,10 @@ Unter **Mehr → Verschlüsseltes Gesamtbackup** lassen sich mit Google Identity
 **Einmalige Einrichtung notwendig:** Als statische GitHub-Pages-PWA kann die App keinen OAuth-Zugang ohne öffentliche OAuth-Web-Client-ID bereitstellen. Das Projekt benötigt eine aktivierte Google Drive API, einen konfigurierten OAuth-Zustimmungsbildschirm und eine auf `https://darkman0607.github.io` zugelassene JavaScript-Quelle. Anleitung: `GOOGLE_DRIVE_EINRICHTUNG.md`. Ohne diese Einrichtung funktionieren Google-Anmeldung und Upload noch nicht. Keine Client-Secrets oder Passwörter in GitHub-Dateien eintragen.
 
 **Prüfung:** `node test-d01-drive.mjs`, `node test-f01-backup.mjs`, `python test-d01-ui.py`, `python test-f07-ui.py` und `python run-regressions-d01.py` (18/18 historische Node-Prüfungen). OAuth/Drive mit echten Google-Kontodaten sowie Android-/GitHub-Pages-Betrieb sind nicht automatisch nachgewiesen.
+
+
+## D02 – Statusmeldungen Google Drive (Beta V0.17.1, 28.10.2026)
+
+Nach dem Speichern der Google-OAuth-Client-ID wird eine Erfolgs- oder Fehlermeldung unmittelbar unter dem entsprechenden Knopf eingeblendet. Anmeldung, Abmeldung, verschlüsseltes Cloud-/Offline-Backup, Backup-Liste und Wiederherstellung zeigen eine gut lesbare, mobile Toast-Meldung mit Erfolg (grün), Verarbeitung (gold) oder Fehler (rot). Der erfolgreiche Upload wird erst nach Bestätigung durch die Drive-API gemeldet; ein nachfolgender Fehler beim Lesen der Dateiliste löscht diese Bestätigung nicht. Rückmeldung im unteren Backup-Ergebnisfeld bleibt zusätzlich erhalten. Keine Änderung an lokalen IndexedDB-Daten.
+
+Tests: `python test-d02-feedback.py` (Chromium, simulierte Google-API), `python run-regressions-d02.py` (18 historische Node-Checks), `node test-d01-drive.mjs` (Drive API Testsimulation). Echte Google-Drive-Anmeldung/Upload auf Nutzerkonto separat prüfen.
