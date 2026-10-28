@@ -21,7 +21,8 @@ TESTERGEBNIS
 - Garantiehinweise sind beim Öffnen der Akten sichtbar, nicht als Systembenachrichtigungen.
 
 GITHUB / VERÖFFENTLICHUNG
-- GitHub-Commit und Quelleprüfung werden im finalen Word-Protokoll ergänzt.
+- Veröffentlicht auf GitHub main: 124f2ebe65fe697db16ad3a619fc4641b9402d1f.
+- Nach Push abgeglichen: version.json, sw.js, assets/app.js, lagerhaus-service.js, lagerhaus-service-view.js, lagerhaus-items-view.js.
 
 NÄCHSTES GEPLANTES UPDATE
 L17 – PDF-Archiv und Offline-Viewer.
