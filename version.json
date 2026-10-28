@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.16.9",
-  "build": "F07 Übersicht und sichere Navigation",
+  "version": "0.17.0",
+  "build": "D01 Google Drive Anmeldung und verschlüsseltes Backup",
   "release_date": "2026-10-28"
 }

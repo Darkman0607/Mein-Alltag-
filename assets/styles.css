@@ -589,3 +589,17 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-f07-tools .health-neutral{min-height:46px;font-size:14px;font-weight:650}
 .health-app .health-entry-actions button,.health-app .health-quick-actions button{min-height:44px;touch-action:manipulation}
 @media(max-width:360px){.health-f07-dates{grid-template-columns:1fr}.health-f07-tools{padding:11px}}
+/* D01: Google Drive connection and backup controls */
+.drive-setup{margin:12px 0 15px;padding:12px;border:1px solid #a5b3c344;border-radius:13px;background:#101926a8}
+.drive-setup summary{cursor:pointer;font-weight:700;color:#e8eff8;min-height:35px;display:list-item;padding:7px 0}
+.drive-setup p{overflow-wrap:anywhere}
+.drive-setup code{color:#d9b77c;overflow-wrap:anywhere}
+.drive-setup a{color:#b5d9ff}
+.drive-connect-status{margin-top:12px!important;padding:11px;border-radius:10px;border:1px solid #8d9fac44;background:#12202c;color:#e9eff6!important}
+.drive-button-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:11px 0}
+.drive-button-row .primary-button{min-width:0;min-height:47px;padding:9px 8px}
+.backup-card .drive-secondary{background:#203044;border:1px solid #667a91;color:#e6edf6}
+.backup-card .primary-button:disabled{opacity:.48;cursor:not-allowed}
+.drive-select{display:block;width:100%;max-width:100%;min-height:49px;margin:8px 0;color:#f2f5fb;background:#172538}
+.drive-select option{background:#172538;color:#f2f5fb}
+@media(max-width:360px){.drive-button-row{grid-template-columns:1fr}}

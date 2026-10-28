@@ -10,8 +10,9 @@ import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
 import {renderHealth,mountHealth,confirmHealthExit} from '../modules/frauengesundheit-ui.js';
 import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapshot,validateSnapshot} from './backup.js';
+import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.16.9';
+export const APP_VERSION='0.17.0';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -96,13 +97,25 @@ let calendarDate=new Date();
 function renderCalendar(){const now=new Date();const fmt=new Intl.DateTimeFormat('de-AT',{month:'long',year:'numeric'});return `${section('Kalender','Monatsübersicht – Termine kommen in einem späteren Update.')}<div class="glass-card"><div class="calendar-head"><button type="button" id="prevMonth" aria-label="Vorheriger Monat">‹</button><h2>${esc(fmt.format(calendarDate))}</h2><button type="button" id="nextMonth" aria-label="Nächster Monat">›</button></div><div class="calendar-grid">${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<span class="day-label">${d}</span>`).join('')}${monthMatrix(calendarDate).map(d=>`<span class="day-cell ${d.other?'other':''} ${d.date.toDateString()===now.toDateString()?'today':''}">${d.date.getDate()}</span>`).join('')}</div></div><div class="glass-card"><h2>Noch keine Termine</h2><p>Der Kalender ist bereits bedienbar. Die Verknüpfung mit dem Familienplaner ist für ein späteres Update vorgesehen.</p></div>`;}
 function renderSearch(){return `${section('Suche','Finde deine fünf Bereiche.')}<label class="field-label" for="searchInput">App-Bereiche durchsuchen</label><input class="search-input" id="searchInput" autocomplete="off" type="search" placeholder="z. B. Lager oder Familie"/><div class="search-results" id="searchResults"></div>`;}
 function searchResults(q){const x=q.trim().toLocaleLowerCase('de-AT');const items=MODULES.filter(m=>`${m.name} ${m.subtitle} ${m.description}`.toLocaleLowerCase('de-AT').includes(x));return items.length?items.map(m=>`<button type="button" class="row-link" data-open="${m.id}"><span>${esc(m.name)}<small style="display:block;color:#9aaab8;font-size:11px;margin-top:3px">${esc(m.subtitle)}</small></span><span>›</span></button>`).join(''):'<p class="empty-state">Kein passender Bereich gefunden.</p>';}
-function renderMore(){return `${section('Mehr & Einstellungen','Informationen zu deinem App-Grundgerüst.')}<div class="glass-card"><h2>App-Version</h2><p>Mein Alltag · Beta V${APP_VERSION}</p><p>Alle Module laufen lokal auf diesem Gerät. Kein Konto, kein Cloud-Sync, keine automatische Datenübertragung.</p></div><div class="glass-card"><h2>Lokaler Datenspeicher</h2><div id="storageStatus" role="status"><p>Prüfe Datenbank …</p></div></div><div class="glass-card backup-card" id="backupManager"><h2>🔐 Verschlüsseltes Gesamtbackup</h2><p>Alle fünf Module, Lagerhaus-Fotos und -Belege werden in <strong>eine AES-256-GCM-verschlüsselte Datei</strong> geschrieben. Nur manuell; kein Cloud-Zugriff aus der App.</p><p><strong>Wichtig:</strong> Das Passwort wird nicht gespeichert. Ohne Passwort lässt sich die Sicherung nicht wiederherstellen. Lokale App-Daten sind derzeit nicht verschlüsselt.</p>
+function renderMore(){return `${section('Mehr & Einstellungen','Lokaler Speicher und sichere Backups.')}<div class="glass-card"><h2>App-Version</h2><p>Mein Alltag · Beta V${APP_VERSION}</p><p>Die fünf Module speichern Daten lokal. Google Drive überträgt Daten ausschließlich beim manuellen Sichern oder Wiederherstellen.</p></div><div class="glass-card"><h2>Lokaler Datenspeicher</h2><div id="storageStatus" role="status"><p>Prüfe Datenbank …</p></div></div>
+<div class="glass-card backup-card" id="backupManager"><h2>🔐 Verschlüsseltes Gesamtbackup</h2><p>Alle fünf Module, Fotos und Belege werden vor dem Speichern mit <strong>AES-256-GCM</strong> verschlüsselt. Kein automatischer Cloud-Abgleich.</p><p><strong>Wichtig:</strong> Das Passwort wird nicht gespeichert. Ohne Passwort kann das Backup nicht wiederhergestellt werden. Die lokalen Daten auf diesem Gerät sind weiterhin nicht separat verschlüsselt.</p>
 <label class="field-label" for="backupPassword">Backup-Passwort (mindestens 12 Zeichen)</label><input class="search-input" id="backupPassword" type="password" autocomplete="new-password" minlength="12" placeholder="Eigenes sicheres Backup-Passwort"/>
 <label class="field-label" for="backupPasswordConfirm">Passwort für neue Sicherung wiederholen</label><input class="search-input" id="backupPasswordConfirm" type="password" autocomplete="new-password" minlength="12" placeholder="Passwort erneut eingeben"/>
-<button class="primary-button backup-main" id="backupExport" type="button">Gesamtbackup herunterladen</button><p>Danach die heruntergeladene Datei über <strong>Dateien → Teilen / Hochladen → Google Drive</strong> sichern. Am PC diese App öffnen und die Datei aus Drive importieren.</p>
-<hr><h3>Gesamtbackup wiederherstellen</h3><label class="field-label" for="backupFile">Verschlüsselte Datei (.meinalltag)</label><input class="backup-file" id="backupFile" type="file" accept=".meinalltag,application/octet-stream,application/json"/><p class="module-privacy">Beim Import werden alle vorhandenen lokalen Daten der fünf Module ersetzt. Bitte vorher deine bisherigen Daten separat sichern.</p>
-<label class="backup-check"><input type="checkbox" id="backupUnderstand"/> Ich habe die bisherigen Daten gesichert und stimme dem Ersetzen aller lokalen Module zu.</label>
-<button class="primary-button backup-main backup-import" id="backupImport" type="button">Backup mit Passwort importieren</button><p class="backup-result" role="status" aria-live="polite" id="backupResult"></p></div><div class="glass-card"><h2>App installieren</h2><p id="installStatus">Installation prüfen …</p><button type="button" class="primary-button" id="installAction">App installieren – Anleitung</button><p id="installHelp" aria-live="polite" class="install-help"></p><p>Alternativ: Chrome-Menü ⋮ → Zum Startbildschirm hinzufügen. Der Android-Browser entscheidet, ob eine App oder eine Verknüpfung erstellt wird.</p></div><button type="button" class="row-link" id="checkUpdate"><span>Auf Updates prüfen</span><span>↻</span></button><p id="moreMessage" class="module-privacy" role="status"></p>`;}
+<h3>📁 Google Drive</h3><p>Manuell in deinem Google Drive im sichtbaren Ordner <strong>Mein Alltag Backups</strong> sichern und von dort wiederherstellen. Google erhält nur verschlüsselte Dateien.</p>
+<details class="drive-setup" id="googleDriveSetup"><summary>Google Drive einmalig einrichten</summary><p>Für die Anmeldung über GitHub Pages benötigt Mein Alltag eine kostenlose Google-Cloud-OAuth-Client-ID für Webanwendungen. Google Drive API aktivieren; als autorisierte JavaScript-Quelle <code>${esc(location.origin)}</code> eintragen. Anleitung: <a href="./GOOGLE_DRIVE_EINRICHTUNG.md" target="_blank" rel="noopener">GOOGLE_DRIVE_EINRICHTUNG.md</a></p><label class="field-label" for="googleClientId">Google OAuth-Client-ID (kein Passwort)</label><input class="search-input" id="googleClientId" type="text" autocomplete="off" spellcheck="false" placeholder="123456789-abc.apps.googleusercontent.com"/><button type="button" class="primary-button backup-main" id="googleSaveClientId">Client-ID auf diesem Gerät speichern</button></details>
+<p class="drive-connect-status" id="googleConnection" role="status">Google Drive: nicht verbunden.</p><div class="drive-button-row"><button class="primary-button" type="button" id="googleLogin">Mit Google anmelden</button><button class="primary-button drive-secondary" type="button" id="googleLogout" disabled>Abmelden</button></div>
+<button class="primary-button backup-main" type="button" id="driveSave" disabled>Verschlüsseltes Backup in Google Drive speichern</button>
+<button class="primary-button backup-main drive-secondary" type="button" id="driveRefresh" disabled>Backups in Drive anzeigen / aktualisieren</button>
+<label class="field-label" for="driveBackupList">Drive-Backup zur Wiederherstellung auswählen</label><select class="search-input drive-select" id="driveBackupList" disabled><option value="">Erst mit Google anmelden</option></select>
+<p class="module-privacy">⚠️ Wiederherstellen ersetzt die lokalen Daten aller fünf Module. Dafür benötigst du das Passwort der gewählten Sicherung.</p>
+<label class="backup-check"><input type="checkbox" id="backupUnderstand"/> Ich habe meine bisherigen lokalen Daten gesichert und stimme dem Ersetzen aller fünf Module zu.</label>
+<button class="primary-button backup-main backup-import" type="button" id="driveRestore" disabled>Aus Google Drive wiederherstellen</button>
+<hr><h3>Offline-Alternative: Backup-Datei</h3>
+<button class="primary-button backup-main drive-secondary" id="backupExport" type="button">Verschlüsseltes Backup herunterladen</button>
+<label class="field-label" for="backupFile">Lokale Sicherungsdatei (.meinalltag)</label><input class="backup-file" id="backupFile" type="file" accept=".meinalltag,application/octet-stream,application/json"/>
+<button class="primary-button backup-main backup-import" id="backupImport" type="button">Backup-Datei mit Passwort importieren</button>
+<p class="backup-result" role="status" aria-live="polite" id="backupResult"></p></div>
+<div class="glass-card"><h2>App installieren</h2><p id="installStatus">Installation prüfen …</p><button type="button" class="primary-button" id="installAction">App installieren – Anleitung</button><p id="installHelp" aria-live="polite" class="install-help"></p><p>Alternativ: Chrome-Menü ⋮ → Zum Startbildschirm hinzufügen. Der Android-Browser entscheidet, ob eine App oder eine Verknüpfung erstellt wird.</p></div><button type="button" class="row-link" id="checkUpdate"><span>Auf Updates prüfen</span><span>↻</span></button><p id="moreMessage" class="module-privacy" role="status"></p>`;}
 async function loadStorage(){const node=document.getElementById('storageStatus');if(!node)return;try{const names=await getStoreNames();const sizes=await Promise.all(MODULE_STORES.map(getModuleCount));if(!node.isConnected)return;node.innerHTML=`<div class="storage-line"><span>Datenbank</span><strong>${esc(DB_NAME)} · v${DB_VERSION}</strong></div>${MODULES.map((m,i)=>`<div class="storage-line"><span>${esc(m.name)}</span><strong>${sizes[i]} Eintrag${sizes[i]===1?'':'e'}</strong></div>`).join('')}<p style="margin-top:13px">Getrennte Speicherbereiche: ${names.length} (5 Module + technische Metadaten)</p>`;}catch(e){if(node.isConnected)node.textContent=`Speicher nicht verfügbar: ${e.message}`;}}
 async function loadNote(id){const field=document.getElementById('moduleNote');if(!field)return;try{const data=await getModuleValue(id,'startNote');if(field.isConnected)field.value=typeof data==='string'?data:'';}catch(e){const msg=document.getElementById('saveMessage');if(msg)msg.textContent=`Speicherfehler: ${e.message}`;}}
 async function saveNote(id){const field=document.getElementById('moduleNote');const msg=document.getElementById('saveMessage');if(!field||!msg)return;const value=field.value;try{await setModuleValue(id,'startNote',value);if(msg.isConnected)msg.textContent='Gespeichert ✓';}catch(e){if(msg.isConnected)msg.textContent=`Fehler: ${e.message}`;}}
@@ -149,32 +162,98 @@ function bindView(route){
  }
 }
 function bindBackup(){
- const status=document.getElementById('backupResult'),exportButton=document.getElementById('backupExport'),importButton=document.getElementById('backupImport');
- const password=document.getElementById('backupPassword'),confirmPass=document.getElementById('backupPasswordConfirm');
- const busy=active=>{exportButton.disabled=active;importButton.disabled=active;};
- exportButton?.addEventListener('click',async()=>{
-  if(password.value.length<12){status.textContent='Mindestens 12 Zeichen für das Backup-Passwort eingeben.';return;}
-  if(password.value!==confirmPass.value){status.textContent='Die beiden Passwörter stimmen nicht überein.';return;}
-  busy(true);status.textContent='Sicherung und Verschlüsselung laufen auf diesem Gerät …';
-  try{const data=await createEncryptedBackup(password.value);const file=triggerBackupDownload(data);status.textContent=`Verschlüsseltes Backup erstellt: ${file}. Bitte in Google Drive hochladen und sicher aufbewahren.`;confirmPass.value='';}
-  catch(err){status.textContent='Sicherung fehlgeschlagen: '+err.message;}
+ const status=document.getElementById('backupResult'),password=document.getElementById('backupPassword'),confirmPass=document.getElementById('backupPasswordConfirm');
+ const exportButton=document.getElementById('backupExport'),importButton=document.getElementById('backupImport');
+ const login=document.getElementById('googleLogin'),logout=document.getElementById('googleLogout'),save=document.getElementById('driveSave');
+ const refresh=document.getElementById('driveRefresh'),restore=document.getElementById('driveRestore');
+ const list=document.getElementById('driveBackupList'),connection=document.getElementById('googleConnection');
+ const clientInput=document.getElementById('googleClientId');clientInput.value=getGoogleClientId();
+ let busyNow=false;
+ function connectedUI(){
+  const connected=isDriveConnected();
+  connection.textContent=connected?'✓ Google Drive verbunden – nur für diese Sitzung.':'Google Drive nicht verbunden. Google-Anmeldung erforderlich.';
+  logout.disabled=!connected||busyNow;login.disabled=busyNow;
+  for(const button of [save,refresh])button.disabled=!connected||busyNow;
+  restore.disabled=!connected||busyNow||!list.value;
+  list.disabled=!connected||busyNow;
+ }
+ function busy(active){busyNow=active;exportButton.disabled=active;importButton.disabled=active;document.getElementById('googleSaveClientId').disabled=active;connectedUI();}
+ function validNewPassword(){
+  if(password.value.length<12){status.textContent='Für ein neues Backup mindestens 12 Zeichen als Passwort eingeben.';return false;}
+  if(password.value!==confirmPass.value){status.textContent='Passwort und Bestätigung stimmen nicht überein.';return false;}
+  return true;
+ }
+ async function driveList(){
+  const items=await listDriveBackups();list.replaceChildren();
+  const intro=document.createElement('option');intro.value='';intro.textContent=items.length?'Backup auswählen ('+items.length+' gefunden)':'Noch keine Backups im Drive-Ordner';list.append(intro);
+  for(const item of items){const option=document.createElement('option');option.value=item.id;
+   const date=item.createdTime?new Date(item.createdTime).toLocaleString('de-AT'):'Datum unbekannt';
+   option.textContent=`${date} · ${item.name} · ${Math.ceil(Number(item.size||0)/1024)} KB`;list.append(option);
+  }
+  connectedUI();return items.length;
+ }
+ const currentId=getGoogleClientId();if(currentId&&validateGoogleClientId(currentId))prepareGoogleIdentity().catch(()=>{});
+ document.getElementById('googleSaveClientId').addEventListener('click',()=>{
+  try{saveGoogleClientId(clientInput.value);list.replaceChildren(new Option('Erst mit Google anmelden',''));connectedUI();
+   status.textContent='Client-ID gespeichert. Jetzt „Mit Google anmelden“ auswählen.';prepareGoogleIdentity().catch(e=>{status.textContent=e.message;});
+  }catch(e){status.textContent='Einrichtung fehlgeschlagen: '+e.message;}
+ });
+ login.addEventListener('click',async()=>{
+  if(!validateGoogleClientId(getGoogleClientId())){document.getElementById('googleDriveSetup').open=true;status.textContent='Bitte zuerst Google Drive einrichten und eine OAuth-Client-ID speichern.';return;}
+  // requestAccessToken is invoked synchronously in connectGoogleDrive(), directly from this user click.
+  let pending;try{pending=connectGoogleDrive();}catch(e){status.textContent=e.message;prepareGoogleIdentity().catch(()=>{});return;}
+  busy(true);status.textContent='Google-Anmeldung geöffnet …';
+  try{await pending;status.textContent='Google Drive verbunden. Lade deine Sicherungen …';const n=await driveList();status.textContent=`Google Drive verbunden. ${n} Backup(s) gefunden.`;}
+  catch(e){status.textContent='Google-Anmeldung/Drive-Liste fehlgeschlagen: '+e.message;}
   finally{busy(false);}
  });
- importButton?.addEventListener('click',async()=>{
+ logout.addEventListener('click',()=>{disconnectGoogleDrive();list.replaceChildren(new Option('Erst mit Google anmelden',''));status.textContent='Google Drive abgemeldet. Lokale Daten bleiben erhalten.';connectedUI();});
+ list.addEventListener('change',connectedUI);
+ refresh.addEventListener('click',async()=>{busy(true);status.textContent='Lade Drive-Backups …';try{const n=await driveList();status.textContent=`${n} Backup(s) in Google Drive gefunden.`;}catch(e){status.textContent='Drive-Liste fehlgeschlagen: '+e.message;}finally{busy(false);}});
+ save.addEventListener('click',async()=>{
+  if(!validNewPassword())return;
+  busy(true);status.textContent='Verschlüssele alle lokalen Daten auf diesem Gerät …';
+  try{const data=await createEncryptedBackup(password.value);status.textContent='Lade verschlüsseltes Backup nach Google Drive hoch …';
+   const result=await uploadDriveBackup(data);confirmPass.value='';status.textContent=`✓ In Google Drive gespeichert: ${result.name}.`;
+   await driveList();
+  }catch(e){status.textContent='Drive-Sicherung fehlgeschlagen: '+e.message+' Lokale Daten wurden nicht verändert.';}
+  finally{busy(false);}
+ });
+ async function importEnvelope(data){
+  if(!document.getElementById('backupUnderstand').checked)throw Error('Bitte zuerst bestätigen, dass bestehende Daten ersetzt werden dürfen.');
+  if(!password.value)throw Error('Backup-Passwort fehlt.');
+  const snapshot=await decryptBackup(data,password.value),info=validateSnapshot(snapshot);
+  if(!window.confirm(`Verschlüsseltes Backup geprüft: ${info.count} Datenbankeinträge. Wirklich ALLE lokalen Daten der fünf Module ersetzen?`))return null;
+  const count=await restoreSnapshot(snapshot);password.value='';confirmPass.value='';
+  setTimeout(()=>location.reload(),950);return count;
+ }
+ restore.addEventListener('click',async()=>{
+  if(!list.value){status.textContent='Bitte zuerst eine Drive-Sicherung auswählen.';return;}
+  if(!document.getElementById('backupUnderstand').checked){status.textContent='Bitte den Datenersatz zuerst bestätigen.';return;}
+  if(!password.value){status.textContent='Passwort für die gewählte Sicherung eingeben.';return;}
+  busy(true);status.textContent='Lade verschlüsselte Datei aus Google Drive und prüfe das Passwort …';
+  try{const envelope=await downloadDriveBackup(list.value);const count=await importEnvelope(envelope);
+   status.textContent=count===null?'Wiederherstellung abgebrochen. Keine Daten geändert.':`✓ ${count} Datensätze wiederhergestellt. App wird neu geladen.`;
+  }catch(e){status.textContent='Drive-Wiederherstellung fehlgeschlagen: '+e.message+' Lokale Daten bleiben unverändert.';}
+  finally{busy(false);}
+ });
+ exportButton.addEventListener('click',async()=>{
+  if(!validNewPassword())return;
+  busy(true);status.textContent='Erstelle und verschlüssele lokale Sicherungsdatei …';
+  try{const data=await createEncryptedBackup(password.value);const file=triggerBackupDownload(data);confirmPass.value='';status.textContent=`✓ Verschlüsselte Datei heruntergeladen: ${file}.`;}
+  catch(e){status.textContent='Sicherung fehlgeschlagen: '+e.message;}
+  finally{busy(false);}
+ });
+ importButton.addEventListener('click',async()=>{
   const file=document.getElementById('backupFile').files[0];
-  if(!file){status.textContent='Bitte zuerst eine .meinalltag-Datei auswählen.';return;}
-  if(!document.getElementById('backupUnderstand').checked){status.textContent='Bitte zuerst bestätigen, dass du vorhandene Daten gesichert hast.';return;}
-  if(!password.value){status.textContent='Backup-Passwort fehlt.';return;}
-  if(file.size>180*1024*1024){status.textContent='Backup-Datei ist zu groß (maximal 180 MB).';return;}
-  busy(true);status.textContent='Datei wird geprüft und entschlüsselt. Vorhandene Daten bleiben noch unverändert …';
-  try{
-   const data=JSON.parse(await file.text());const snapshot=await decryptBackup(data,password.value),info=validateSnapshot(snapshot);
-   if(!window.confirm(`Verschlüsselte Datei geprüft: ${info.count} Datenbankeinträge. Wirklich alle lokalen Daten der 5 Module auf diesem Gerät ersetzen?`)){status.textContent='Import abgebrochen. Keine Daten geändert.';return;}
-   const count=await restoreSnapshot(snapshot);status.textContent=`Wiederherstellung abgeschlossen: ${count} Datensätze. App wird neu geladen.`;
-   password.value='';confirmPass.value='';setTimeout(()=>location.reload(),950);
-  }catch(err){status.textContent='Wiederherstellung fehlgeschlagen: '+err.message+' Vorhandene Daten wurden nicht absichtlich verändert.';}
+  if(!file){status.textContent='Bitte eine .meinalltag-Datei auswählen.';return;}
+  if(file.size>180*1024*1024){status.textContent='Backup-Datei zu groß (maximal 180 MB).';return;}
+  busy(true);status.textContent='Prüfe und entschlüssele die lokale Sicherungsdatei …';
+  try{const count=await importEnvelope(JSON.parse(await file.text()));status.textContent=count===null?'Import abgebrochen. Keine Daten geändert.':`✓ ${count} Datensätze wiederhergestellt. App wird neu geladen.`;}
+  catch(e){status.textContent='Wiederherstellung fehlgeschlagen: '+e.message+' Lokale Daten wurden nicht verändert.';}
   finally{busy(false);}
  });
+ connectedUI();
 }
 export function render(){
  const route=hashRoute();

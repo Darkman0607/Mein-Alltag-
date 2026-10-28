@@ -1,0 +1,27 @@
+MEIN ALLTAG – UPDATE D01 · Beta V0.17.0 · 28.10.2026
+
+Neu unter Mehr → Verschlüsseltes Gesamtbackup:
+✓ Google OAuth-Anmeldung (Google Identity Services, Drive-Scope drive.file)
+✓ Google-Cloud OAuth-Client-ID einmalig in der App hinterlegen (ohne Client-Secret)
+✓ In Google Drive sichtbaren Ordner „Mein Alltag Backups“ bei Bedarf erstellen
+✓ Alle fünf Module inklusive Fotos/Belege als AES-256-GCM-verschlüsselte Datei hochladen
+✓ Gesicherte Versionen im Ordner anzeigen und auswählen
+✓ Manuelle Wiederherstellung mit Passwort, Integritätsprüfung und Bestätigung
+✓ Passwort bleibt auf dem Gerät; Tokens nur im Arbeitsspeicher
+✓ Vorhandener Datei-Download und Datei-Import weiter benutzbar
+✓ Offline-Cache, App-Header und Version auf V0.17.0 aktualisiert
+
+TESTS (lokal mit simulierten Google-Antworten):
+✓ node test-d01-drive.mjs
+✓ node test-f01-backup.mjs
+✓ python test-d01-ui.py
+✓ python test-f07-ui.py
+✓ python run-regressions-d01.py (18/18 historische Node-Prüfungen)
+✓ JS-Syntax und Offline-Cache-Pfade
+
+OFFEN: Einmalige Google-Cloud-Einrichtung (Client-ID, Drive API, OAuth-Zustimmungsbildschirm und zulässige JavaScript-Quelle). Der echte Login und das Backup zu einem realen Google-Konto wurden hier mangels OAuth-Zugangsdaten nicht durchgeführt. Auch echter Android-/GitHub-Pages-/Offline-Live-Test offen.
+
+DATENSCHUTZ: Die lokalen IndexedDB-Daten sind nicht zusätzlich verschlüsselt. Die verschlüsselte Cloud-Datei kann bei Kenntnis des Passworts wiederhergestellt werden. Unbedingt Passwort separat sichern.
+
+Anleitung: GOOGLE_DRIVE_EINRICHTUNG.md
+Word: D01_Checkliste.docx, DOKUMENTATION/bauhaus.docx

@@ -1,3 +1,13 @@
+# F05 0.16.7 – Prüfprotokoll 28.10.2026
+
+- PASS `python test-f05-ui.py`: mobiler Chromium-F05-Komponententest (390 px) mit fiktiven Angaben, Filtern, Bearbeitung/Löschung, Neustart im lokalen Test-Adapter.
+- PASS `python run-regressions-f05.py`: 18/18 historische Node-Tests nach Anpassung der erwarteten Versionskennung.
+- PASS `node test-f01-backup.mjs`: Passwort-verschlüsselter Backup-/Restore-Roundtrip.
+- BLOCKIERT `python test-f03-realapp.py`: HTTP-Aufruf 127.0.0.1 in dieser Umgebung administrativ gesperrt; daher kein vollständiger Real-HTTP-/Android-Test.
+- Kein Test mit persönlichen Gesundheitsdaten, keine automatischen medizinischen Schlussfolgerungen.
+
+---
+
 # F04 – Abnahme V0.16.6 (28.10.2026)
 
 - [x] Chromium mobil 390px: Blutungsbeginn, -ende, Schmierblutung, Stärke und Schmerz dokumentierbar.
@@ -204,3 +214,36 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - `node --check` für alle produktiven Module, Assets und SW: PASS.
 - Browser-E2E: BLOCKIERT – `net::ERR_BLOCKED_BY_ADMINISTRATOR`, sogar für lokale `file:`- und `data:`-URLs; **nicht als bestanden gewertet**.
 - Android-Praxistest: OFFEN – tatsächliches Tippen/Ziehen/Drehen/Neuladen und IndexedDB-Persistenz auf dem Nutzergerät sind vor dem produktiven Einsatz zu bestätigen.
+
+## L16.2 – Kompakte Bedienung und Schnellzugriffe
+
+- `node release-check-l16-2.mjs`: PASS – Bestands-/3D-/Service-L16.1-Logik weiter kompatibel, angepasste Versions- und Offline-Kennungen.
+- `python run-regressions-l16-2.py`: PASS – 16 frühere historische Logiktests, nur erwartete App-/Cache-Version in temporären Kopien an V0.16.2 angepasst.
+- `python test-ui-l16-2.py`: PASS – HTML der echten `roomDetails()` gerendert und auf 6 zunächst eingeklappte Gruppen, beide Schnellaktionen, bestehende Formulare, erreichbaren Vollbildknopf, externe Boden-Dialogebene und eindeutige IDs geprüft.
+- `node --check` für alle produktiven JS-Dateien und die Offline-Assetliste prüfen.
+- **Offen:** echter Android-/Touch-E2E-Test, Datenpersistenz auf Android und Live-GitHub-Bestätigung.
+
+- Nach GitHub-Commit 0174c42539 wurden V0.16.2, importierte Klappmoduldatei und Offline-Cache auf `main` nachgelesen: PASS.
+
+## Frauengesundheit F02 – Untersuchungen & Notizen (V0.16.4)
+- [x] Chromium (isolierte Vorschau mit Test-Datenbank): Termin anlegen, Fragen und Symptome eintragen, 21:00 als Uhrzeit, nächster Termin auf Startseite, PDF als Anhang speichern, Termin bearbeiten, Status auf abgeschlossen, Befund/ärztliche Einschätzung/Nachkontrolle ergänzen, Dateianhang entfernen, Eintrag löschen.
+- [x] Echte UI-Klassen und Handler des Gesundheitsmoduls bei 390px Browserbreite ausgeführt.
+- [x] Strenge Datumsprüfung verwirft 31. Februar.
+- [x] 18/18 frühere Node-Release-Prüfsuiten nach ausschließlich angepassten Versions-/Build-Assertions.
+- [x] JavaScript-Syntax und Service-Worker-Assetliste geprüft.
+- [ ] Realer Android-Chrome-/GitHub-Pages-/Offline-Test inklusive Browser-Neustart und echter IndexedDB-Persistenz steht aus.
+- [ ] GitHub-Pages-Live-Veröffentlichung / identischer Stand 0.16.4 muss nach Commit separat bestätigt werden.
+
+- [x] F02 GitHub main: sechs Release-Kerndateien über die GitHub-Schnittstelle nach Upload zurückgelesen; Git-Blob-SHA stimmt bytegenau mit lokalem ZIP-Projekt überein. Letzter Commit 9038a51774a415c9b7f8d17641631980301a7c85.
+
+## Frauengesundheit F03 – Schwangerschaft & Tests (V0.16.5)
+- [x] Chromium-UI: Status speichern und beim Neustart wiederherstellen, Test erfassen/bearbeiten, keine automatische Änderung des Status.
+- [x] SSW und Geburtstermin aus letzter Periode, optionales ärztliches Datum, UTC-Datumsarithmetik um Zeitumstellung.
+- [x] Zukunftsdatum für Test abweisen; F02-Fragen/Untersuchungen unverändert editierbar.
+- [ ] Echter Android-Gerätetest / Pages-Cache-Abgleich durch Nutzer offen.
+
+## D01 – Google Drive Backup V0.17.0
+
+Technische Tests: `node --check assets/google-drive.js`, `node --check assets/app.js`, `node --check modules/lagerhaus-app.js`, `node --check sw.js`; `node test-d01-drive.mjs`; `node test-f01-backup.mjs`; `python test-d01-ui.py`; `python test-f07-ui.py`; `python run-regressions-d01.py`.
+
+Noch auf realem Android-Chrome mit demselben Google-Cloud-OAuth-Client zu prüfen (ausdrücklich NICHT als bestanden markieren): Google-Popup öffnen; Drive-Zugriff autorisieren; verschlüsseltes Backup erstellen; Datei im sichtbaren Drive-Ordner kontrollieren; vorhandene lokale Daten separat sichern; auf einem anderen Gerät das Backup laden, entschlüsseln und importieren; bei falschem Passwort darf nichts verändert werden; Offline-Export weiter möglich; Service-Worker lädt V0.17.0 korrekt.

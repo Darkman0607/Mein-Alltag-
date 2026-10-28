@@ -8,21 +8,17 @@
 
 ---
 
-# Mein Alltag – Beta V0.16.8 (F06 Sex & Tagebuch)
+# Mein Alltag – Beta V0.16.7 (F05 Symptome & Ausfluss)
 
-## Neues Update F06 – 28.10.2026
+## Neues Update F05 – 28.10.2026
 
-- Freiwillige vertrauliche Sex-Einträge mit Schutz, Verhütung, optionaler Uhrzeit, Wohlbefinden und Freitext.
-- Freitext-Tagebuch mit Tagesübersicht, Datumsauswahl, Navigation und Tageszähler.
-- Bestehende F05-Symptomfelder und Gesundheitseinträge bleiben unverändert vorhanden.
-- Lokale Speicherung ohne automatische Weitergabe; lokale Datensätze nicht separat verschlüsselt. Manuelles Backup weiterhin passwortgeschützt.
-- Chromium-Mobiltest F06/F05 und 18/18 historische Regressionen PASS; Android- und reale Pages-/PWA-Prüfung offen.
+- Datierte Ausflussbeobachtungen: Farbe, Konsistenz, Menge, Geruch und begleitende Beschwerden inkl. Juckreiz/Brennen/Schmerzen.
+- Tagebuch / Symptome & Befinden: Stimmung, Schmerzstärke 0–10, Schmerzort, Übelkeit, Brustbeschwerden und Freitext.
+- Start-Schnellerfassung und Datum-/Textfilter für beide Beobachtungsbereiche; Liste bearbeiten, löschen und nach Neustart wiederfinden.
+- Bestehende Datenbank health.entries.v1 beibehalten, keine Migration oder Datenlöschung.
+- Keine Diagnose oder Schwangerschaftsfeststellung aus Symptomen; bestehender Datenschutzstatus unverändert.
 
----
-
-# Mein Alltag – Beta V0.16.6 (F04 Periode & Zykluskalender)
-
-## Neues Update F04 – 28.10.2026
+## Vorheriges Update F04 – 28.10.2026
 - Periode: Beginn, weiterer Blutungstag, Ende, Schmierblutung, Stärke, Schmerzen (0–10) und Notizen.
 - Periodenkalender mit Monatsnavigation, Tagesauswahl, Markierungen und jüngsten dokumentierten Perioden.
 - Zykluslänge frei einstellbar (18–60 Tage), historische Abstände, nächster Beginn nur als Schätzung.
@@ -270,5 +266,34 @@ atomare IndexedDB-Transaktion gegen Teilimporte abgesichert. Backup-Passwort wir
 nicht gespeichert. Keine allgemeine App-Sperre und keine Frauengesundheit-PIN;
 lokale Daten sind NICHT verschlüsselt. App-Programmcode ist nicht Teil des Datenbackups.
 
-Bewusste Testgrenze: GitHub-Pages-/Android-E2E und die Veröffentlichung sind in dieser
-Auslieferung noch nicht bestätigt. Bis zum echten Gerätetest nur Testdaten eingeben.
+Bewusste Testgrenze: GitHub-Pages-/Android-E2E und die öffentliche GitHub-Pages-Auslieferung sind
+in dieser Umgebung nicht abschließend bestätigt; der Code wurde auf GitHub main veröffentlicht. Bis zum echten Gerätetest nur Testdaten eingeben.
+
+## Frauengesundheit F01 (V0.16.3, 28.10.2026)
+- Rosafarbene Gesundheitszentrale mit acht Bereichen, direkter Zyklusübersicht und eigenem Gesundheitstagebuch.
+- AES-256-GCM-verschlüsseltes manuelles Gesamtbackup der lokalen Daten (ein Passwort ab 12 Zeichen); lokale Datenbank selbst noch nicht verschlüsselt und noch ohne separate PIN.
+
+## Frauengesundheit F02 (V0.16.4, 28.10.2026)
+- Untersuchungen & Notizen: Frauenarzttermin, Praxis, Uhrzeit, Beschwerden, vorbereitete Fragen sowie anschließend Befunde, ärztliche Aussagen und Nachkontrolle in einem bearbeitbaren Eintrag.
+- Status „Geplant/Durchgeführt“, Selbstbeobachtung/Labor als eigenständige Dokumentationsarten, nächste offene Untersuchung auf der Gesundheitsstartseite.
+- Bis zu 4 MB pro Eintrag als Foto (JPG/PNG/WebP) oder PDF; Export einzelner PDF-Anhänge; Speichern, Bearbeiten, Löschen. Eigene Beobachtung ist keine medizinische Diagnose.
+- Tests: isolierter mobiler Chromium-Funktionstest (F02), 18 historische Node-Regressionen nach reinen Versionsanpassungen. Nicht geprüft: reales Android-Gerät, vollständiges PWA-E2E, tatsächliche GitHub-Pages-Live-Version.
+- Alle Einträge liegen lokal im Browserprofil; vor Gerätetausch unbedingt verschlüsseltes Backup erstellen. Gesundheitsdaten nicht ins GitHub-Repository übertragen.
+
+F02 GitHub main: vollständiger Code-Abgleich von index.html, F02-Gesundheitsmodul, app.js, lagerhaus-app.js, sw.js und version.json am 28.10.2026 erfolgreich (SHA exakt identisch). Letzter Commit: 9038a51774a415c9b7f8d17641631980301a7c85. GitHub Pages konnte hier nicht direkt aufgerufen werden; Anzeige auf Android weiterhin offen.
+
+## Frauengesundheit F03 (V0.16.5, 28.10.2026)
+- Schwangerschaftsstatus manuell getrennt von Schwangerschaftstestergebnissen, Arztbestätigung nie automatisch.
+- Testtyp/Datum/Ergebnis/Notizen, Verlauf, Bearbeiten und Löschen; Schnellaktion innerhalb der Schwangerschaftsseite.
+- Rechnerische Schwangerschaftswoche (Wochen+Tage), vorläufiger Geburtstermin 280 Tage nach letzter Periode und optional ärztlich genannter Termin. Berechnungen werden ausdrücklich als Schätzung kenntlich gemacht; Datum aus Zykluseinstellungen wird bei Bedarf als Datenquelle markiert.
+- Tagesberechnung in UTC gegen Sommerzeitfehler; Zukunftsdatum bei Schwangerschaftstest nicht zulässig.
+- Bestehende F02-Einträge bleiben erhalten; keine Datenmigration und keine Änderung der IndexedDB-Struktur.
+- Nur fiktive Testdaten. Der Browserbestand auf dem Gerät ist nicht verschlüsselt; Backup-Export ist separat verschlüsselt.
+
+## D01 – Google Drive direkt aus der App (Beta V0.17.0, 28.10.2026)
+
+Unter **Mehr → Verschlüsseltes Gesamtbackup** lassen sich mit Google Identity Services manuell verschlüsselte Sicherungen aller fünf Module erzeugen und in den sichtbaren Drive-Ordner **Mein Alltag Backups** hochladen. Frühere Sicherungen bleiben erhalten; aus der Backup-Liste ist eine passwortgeschützte Wiederherstellung mit ausdrücklicher Bestätigung möglich. Die bestehende lokale Datei-Export-/Import-Funktion bleibt erhalten. Eine Synchronisierung der Live-Daten findet nicht statt; Tokens werden nur im Arbeitsspeicher gehalten.
+
+**Einmalige Einrichtung notwendig:** Als statische GitHub-Pages-PWA kann die App keinen OAuth-Zugang ohne öffentliche OAuth-Web-Client-ID bereitstellen. Das Projekt benötigt eine aktivierte Google Drive API, einen konfigurierten OAuth-Zustimmungsbildschirm und eine auf `https://darkman0607.github.io` zugelassene JavaScript-Quelle. Anleitung: `GOOGLE_DRIVE_EINRICHTUNG.md`. Ohne diese Einrichtung funktionieren Google-Anmeldung und Upload noch nicht. Keine Client-Secrets oder Passwörter in GitHub-Dateien eintragen.
+
+**Prüfung:** `node test-d01-drive.mjs`, `node test-f01-backup.mjs`, `python test-d01-ui.py`, `python test-f07-ui.py` und `python run-regressions-d01.py` (18/18 historische Node-Prüfungen). OAuth/Drive mit echten Google-Kontodaten sowie Android-/GitHub-Pages-Betrieb sind nicht automatisch nachgewiesen.
