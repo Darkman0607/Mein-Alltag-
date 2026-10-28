@@ -171,3 +171,11 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - PASS `node --check`: alle produktiven JS-Module.
 - BLOCKIERT `python browser-test-l15.py`: lokales Chromium schlägt bereits beim Aufruf der Webseite mit `net::ERR_BLOCKED_BY_ADMINISTRATOR` fehl. Es liegt *kein* erfolgreicher E2E-Durchlauf vor.
 - AUSSTEHEND: Installation, manuelle Bedienung, lokaler Speicher, echtes Offline-Verhalten und GitHub-Pages-Praxis auf Android.
+
+## L16 – Wartung, Reparatur, Garantien (V0.16.0, 28.10.2026)
+- [x] `node release-check-l16.mjs`: Servicehistorie / L15-Übernahme, Kosten ohne erfundene Nullwerte, Reparaturen, Betriebsstundenbasis, Garantiefristen, Sperrstatus, Dateisignaturen und Einzelgeräte-Isolation.
+- [x] `python run-regressions-l16.py`: 14 frühere Module (historische Versionen nur in flüchtigen Testkopien aktualisiert).
+- [x] `node --check`: sämtliche produktiven JavaScript-Module und Service-Worker.
+- [ ] `python browser-test-l16.py`: Chromium verweigert localhost mit `ERR_BLOCKED_BY_ADMINISTRATOR` – vor App-Laden abgebrochen.
+- [ ] Echter Android-Praxistest: Geräte-Status, neue Reparatur, Belegimport/-download, Offline-Neustart, Cache-/Versionswechsel und Datenpersistenz.
+- [ ] Bestätigung, dass GitHub-Pages-PWA auf dem echten Endgerät V0.16.0 anzeigt.

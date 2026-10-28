@@ -347,3 +347,22 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
 .lager-service-editor input,.lager-service-editor textarea{max-width:100%;box-sizing:border-box}
 .lager-service-editor .primary-button,.lager-service-card button{min-height:44px}
 @media(min-width:900px){.lager-service-list{grid-template-columns:repeat(2,minmax(0,1fr))}.lager-service-editor{padding:24px}}
+/* L16: service history, explicit equipment availability and warranty notices */
+.lager-service-card.is-blocked{border-color:#d96e70;background:#291b25}
+.lager-service-card.is-blocked .lager-service-state{border-color:#dc8488;color:#ffc4c7}
+.lager-service-readiness{padding:14px 16px;border:1px solid #3e786c;border-radius:12px;background:#132e2b;margin:14px 0}
+.lager-service-readiness.is-blocked{border-color:#b4676a;background:#3b252d}
+.lager-service-readiness strong{color:#f4f8fc}
+.lager-service-readiness p{margin:5px 0 0;color:#d2dde6}
+.lager-service-history{display:grid;gap:10px;margin:14px 0}
+.lager-service-event{border:1px solid #496078;padding:12px;border-radius:12px;background:#111e2b;overflow-wrap:anywhere}
+.lager-service-event-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:#ecf7ff}
+.lager-service-event p{margin:7px 0;color:#d3e4ed}
+.lager-service-event small{color:#c1d0dc}
+.lager-service-event button{min-height:44px;margin-top:9px;max-width:100%;white-space:normal;text-align:left}
+.lager-service-inline-check{display:flex;gap:10px;align-items:center;margin:12px 0}
+.lager-service-inline-check input{width:22px;height:22px;flex:0 0 auto}
+.lager-track-blocked{background:#50242d;color:#ffd4d6;border:1px solid #a65a63}
+.lager-service-editor input[type="file"]{display:block;width:100%;min-height:44px;padding:8px 0}
+.lager-service-editor select{max-width:100%;box-sizing:border-box}
+@media(max-width:430px){.lager-service-event-top{display:block}.lager-service-editor .lager-item-form{overflow-wrap:anywhere}}

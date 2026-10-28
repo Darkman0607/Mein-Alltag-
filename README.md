@@ -1,4 +1,4 @@
-# Mein Alltag – Beta V0.13.0 (Lagerhaus L13)
+# Mein Alltag – Beta V0.16.0 (Lagerhaus L16)
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -182,3 +182,12 @@ Die Browser-End-to-End-Prüfung ist in der Testumgebung durch die Chromium-Siche
 - Alles liegt lokal im vorhandenen IndexedDB-Datensatz des Geräts (`items.v1`), ohne geänderte Datenbankversion oder Speicherung auf Servern.
 - Vollständige Historie, Reparaturen, Garantien, Kosten und Belege sind **L16**. Details und dokumentierte Testgrenzen in `UPDATE_L15.txt`.
 - Test `node release-check-l15.mjs && python run-regressions-l15.py`. Der echte lokale Browser-End-to-End-Test ist wegen der Chromium-Administratorrichtlinie blockiert; Android-Praxistest bleibt offen.
+
+## Lagerhaus L16 – Wartung, Reparatur und Garantien (V0.16.0, 28.10.2026)
+- Einträge für Wartung/Reparatur inklusive Datum, Kosten (oder „nicht erfasst“), Belegdatei und Verlauf je Einzelgerät.
+- Gesperrte oder als defekt markierte Geräte sind in den Geräteansichten ausdrücklich „nicht frei verfügbar“. Eine Reparatur hebt eine Sperre nicht automatisch auf.
+- Garantie-Datum und Vorlauf für lokale Hinweise; **keine Android-Push-Nachrichten**.
+- PDF/JPG/PNG/WebP-Belege bis 10 MB als IndexedDB-Blob offline gespeichert; Herunterladen möglich. Interner PDF-Viewer folgt erst in L17.
+- Vorhandene L15-Wartungsdaten und die Geräte-/Lagerkennungen werden übernommen; Datenbank bleibt `mein-alltag-v0`, Schema v1.
+- Prüfergebnis: L16-Logik + 14 historische Regressionstests erfolgreich; Browser-/Android-E2E bleibt offen (lokale Chromium-Navigation durch Administratorrichtlinie blockiert).
+- Hinweise und Abnahmeprotokoll: `UPDATE_L16.txt` und `DOKUMENTATION/bauhaus.docx`.

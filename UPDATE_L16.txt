@@ -1,0 +1,27 @@
+Mein Alltag – Lagerhaus L16 / V0.16.0 – Wartung, Reparatur, Garantien
+Stand: 28.10.2026
+
+NEU
+- Chronologische, pro Einzelgerät getrennte Historie; die letzte L15-Wartung wird als historische Wartung angezeigt, nicht durch fingierte frühere Einträge ergänzt.
+- Neue Wartungen erhalten Kostenangaben und optional einen PDF-/JPG-/PNG-/WebP-Beleg (maximal 10 MB, Signatur geprüft).
+- Reparatur mit Datum, Beschreibung, optionalem Betrieb, Kosten und Beleg; gesonderte Gerätesperre nach Bedarf.
+- Einsatzstatus: manuell einsatzbereit/gesperrt. Defekt gekennzeichnete Geräte bleiben unabhängig von der manuellen Freigabe gesperrt.
+- Garantieende nur bei manuell eingegebenem Datum; einstellbarer Vorlauf für In-App-Hinweise, keine Pushbenachrichtigung.
+- Pro Gerät nachvollziehbare Auflistung mit Kosten. Nicht erfasste Kosten bleiben unbekannt und werden nicht als 0 Euro ausgegeben.
+- Belege bleiben lokal im vorhandenen IndexedDB-Store; sie sind als Datei herunterladbar (integrierter PDF-Viewer erst L17).
+- Entfernte Einzelgeräte/Artikel räumen zugehörige Belegdateien bei Bearbeitung über die Artikelverwaltung auf.
+- Keine Änderung von Artikel-/Gerätekennungen, Mengen oder Lagerort-Buchungen durch L16.
+
+TESTERGEBNIS
+- Node release-check-l16.mjs: bestanden (L16-Logik).
+- run-regressions-l16.py: 14 historische Tests erfolgreich; reine Versionsassertions für Testkopien angepasst.
+- node --check der Produktiv-JavaScript-Module: bestanden.
+- Browser-Test vor dem Seitenladen durch net::ERR_BLOCKED_BY_ADMINISTRATOR blockiert (kein bestandener E2E-Test).
+- Android-Touch, Belegdownload, Offline-Update und Online-GitHub-Pages auf Endgerät noch nicht bestätigt.
+- Garantiehinweise sind beim Öffnen der Akten sichtbar, nicht als Systembenachrichtigungen.
+
+GITHUB / VERÖFFENTLICHUNG
+- GitHub-Commit und Quelleprüfung werden im finalen Word-Protokoll ergänzt.
+
+NÄCHSTES GEPLANTES UPDATE
+L17 – PDF-Archiv und Offline-Viewer.
