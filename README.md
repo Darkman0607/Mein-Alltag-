@@ -1,3 +1,15 @@
+# Mein Alltag – Beta V0.16.8 (F06 Sex & Tagebuch)
+
+## Neues Update F06 – 28.10.2026
+
+- Freiwillige vertrauliche Sex-Einträge mit Schutz, Verhütung, optionaler Uhrzeit, Wohlbefinden und Freitext.
+- Freitext-Tagebuch mit Tagesübersicht, Datumsauswahl, Navigation und Tageszähler.
+- Bestehende F05-Symptomfelder und Gesundheitseinträge bleiben unverändert vorhanden.
+- Lokale Speicherung ohne automatische Weitergabe; lokale Datensätze nicht separat verschlüsselt. Manuelles Backup weiterhin passwortgeschützt.
+- Chromium-Mobiltest F06/F05 und 18/18 historische Regressionen PASS; Android- und reale Pages-/PWA-Prüfung offen.
+
+---
+
 # Mein Alltag – Beta V0.16.6 (F04 Periode & Zykluskalender)
 
 ## Neues Update F04 – 28.10.2026

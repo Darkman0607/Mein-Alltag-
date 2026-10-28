@@ -552,3 +552,28 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-observation-tools #healthObservationCount{font-size:12px;line-height:1.4;color:#81556e;margin:8px 0 0}
 .health-observation-tools .health-neutral{min-height:38px;padding:8px 12px}
 @media(max-width:350px){.health-observation-dates{grid-template-columns:1fr}}
+
+/* F06 – Tagebuch-Tagesübersicht / vertrauliche Einträge */
+.health-f06-day{margin:12px 0 20px;padding:15px;border:1px solid #ebc1d1;border-radius:18px;background:linear-gradient(155deg,#fff9fa,#f8e8ef);color:#60364f;min-width:0}
+.health-f06-day-title{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.health-f06-day-title h3{font:700 19px/1.25 Georgia,serif;margin:4px 0 9px}
+.health-f06-eyebrow{font-size:11px;font-weight:700;color:#a45176;letter-spacing:.05em}
+.health-f06-count{background:white;border:1px solid #ead2dd;border-radius:18px;padding:6px 9px;white-space:nowrap;font-size:11px;font-weight:700}
+.health-f06-date-controls{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:end;gap:8px;margin:10px 0}
+.health-f06-date-controls label{display:block;min-width:0;font-size:12px;font-weight:650}
+.health-f06-date-controls input{display:block;min-width:0;width:100%;margin-top:5px;padding:8px;border-radius:11px;background:#fff;color:#60364f;border:1px solid #deb9c9;min-height:42px;font-size:14px}
+.health-f06-date-controls button{min-height:42px;min-width:40px;padding:0;font-size:23px}
+.health-f06-date-controls button:disabled{opacity:.4;cursor:not-allowed}
+.health-f06-day-buttons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.health-f06-day-buttons button{min-height:44px}
+.health-f06-day-buttons .health-save{flex:1 1 175px}
+.health-f06-day-buttons .health-neutral{flex:0 0 auto}
+.health-f06-day-tip{font-size:12px;color:#83546b;margin:10px 0 0;line-height:1.5}
+.health-f06-day .health-entries{margin-top:8px}
+@media(max-width:360px){.health-f06-day{padding:11px}.health-f06-date-controls{gap:5px}}
+.health-f06-day-items{display:grid;gap:7px;margin:10px 0}
+.health-f06-day-item{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#fff;border:1px solid #f0d5df;border-radius:11px;padding:9px;min-width:0}
+.health-f06-day-item>div{min-width:0;display:grid;gap:3px}
+.health-f06-day-item b{font-size:13px;overflow-wrap:anywhere}
+.health-f06-day-item small{font-size:11px;color:#7b5269;overflow-wrap:anywhere;white-space:pre-wrap}
+.health-f06-day-item .health-neutral{flex-shrink:0;min-height:39px}
