@@ -1,4 +1,12 @@
-# Mein Alltag – Beta V0.16.0 (Lagerhaus L16)
+# Mein Alltag – Beta V0.16.6 (F04 Periode & Zykluskalender)
+
+## Neues Update F04 – 28.10.2026
+- Periode: Beginn, weiterer Blutungstag, Ende, Schmierblutung, Stärke, Schmerzen (0–10) und Notizen.
+- Periodenkalender mit Monatsnavigation, Tagesauswahl, Markierungen und jüngsten dokumentierten Perioden.
+- Zykluslänge frei einstellbar (18–60 Tage), historische Abstände, nächster Beginn nur als Schätzung.
+- Daten bleiben im vorhandenen IndexedDB-Store; keine medizinische Diagnose oder sichere Verhütungsmethode.
+- 18/18 alte Node-Regressionstests, verschlüsselter Backup-Roundtrip und mobiler Chromium-Komponententest bestanden.
+- GitHub-main-Abgleich: 6/6 App-Dateien zum Release-Commit `18fee2dc6921ae1f9defd293d72701c924eb02b9` bytegleich. Die öffentliche GitHub-Pages-Version und ein echter Android-Gerätetest sind noch offen.
 
 Das erste funktionsfähige Grundgerüst (G01 / V0) mit fünf klar getrennten Bereichen:
 1. Lagerhaus
@@ -29,7 +37,7 @@ Online-Adresse nach erfolgreicher Veröffentlichung:
 Die technische Testliste steht in `TESTS.md` und im separat mitgelieferten Word-Dokument. Browser- und Android-Gerätetests müssen vor der Freigabe auf dem jeweiligen Gerät überprüft werden.
 
 ## Datenschutz
-Persönliche Daten werden nur im lokalen Browserprofil per IndexedDB gespeichert. Es gibt derzeit **keine Verschlüsselung, PIN, Datensicherung oder Synchronisierung**. Insbesondere sensible Gesundheitsdaten sollten erst nach Implementierung eines passenden Schutzkonzepts eingetragen werden. App deinstallieren oder Browserdaten löschen kann lokale Daten entfernen.
+Persönliche Daten werden lokal im Browserprofil per IndexedDB gespeichert. **Eine verschlüsselte manuelle Gesamtsicherung (AES-GCM, passwortgeschützt) ist vorhanden**, aber die laufenden Gesundheitsdaten im Browser sind weiterhin nicht separat verschlüsselt und es gibt noch keine eigene App-PIN oder geräteübergreifende Synchronisierung. Ein geschütztes Gerät und regelmäßige Sicherungen sind wichtig. App-Deinstallation oder Löschen von Browserdaten kann lokale Daten entfernen.
 
 ## Installationshilfe V0.0.2
 - Native Chrome-Installation, soweit `beforeinstallprompt` vom Browser bereitgestellt wird, über **App installieren** auslösbar.

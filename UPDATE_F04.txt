@@ -1,0 +1,24 @@
+MEIN ALLTAG – F04 V0.16.6 – PERIODE & ZYKLUSKALENDER
+Stand: 28.10.2026
+
+UMGESETZT:
+- Beginn, weiterer Tag, Ende und Schmierblutung, Blutungsstärke und Schmerz 0–10 als datierte, änderbare Einträge.
+- Periodenkalender mit Monatsnavigation, Tagesauswahl und Tages-Schnellerfassung.
+- Jüngste fünf Perioden; Dauer nur bei dokumentiertem Enddatum.
+- Einstellbare übliche Zykluslänge und historische Zyklusabstände; nächster Periodenbeginn nur als Schätzung.
+- Änderungen/Löschungen aktualisieren den errechneten letzten Periodenbeginn; bestehende Datenbank bleibt erhalten.
+- Version 0.16.6 und Service-Worker-Cache aktualisiert; Lagerhaus-Version in der Überschrift vereinheitlicht.
+
+TESTS:
+PASS Chromium 390px: F04-Erfassung, Kalender, Schätzung, Änderung/Löschung, F02/F03 aufrufbar.
+PASS 18/18 historische Node-Regressionschecks.
+PASS AES-GCM Backup/Restore-Roundtrip.
+GitHub main: 6/6 App-Dateien mit ZIP bytegleich, Code-Commit 18fee2dc6921ae1f9defd293d72701c924eb02b9.
+
+OFFEN:
+Ein echter Android-/GitHub-Pages-Praxistest, insbesondere Offline/PWA und Live-Auslieferung, ist hier nicht möglich gewesen.
+Gesundheitsdaten im lokalen Browser sind nicht gesondert verschlüsselt; nur exportierte Sicherungsdateien werden verschlüsselt.
+Die Lernschule ist weiterhin Planung, kein Teil von F04.
+
+WORD:
+F04_Checkliste.docx – F04 abgehakt; übrige F05–F08 Punkte bleiben offen.

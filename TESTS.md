@@ -1,3 +1,20 @@
+# F04 – Abnahme V0.16.6 (28.10.2026)
+
+- [x] Chromium mobil 390px: Blutungsbeginn, -ende, Schmierblutung, Stärke und Schmerz dokumentierbar.
+- [x] Periodenkalender, Monatsmarkierungen, Periodenverlauf, Zykluslänge, Start-zu-Start-Abstände und Prognose getestet.
+- [x] Vorhersage ausdrücklich als unsicher gekennzeichnet; zukünftige Blutungseinträge abgewiesen.
+- [x] Bearbeiten, Löschen, erneutes Öffnen über den Modell-Speicheradapter; F02- und F03-Oberflächen erreichbar.
+- [x] Verschlüsselter Gesamtsicherungs-Roundtrip (inkl. F01-Vorgang) bestanden.
+- [x] 18/18 historische Node-Regressionstests bestanden; aktualisierte Version und Offline-Cache geprüft.
+- [x] GitHub main: 6/6 geänderte App-Dateien bytegleich zum ZIP; Code-Commit `18fee2dc6921ae1f9defd293d72701c924eb02b9`.
+- [ ] Vollständiger lokaler HTTP/PWA-/IndexedDB-Browsertest: Testumgebung blockiert Loopback und Dateizugriff.
+- [ ] Reales Vivo-/Android-Chrome-Gerät: Installation, Offline-Start, Anzeige V0.16.6 und Datenpersistenz prüfen.
+- [ ] Öffentliche GitHub Pages-Auslieferung der Versionsdatei unabhängig verifizieren.
+
+Hinweis: Der Chromium-Komponententest verwendet eine fiktive Speicheranbindung und Testdaten, keine privaten Gesundheitsdaten. Getrennt vom echten Gerätetest bewerten.
+
+---
+
 # Testplan V0.0.1
 
 ## Automatisiert überprüfbar
