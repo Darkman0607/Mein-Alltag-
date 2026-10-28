@@ -577,3 +577,15 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-f06-day-item b{font-size:13px;overflow-wrap:anywhere}
 .health-f06-day-item small{font-size:11px;color:#7b5269;overflow-wrap:anywhere;white-space:pre-wrap}
 .health-f06-day-item .health-neutral{flex-shrink:0;min-height:39px}
+
+/* F07 – zentraler Filter, große Touchflächen und klare Zustände */
+.health-f07-tools{display:grid;gap:10px;margin:14px 0 18px;padding:15px;background:linear-gradient(155deg,#fff9fb,#f9e6ef);border:1px solid #e7c0d1;border-radius:18px;color:#60344e;min-width:0}
+.health-f07-tools-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.health-f07-tools-head strong{font:700 18px Georgia,serif}
+.health-f07-tools-head span{border-radius:50px;padding:6px 9px;background:#fff;border:1px solid #e8cfdb;font-size:12px;font-weight:650}
+.health-f07-tools label{display:grid;gap:5px;font-size:12px;font-weight:650;min-width:0}
+.health-f07-tools input,.health-f07-tools select{display:block;width:100%;min-width:0;min-height:46px;padding:10px;border:1px solid #dbb5c6;background:#fff;border-radius:11px;font:inherit;font-size:15px;color:#60344e}
+.health-f07-dates{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.health-f07-tools .health-neutral{min-height:46px;font-size:14px;font-weight:650}
+.health-app .health-entry-actions button,.health-app .health-quick-actions button{min-height:44px;touch-action:manipulation}
+@media(max-width:360px){.health-f07-dates{grid-template-columns:1fr}.health-f07-tools{padding:11px}}

@@ -1,3 +1,13 @@
+# Mein Alltag – F07 V0.16.9 (28.10.2026)
+
+- Zentrale Liste aller Gesundheitsaufzeichnungen, Bereichsfilter, Datumsfilter (Von/Bis), Textsuche, Zurücksetzen und Live-Trefferzahl.
+- Untersuchungen und Notizen weiterhin direkt über die Startseite erreichbar; Bearbeiten/Löschen auch über Gesamtübersicht möglich.
+- Beim Navigieren, Zurückgehen, Wechseln der Bereiche und Verlassen von geänderten Formularen wird vor Datenverlust nachgefragt; Schutz auch für Zyklus- und Schwangerschaftsformular.
+- Keine Datenmigration oder Änderung der Datenbank.
+- Hinweis: Lokale Daten weiterhin nicht zusätzlich verschlüsselt; nur der manuelle Backup-Export ist verschlüsselt.
+
+---
+
 # Mein Alltag – Beta V0.16.8 (F06 Sex & Tagebuch)
 
 ## Neues Update F06 – 28.10.2026

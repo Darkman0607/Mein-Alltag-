@@ -1,5 +1,5 @@
 /* Mein Alltag – offline shell cache; increment version when updating assets. */
-const CACHE='mein-alltag-v0-16-8';
+const CACHE='mein-alltag-v0-16-9';
 const ASSETS=[
  './','./index.html','./version.json','./manifest.webmanifest','./assets/styles.css','./assets/app.js','./assets/database.js','./assets/backup.js',
  './assets/icons/app-192.png','./assets/icons/app-512.png',

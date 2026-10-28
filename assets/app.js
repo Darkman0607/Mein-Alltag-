@@ -8,10 +8,10 @@ import frauengesundheit from '../modules/frauengesundheit.js';
 import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
 import hausservice from '../modules/hausservice.js';
-import {renderHealth,mountHealth} from '../modules/frauengesundheit-ui.js';
+import {renderHealth,mountHealth,confirmHealthExit} from '../modules/frauengesundheit-ui.js';
 import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapshot,validateSnapshot} from './backup.js';
 
-export const APP_VERSION='0.16.8';
+export const APP_VERSION='0.16.9';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -192,7 +192,13 @@ export function render(){
 backButton.addEventListener('click',()=>{if(history.length>1)history.back();else navigate('home');});
 document.getElementById('settingsButton').addEventListener('click',()=>navigate('more'));
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));
-window.addEventListener('hashchange',render);
+let renderedHash=location.hash;
+window.addEventListener('hashchange',()=>{
+ if(renderedHash.startsWith('#/module/frauengesundheit') && location.hash!==renderedHash && !confirmHealthExit()){
+  history.replaceState(null,'',renderedHash);return;
+ }
+ renderedHash=location.hash;render();
+});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('#lagerShelfPanel[open]')&&!backButton.hidden){if(history.length>1)history.back();else navigate('home');}});
 if(!location.hash)history.replaceState(null,'','#/home');
 render();
