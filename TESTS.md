@@ -179,3 +179,11 @@ Automatisierte Testläufe: `node release-check.mjs`, `node release-check-l05.mjs
 - [ ] `python browser-test-l16.py`: Chromium verweigert localhost mit `ERR_BLOCKED_BY_ADMINISTRATOR` – vor App-Laden abgebrochen.
 - [ ] Echter Android-Praxistest: Geräte-Status, neue Reparatur, Belegimport/-download, Offline-Neustart, Cache-/Versionswechsel und Datenpersistenz.
 - [ ] Bestätigung, dass GitHub-Pages-PWA auf dem echten Endgerät V0.16.0 anzeigt.
+
+## L16.1 – Bodenlager und Stellplätze
+
+- `node release-check-l16-1.mjs`: PASS – alte Raum-/Regalkennungen, Geräte-ID und Bestand, `P-`-Kennungen, Lagerort-Auswahl, SVG-Projektion, 6×4-Kollisionen, Platzfindung, 90°-Drehung, Artikelschutz, Standortbuchung ohne Mengenerhöhung, Schutz vor Löschen belegter Zonen, Offline-Assetliste.
+- `python run-regressions-l16-1.py`: PASS – 15 frühere Regressionstestmodule (nur Versionslabels in temporären Testkopien angepasst).
+- `node --check` für alle produktiven Module, Assets und SW: PASS.
+- Browser-E2E: BLOCKIERT – `net::ERR_BLOCKED_BY_ADMINISTRATOR`, sogar für lokale `file:`- und `data:`-URLs; **nicht als bestanden gewertet**.
+- Android-Praxistest: OFFEN – tatsächliches Tippen/Ziehen/Drehen/Neuladen und IndexedDB-Persistenz auf dem Nutzergerät sind vor dem produktiven Einsatz zu bestätigen.

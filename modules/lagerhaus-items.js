@@ -14,6 +14,7 @@ export function locationChoices(rooms=[],areas=[]){
   const area=areas.find(a=>a.id===r.areaId);
   const path=[area?.name||'Lagerbereich',r.name];
   choices.push({id:r.id,kind:'room',label:path.join(' / ')});
+  for(const spot of r.floorObjects||[]){if(spot.kind==='zone')choices.push({id:spot.id,kind:'floor',label:[...path,'Boden: '+spot.name].join(' / ')});}
   for(const f of r.furniture||[]){
    choices.push({id:f.id,kind:'furniture',label:[...path,f.name].join(' / ')});
    for(const c of f.compartments||[])choices.push({id:c.id,kind:'compartment',label:[...path,f.name,c.name].join(' / ')});
@@ -85,7 +86,8 @@ export function deleteItem(items,id){
 export function locationsInNode(kind,object){
  if(kind==='compartment')return [object.id];
  if(kind==='furniture')return [object.id,...(object.compartments||[]).map(c=>c.id)];
- if(kind==='room')return [object.id,...(object.furniture||[]).flatMap(f=>locationsInNode('furniture',f))];
+ if(kind==='floor')return [object.id];
+ if(kind==='room')return [object.id,...(object.furniture||[]).flatMap(f=>locationsInNode('furniture',f)),...(object.floorObjects||[]).filter(p=>p.kind==='zone').map(p=>p.id)];
  return [];
 }
 export function assertNodeHasNoItems(items,kind,object){

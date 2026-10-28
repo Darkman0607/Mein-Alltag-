@@ -11,6 +11,7 @@ export function findLocation(locationId,rooms=[],areas=[]){
   const area=areas.find(a=>a.id===room.areaId);
   const root=[area?.name||'Lagerbereich',room.name];
   if(room.id===id)return {id,kind:'room',roomId:room.id,furnitureId:'',compartmentId:'',valid:true,label:room.name,path:root.join(' / '),code:room.code||''};
+  for(const spot of room.floorObjects||[]){if(spot.kind==='zone'&&spot.id===id)return {id,kind:'floor',roomId:room.id,furnitureId:'',compartmentId:'',valid:true,label:spot.name,path:[...root,'Boden: '+spot.name].join(' / '),code:spot.code||''};}
   for(const furniture of room.furniture||[]){
    const shelf=[...root,furniture.name];
    if(furniture.id===id)return {id,kind:'furniture',roomId:room.id,furnitureId:furniture.id,compartmentId:'',valid:true,label:furniture.name,path:shelf.join(' / '),code:furniture.code||''};

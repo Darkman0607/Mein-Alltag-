@@ -366,3 +366,29 @@ dialog.lager-shelf-modal::backdrop{background:rgba(1,6,12,.91)}
 .lager-service-editor input[type="file"]{display:block;width:100%;min-height:44px;padding:8px 0}
 .lager-service-editor select{max-width:100%;box-sizing:border-box}
 @media(max-width:430px){.lager-service-event-top{display:block}.lager-service-editor .lager-item-form{overflow-wrap:anywhere}}
+
+/* L16.1 – reachable floor inventory and large touch targets */
+.lager-floor-chooser{margin:18px 0;padding:17px;border:1px solid #738e8f88;border-radius:18px;background:linear-gradient(145deg,#1d3441,#13242f)}
+.lager-floor-chooser h2{font-size:18px;color:#ffda96;margin:0 0 8px}
+.lager-floor-form{display:grid;gap:10px;margin:12px 0 8px}
+.lager-floor-form label,.lager-floor-manage label{font-size:13px;display:grid;gap:6px;color:#dce7ed;font-weight:650}
+.lager-floor-form input,.lager-floor-form select,.lager-floor-manage input{min-width:0;width:100%;min-height:48px;padding:11px;border:1px solid #587386;border-radius:11px;background:#0c1b26;color:#f5f9fb;font-size:15px}
+.lager-floor-form .primary-button{min-height:50px}
+.lager-floor-chips{display:flex;flex-wrap:wrap;gap:7px;padding-top:8px}
+.lager-floor-chips button{min-height:46px;text-align:left}
+.lager-floor-chips small{font-size:10px;color:#b2c2ce;margin-left:3px}
+.lager-floor-dialog{position:fixed;inset:0;margin:auto;width:min(94vw,550px);max-width:550px;max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;border:1px solid #9b8861;border-radius:19px;padding:16px;background:#142631;color:#eff4f8;box-shadow:0 20px 80px #000a}
+.lager-floor-dialog::backdrop{background:rgba(0,8,14,.82)}
+.lager-floor-dialog-head{display:flex;justify-content:space-between;gap:12px;align-items:start;border-bottom:1px solid #6e869044;padding-bottom:12px}
+.lager-floor-dialog-head h2{margin:6px 0;font-size:20px}
+.lager-floor-dialog-head p,.lager-floor-dialog .lager-hint{font-size:12px;color:#c2d0db}
+.lager-floor-dialog-head button{min-height:48px;flex:0 0 auto}
+.lager-floor-detail{padding:12px 0;display:grid;gap:9px}
+.lager-floor-detail h3{margin:2px 0 0;font-size:16px}
+.lager-floor-detail>a{display:block;text-align:center;min-height:48px;padding:12px}
+.lager-floor-manage{border-top:1px solid #6e869044;padding-top:13px;display:grid;gap:11px}
+.lager-floor-manage>.secondary-button{min-height:46px}
+.lager-floor-manage .lager-nudge button{min-height:51px}
+.room-floor-object{cursor:grab;touch-action:none}
+.room-floor-object:focus-visible polygon{stroke:#f7d281;stroke-width:3}
+@media(max-width:370px){.lager-floor-dialog{width:97vw;padding:10px}.lager-floor-dialog-head{flex-wrap:wrap}}

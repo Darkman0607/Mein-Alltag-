@@ -191,3 +191,13 @@ Die Browser-End-to-End-Prüfung ist in der Testumgebung durch die Chromium-Siche
 - Vorhandene L15-Wartungsdaten und die Geräte-/Lagerkennungen werden übernommen; Datenbank bleibt `mein-alltag-v0`, Schema v1.
 - Prüfergebnis: L16-Logik + 14 historische Regressionstests erfolgreich; Browser-/Android-E2E bleibt offen (lokale Chromium-Navigation durch Administratorrichtlinie blockiert).
 - Hinweise und Abnahmeprotokoll: `UPDATE_L16.txt` und `DOKUMENTATION/bauhaus.docx`.
+
+## L16.1 – Bodenlager & freie 3D-Objekte (Beta V0.16.1, 28.10.2026)
+
+- Im Raum können nun **Bodenobjekte** (Rasenmäher, Motorsäge, Heckenschere, Kübel, Kiste/Schachtel, Sonstiges) sowie **Bodenstellplätze** für mehrere Artikel angelegt werden. Die Symbole bestehen aus schematischen SVG-3D-Körpern mit gerätespezifischen Details.
+- Bodenobjekte sind mit dem **bestehenden Artikel am Raumlagerort** verknüpft; sie erzeugen keinen zweiten Artikel und keine zusätzliche Menge. Für fehlende Artikel zuerst „Artikel erfassen“ wählen. Artikel-IDs und Geräte-/Serviceakten bleiben unverändert.
+- Mehrfach belegbare Bodenstellplätze bekommen einen **eigenen Lagerort `P-...`** und sind in der Artikelverwaltung auswählbar. Das Umbuchen aus dem Raum auf einen Bodenstellplatz erfolgt über eine transaktionale Lagerbuchung; gekennzeichnete Einzelgeräte/Gebinde unterliegen weiter dem bestehenden Schutz gegen generische Umbuchungen.
+- 3D-Objekte können per Touch/Maus mit Snap-to-Grid gezogen oder über große Pfeiltasten bewegt, mit dem 90°-Button gedreht, angetippt und auf Kollisionen mit Möbeln und anderen Bodenobjekten geprüft werden. Die dargestellten Maße bleiben schematisch und sind **nicht maßstabsgetreu**.
+- Bodenstellplätze mit Bestand können nicht gelöscht werden. Das Entfernen eines reinen 3D-Artikelsymbols löscht keine Artikel oder Bestände. Alte Raumsätze werden verlustfrei um ein leeres `floorObjects`-Feld ergänzt.
+- Die Datenbank bleibt `mein-alltag-v0`, Version 1; der Offline-Cache heißt `mein-alltag-v0-16-1` und enthält `modules/lagerhaus-floor.js`.
+- **Prüfstatus:** Neuer L16.1-Logiktest und 15 historische Node-Regressionstests bestanden. 25/25 produktive JS-Dateien syntaktisch geprüft. Chromium- und echte Android-/Touch-/IndexedDB-Praxistests **nicht bestanden gemeldet**, weil Chromium alle lokalen Testseiten per Admin-Richtlinie blockiert und kein Zugriff auf das persönliche Android-Gerät besteht.

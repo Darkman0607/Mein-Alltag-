@@ -10,7 +10,7 @@ function resultLine(row){
  const loc=row.location;
  return `<article class="lager-l14-card"><div class="lager-l14-itemhead"><span class="lager-identifier">${esc(row.itemCode)}</span><strong>${esc(row.itemName)}</strong><b>${esc(fmt(row.quantity))} ${esc(row.unit)}</b></div>
  <div class="lager-l14-path"><span aria-hidden="true">📍</span><span>${esc(loc.path)}</span></div>
- ${row.href?`<a class="lager-l14-cta" href="${esc(row.href)}" aria-label="${esc(row.itemName)} im 3D-Lager anzeigen: ${esc(loc.path)}">${loc.kind==='compartment'?'Fach':loc.kind==='furniture'?'Regal':'Raum'} im 3D-Lager anzeigen <span aria-hidden="true">›</span></a>`:`<p class="lager-l14-notfound">${loc.kind==='missing'?'⚠️ Lagerort nicht vorhanden – bitte Artikelzuordnung prüfen.':'Noch keinem Lagerraum zugeordnet.'}</p>`}</article>`;
+ ${row.href?`<a class="lager-l14-cta" href="${esc(row.href)}" aria-label="${esc(row.itemName)} im 3D-Lager anzeigen: ${esc(loc.path)}">${loc.kind==='compartment'?'Fach':loc.kind==='furniture'?'Regal':loc.kind==='floor'?'Bodenstellplatz':'Raum'} im 3D-Lager anzeigen <span aria-hidden="true">›</span></a>`:`<p class="lager-l14-notfound">${loc.kind==='missing'?'⚠️ Lagerort nicht vorhanden – bitte Artikelzuordnung prüfen.':'Noch keinem Lagerraum zugeordnet.'}</p>`}</article>`;
 }
 function treeHtml(){
  const tree=roomTree(rooms,areas,items).filter(room=>!roomFilter||room.id===roomFilter);

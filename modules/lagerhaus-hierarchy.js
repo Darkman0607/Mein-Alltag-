@@ -1,12 +1,12 @@
 /** L04 – pure hierarchy operations: stable codes, legacy migration, lossless moves. */
 export const DEFAULT_AREA_NAME='Allgemeiner Lagerbereich';
 export const COMPARTMENT_KINDS=Object.freeze({fach:'Fach',schublade:'Schublade',box:'Box',platz:'Stellplatz'});
-export const codePattern=/^(B|R|M|F)-\d{4,}$/;
+export const codePattern=/^(B|R|M|F|P)-\d{4,}$/;
 export function allocateCode(prefix,used){
  let n=1; while(used.has(`${prefix}-${String(n).padStart(4,'0')}`))n++;
  const value=`${prefix}-${String(n).padStart(4,'0')}`;used.add(value);return value;
 }
-function allNodes(rooms,areas){return [...areas,...rooms,...rooms.flatMap(r=>r.furniture||[]),...rooms.flatMap(r=>(r.furniture||[]).flatMap(f=>f.compartments||[]))];}
+function allNodes(rooms,areas){return [...areas,...rooms,...rooms.flatMap(r=>r.furniture||[]),...rooms.flatMap(r=>(r.furniture||[]).flatMap(f=>f.compartments||[])),...rooms.flatMap(r=>r.floorObjects||[])];}
 export function ensureHierarchy(rooms,areas,makeId){
  let changed=false;
  if(!areas.length){areas.push({id:makeId(),name:DEFAULT_AREA_NAME,createdAt:new Date().toISOString()});changed=true;}
@@ -33,6 +33,8 @@ export function ensureHierarchy(rooms,areas,makeId){
   if(!areas.some(a=>a.id===r.areaId)){r.areaId=firstArea;changed=true;}
   label(r,'R');
   if(!Array.isArray(r.furniture)){r.furniture=[];changed=true;}
+  if(!Array.isArray(r.floorObjects)){r.floorObjects=[];changed=true;}
+  for(const o of r.floorObjects)label(o,'P');
   for(const f of r.furniture){
    label(f,'M');
    if(!Array.isArray(f.compartments)){f.compartments=[];changed=true;}
