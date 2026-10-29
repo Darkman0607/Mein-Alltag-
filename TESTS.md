@@ -1,3 +1,13 @@
+## LS02 – Lernschule Admin-Zugang V0.19.0
+
+- `node test-ls02-crypto.mjs`: 14 reale WebCrypto-PBKDF2-Prüfungen mit simuliertem IndexedDB-Adapter (kein echter Browser-Datenbank-Test); Setup, Salt/Hash, falsche Passwörter, Anmeldung, Recovery, Rotation und frische JS-Sitzung.
+- `python test-ls02-ui.py`: 390-px-Chromium-Komponententest; WebCrypto-Interface simuliert (da Netzwerk/HTTPS in Testumgebung blockiert), Admin-UI, Login, Reset, Suche und unveränderte Gesundheitsnavigation.
+- `python test-ls01-ui.py`: Regression der sieben Themen und 19 Kapitel, Live-Suche und getrennte Tagebuchdatensätze.
+- Offline-Service-Worker-Asset-Liste, JavaScript-Syntax und Version unabhängig geprüft.
+- **Offen**: echte Android-Installation, echter HTTPS-/Pages-Test, Browser-IndexedDB-End-to-End.
+
+---
+
 # F05 0.16.7 – Prüfprotokoll 28.10.2026
 
 - PASS `python test-f05-ui.py`: mobiler Chromium-F05-Komponententest (390 px) mit fiktiven Angaben, Filtern, Bearbeitung/Löschung, Neustart im lokalen Test-Adapter.
