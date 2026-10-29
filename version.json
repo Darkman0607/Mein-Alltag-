@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.19.0",
-  "build": "LS02 Lernschule Admin-Passwort und Offline-Wiederherstellung",
+  "version": "0.20.0",
+  "build": "LS03 Lernschule Rich-Text-Editor, Unterkapitel und Lektionen",
   "release_date": "2026-10-29"
 }

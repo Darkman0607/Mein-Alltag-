@@ -1,3 +1,15 @@
+# Mein Alltag – Lernschule LS03 / V0.20.0 (29.10.2026)
+
+- **Frauengesundheit → Lernschule**: 7 Themen / 19 Kapitel bleiben erhalten.
+- **Admin-Editor**: Themen, Kapitel, Unterkapitel und Lektionen erstellen/bearbeiten.
+- **Text gestalten**: Kopieren/Einfügen, unterstützte Schriftarten, Größen 12–48 px, Farbe, Emoji, Bilder, Tabellen, Vorschau.
+- **Entwürfe** sind nur mit Anmeldung sichtbar; Veröffentlichung macht die Lektion ohne Admin lesbar.
+- **Sicherheit**: eingefügtes HTML wird gefiltert; lokaler Adminschutz ist kein serverseitiger Zugriffsmechanismus.
+- **Tests**: `python test-ls03-editor.py`; vorherige LS01/LS02-Tests; Einschränkung: echter Android-/Pages-Integrationstest offen.
+- **Checkliste**: `Lernschule_LS03_Mastercheckliste.docx`. Mehr: `UPDATE_LS03.txt`.
+
+---
+
 # Mein Alltag – Lernschule LS02 / V0.19.0 (29.10.2026)
 
 - **Frauengesundheit → Lernschule → 🔐 Admin-Zugang**: Admin-Passwort einmalig einrichten, anmelden und manuell abmelden; kein Inaktivitäts-Timeout. Nach vollständigem Neuladen ist erneute Anmeldung nötig.

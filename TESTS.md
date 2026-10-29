@@ -1,3 +1,12 @@
+## LS03 – Rich-Text-Editor (V0.20.0)
+
+- `python test-ls03-editor.py`: isolierter mobiler Chromium-Test (390 px). Browser-Oberfläche echt; Datenspeicher und Crypto-Adapter simuliert. Prüft Authentifizierung, Erstellung von Thema/Kapitel/Unterkapitel, Lektion, HTML-Paste, Sicherheit, Vorschau, Entwurf, Veröffentlichung, Wiederladen.
+- `python test-ls02-ui.py`, `python test-ls01-ui.py`, `node test-ls02-crypto.mjs`: Regressionen.
+- `node --check`: JavaScript-Syntax.
+- Kein echter HTTPS-/IndexedDB-/Android-End-to-End-Test im Container möglich (HTTP-Navigation blockiert).
+
+---
+
 ## LS02 – Lernschule Admin-Zugang V0.19.0
 
 - `node test-ls02-crypto.mjs`: 14 reale WebCrypto-PBKDF2-Prüfungen mit simuliertem IndexedDB-Adapter (kein echter Browser-Datenbank-Test); Setup, Salt/Hash, falsche Passwörter, Anmeldung, Recovery, Rotation und frische JS-Sitzung.
