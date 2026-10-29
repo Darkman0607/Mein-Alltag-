@@ -1,0 +1,48 @@
+MEIN ALLTAG · UPDATE W01 · APP-VERSION 0.22.0 · 29.10.2026
+
+AUSGANGSVERSION
+V0.21.0 / LS04. Alle bisherigen fünf Module bleiben erhalten.
+
+NEU IM BEREICH PUTZMANAGER
+- Meine Wohnung: Räume einzeln anlegen, öffnen, umbenennen und löschen.
+- Raumart: Badezimmer, Küche, WC, Wohnzimmer, Schlafzimmer, Kinderzimmer,
+  Flur, Abstellraum, Arbeitszimmer und Sonstiges.
+- Optionale Maße (Breite/Länge) und Raumnotizen.
+- Mehrere Zimmerfotos (max. 24 pro Raum) ausschließlich lokal in IndexedDB;
+  Originalfotos werden zur Speicherschonung auf max. 1600 Pixel verkleinert.
+- Einfache schematische 2D-Grundstruktur; Objekte mit stabiler Kennung und
+  neun wählbaren Positionen hinzufügen bzw. entfernen.
+- Keine KI-Erkennung, keine automatischen Foto-zu-3D-Skizzen: erst in W02+.
+- Die Zimmerfotos bleiben auf dem Gerät und sind nicht im öffentlichen Code.
+
+BEDIENUNG
+1. Nach Installation/Aktualisierung: „Putzmanager“ öffnen.
+2. „Raum anlegen“ antippen, Name und Raumart eingeben, speichern.
+3. Optional Fotos hinzufügen, Maße und Objekte erfassen.
+4. Auf „Alle Räume“ wechseln und weitere Zimmer anlegen.
+5. Im Bereich „Mehr“ ein verschlüsseltes Gesamtbackup erstellen.
+
+PRÜFUNGEN
+- JavaScript-Syntax in assets/, modules/ und sw.js geprüft.
+- Mobile Chromium-Simulation (390px) erfolgreich: Erstellen, Umbenennen,
+  Löschen, Fotoimport/Fotolöschen, Objektverwaltung, Wiederöffnen der Ansicht.
+- Frühere Lernschule LS04-UI-Tests bestanden.
+- Frühere Lernschule LS02-WebCrypto-Tests bestanden.
+- Service Worker asset list enthält die drei neuen W01-Dateien.
+- Reale Android-, GitHub-Pages- und Offline-Hardwareprüfungen sind noch offen.
+- Die vorhandenen alten Release-Check-Skripte mit fest verdrahteter Version
+  0.16.0 sind für den neuen Versionsstand nicht geeignet.
+
+WICHTIG ZUR DATENSICHERUNG
+Die Raumdaten liegen ausschließlich lokal auf diesem Gerät. Vor Löschen
+von Browserdaten oder Gerätewechsel eine verschlüsselte Gesamtsicherung
+im Bereich „Mehr“ erstellen. Nicht ins öffentliche GitHub einchecken.
+
+WORD-DOKUMENT
+Wohnungsplan_Checkliste.docx wurde aktualisiert und liegt in diesem ZIP.
+Die Dokumentation markiert die Android-Praxisabnahme ausdrücklich noch offen.
+
+NÄCHSTES UPDATE W02
+Du schickst Fotos von Badezimmer und Küche oder zwei anderen echten Zimmern.
+Nach deiner Bestätigung erstellen wir zwei annähernde Raumskizzen und
+übernehmen sie in den Putzmanager.

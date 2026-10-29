@@ -7,12 +7,13 @@ import {renderLagerService,mountLagerService} from '../modules/lagerhaus-service
 import frauengesundheit from '../modules/frauengesundheit.js';
 import familienplaner from '../modules/familienplaner.js';
 import putzmanager from '../modules/putzmanager.js';
+import {renderPutzmanager,mountPutzmanager} from '../modules/putzmanager-ui.js';
 import hausservice from '../modules/hausservice.js';
 import {renderHealth,mountHealth,confirmHealthExit} from '../modules/frauengesundheit-ui.js';
 import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapshot,validateSnapshot} from './backup.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.21.0';
+export const APP_VERSION='0.22.0';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -124,6 +125,7 @@ function bindView(route){
  if(route.page==='module'){
    if(route.id==='lagerhaus') mountLagerhaus();
    else if(route.id==='frauengesundheit') mountHealth();
+   else if(route.id==='putzmanager') mountPutzmanager();
    else { document.getElementById('saveNote')?.addEventListener('click',()=>saveNote(route.id)); loadNote(route.id); }
  }
  if(route.page==='lagerraum') mountLagerraum(route.roomId,route.shelfId,route.focusId,route.compartmentId);
@@ -287,7 +289,7 @@ export function render(){
  appTitle.textContent=title;appSubtitle.textContent=sub;
  backButton.hidden=route.page==='home';
  document.querySelectorAll('.nav-item').forEach(item=>{const active=item.dataset.route===route.page;item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});
- view.innerHTML=route.page==='home'?renderHome():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():route.id==='frauengesundheit'?renderHealth():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='lagernavigator'?renderLagerNavigator():route.page==='lagerservice'?renderLagerService():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
+ view.innerHTML=route.page==='home'?renderHome():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():route.id==='frauengesundheit'?renderHealth():route.id==='putzmanager'?renderPutzmanager():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='lagernavigator'?renderLagerNavigator():route.page==='lagerservice'?renderLagerService():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
  document.body.classList.toggle('health-mode',route.page==='module'&&route.id==='frauengesundheit');
  view.scrollTop=0;bindView(route);
  document.getElementById('installAction')?.addEventListener('click',requestInstall);

@@ -349,3 +349,12 @@ Unter **Mehr → Verschlüsseltes Gesamtbackup** lassen sich mit Google Identity
 Nach dem Speichern der Google-OAuth-Client-ID wird eine Erfolgs- oder Fehlermeldung unmittelbar unter dem entsprechenden Knopf eingeblendet. Anmeldung, Abmeldung, verschlüsseltes Cloud-/Offline-Backup, Backup-Liste und Wiederherstellung zeigen eine gut lesbare, mobile Toast-Meldung mit Erfolg (grün), Verarbeitung (gold) oder Fehler (rot). Der erfolgreiche Upload wird erst nach Bestätigung durch die Drive-API gemeldet; ein nachfolgender Fehler beim Lesen der Dateiliste löscht diese Bestätigung nicht. Rückmeldung im unteren Backup-Ergebnisfeld bleibt zusätzlich erhalten. Keine Änderung an lokalen IndexedDB-Daten.
 
 Tests: `python test-d02-feedback.py` (Chromium, simulierte Google-API), `python run-regressions-d02.py` (18 historische Node-Checks), `node test-d01-drive.mjs` (Drive API Testsimulation). Echte Google-Drive-Anmeldung/Upload auf Nutzerkonto separat prüfen.
+
+---
+## W01 / V0.22.0 – Meine Wohnung im Putzmanager
+- Raumverwaltung, optionale Maße/Notizen, lokal gespeicherte Fotos und
+  schematische 2D-Objektpositionen im vorhandenen Putzmanager-Modul.
+- Alle echten Zimmerfotos und individuellen Raumdatensätze liegen nur in
+  der lokalen IndexedDB; sie gehören niemals in das öffentliche Repository.
+- W02 verarbeitet zwei vom Nutzer bestätigte Raumvorlagen anhand seiner Fotos.
+- Siehe `UPDATE_W01.txt` und `Wohnungsplan_Checkliste.docx` im Offline-ZIP.

@@ -1,1 +1,1 @@
-export default Object.freeze({id:'putzmanager',name:'Putzmanager',subtitle:'Wohnung & Reinigung',description:'Eigener Bereich für Räume, Reinigungen und den Putzplan.',icon:'putzmanager.png',features:['Räume und Grundriss (später)','Reinigungsübersicht (später)','Putzplan und Lager (später)']});
+export default Object.freeze({id:'putzmanager',name:'Putzmanager',subtitle:'Wohnung & Reinigung',description:'Deine Wohnung – Raum für Raum im Putzmanager.',icon:'putzmanager.png',features:['Meine Wohnung (W01)','Raumskizzen aus Fotos (ab W02)','Putzplan und Lager (später)']});

@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.21.0",
-  "build": "LS04 Lernschule Medien- und Infobausteine mit PDF und Galerie",
+  "version": "0.22.0",
+  "build": "W01 Putzmanager Raumverwaltung, lokale Fotos und 2D-Raumgrundstruktur",
   "release_date": "2026-10-29"
 }
