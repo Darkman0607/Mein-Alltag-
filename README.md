@@ -1,3 +1,13 @@
+# Mein Alltag – LS04 / V0.21.0 (29.10.2026)
+
+- Lernschule: PDF-Anhänge, Einzelbilder/Galerien, Info-/Warn-/Tippkästen, sortierbare Zusatzbausteine und lokale PDF-Vorschau.
+- Bestehende Texte unverändert; neue Medien direkt in der jeweiligen Lektion gespeichert.
+- Getrennter Entwurf schützt nun auch den veröffentlichten Titel und dessen Medien.
+- Weiterhin offen: Wissenstests, Autosave, Lernfortschritt, vollständiger Offline-ZIP-Export der Lernschule, Android-Endtest.
+- Details: `UPDATE_LS04.txt`; Checkliste: `Lernschule_LS04_Mastercheckliste.docx`.
+
+---
+
 # Mein Alltag – Lernschule LS03 / V0.20.0 (29.10.2026)
 
 - **Frauengesundheit → Lernschule**: 7 Themen / 19 Kapitel bleiben erhalten.

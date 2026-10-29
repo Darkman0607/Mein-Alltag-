@@ -1,0 +1,37 @@
+MEIN ALLTAG – LS04 / V0.21.0 – 29.10.2026
+
+NEU IM BEREICH FRAUENGESUNDHEIT → LERNSCHULE
+- Lektionen erhalten einen einfachen, mobilen Bausteinbereich zusätzlich zum Rich-Text-Editor.
+- Drei farbige Infokästen (Information / Tipp / Wichtig) mit Titel und Text.
+- Einzelbilder und Galerien (max. 4 JPG/PNG/WebP je Galerie; 900 KB/Bild).
+- PDF-Dateien direkt in Lektionen speichern (max. 1,5 MB pro PDF; Prüfung von PDF-Dateisignatur).
+- PDF im integrierten Browser-Fenster anzeigen, soweit der Browser die Darstellung unterstützt,
+  oder offline herunterladen.
+- Zusatzbausteine mit Pfeilen nach oben/unten verschieben oder entfernen.
+- Vorschau enthält Rich-Text, Bild-/PDF-Anhänge und Infokästen.
+- Neue strukturierte Daten bleiben im selben Lernschule-Bibliotheksschlüssel gespeichert;
+  alte V0.20.0-Lektionen werden ohne Migration weitergelesen.
+- Korrektur: Bei veröffentlichter Lektion bleibt nun auch der alte Titel mit alten Medien sichtbar,
+  wenn eine unveröffentlichte Bearbeitung manuell als Entwurf gespeichert wird.
+
+SICHERHEIT / GRENZEN
+- Die Dateiformate und Mediengrößen werden geprüft; externe Medien-URLs werden nicht hinzugefügt.
+- Maximal 20 Zusatzbausteine und ca. 6 MB kombinierte Mediendaten pro Lektion.
+- PDF-Unterstützung unterscheidet sich je nach Android-/Chrome-Version.
+- Es gibt noch kein echtes automatisches Speichern und keine Quiz-, Lernfortschritts- oder
+  vollständige ZIP-Backup-Funktion der Lernschule. Die letzten Backup-Entscheidungen bleiben offen.
+- Die App speichert Inhalte ausschließlich auf deinem Gerät: vor Löschen von Browserdaten
+  zunächst ein vollständiges Backup der gesamten App anlegen.
+- Eingefügte medizinische Texte sind nicht automatisch medizinisch geprüft.
+
+PRÜFUNGEN
+- test-ls04-blocks.py: Chromium mobil 390px, Admin, Datei-Signatur, PDF, Galerie, Info,
+  Reihenfolge, Vorschau, Veröffentlichen, getrennten Entwurf, simulierten Datenspeicher.
+- test-ls03-editor.py, test-ls02-ui.py, test-ls01-ui.py: Regressionen bestanden.
+- test-ls02-crypto.mjs: 14 echte PBKDF2/WebCrypto-Checks, IndexedDB simuliert.
+- node --check: JavaScript-Syntax.
+- Reale Android-/GitHub-Pages- und echte Browser-IndexedDB-Endtests noch nicht durchgeführt.
+
+ENTHALTEN
+- Volle App mit bisherigen 5 Modulen, aktualisierter Word-Checkliste
+  „Lernschule_LS04_Mastercheckliste.docx“, Testcode und Release-Hinweisen.

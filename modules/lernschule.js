@@ -1,4 +1,4 @@
-/** Lernschule LS03 – geschützter Rich-Text-Editor und Lesebibliothek und lokaler, sitzungsgebundener Admin-Zugang.
+/** Lernschule LS04 – Rich-Text-Lektionen mit geordneten Medien- und Infobausteinen und Adminzugang.
  * Nur Lernschul-Admin-Einstellungen werden getrennt im vorhandenen IDB-Store gespeichert.
  * Ein lokaler Passwortschutz kann bei Manipulation des Geräts/Browsers umgangen werden.
  */
@@ -28,7 +28,11 @@ export function validateLearningLibrary(data){
    if(!c||typeof c.id!=='string'||typeof c.title!=='string'||!Array.isArray(c.sections))throw new Error('Ungültiges Lernkapitel.');
    for(const section of c.sections){
     if(!section||typeof section.id!=='string'||typeof section.title!=='string'||!Array.isArray(section.lessons))throw new Error('Ungültiges Unterkapitel.');
-    for(const lesson of section.lessons)if(!lesson||typeof lesson.id!=='string'||typeof lesson.title!=='string'||typeof lesson.html!=='string'||!['draft','published'].includes(lesson.status))throw new Error('Ungültige Lektion.');
+    for(const lesson of section.lessons){
+     if(!lesson||typeof lesson.id!=='string'||typeof lesson.title!=='string'||typeof lesson.html!=='string'||!['draft','published'].includes(lesson.status))throw new Error('Ungültige Lektion.');
+     validateLessonBlocks(lesson.blocks||[]);
+     if(lesson.draftBlocks!==undefined)validateLessonBlocks(lesson.draftBlocks);
+    }
    }
   }
  }
@@ -159,6 +163,69 @@ function sanitizeHtml(input){
  const wrap=document.createElement('div');for(const child of [...tpl.content.childNodes])clean(child,wrap);
  return wrap.innerHTML;
 }
+// LS04: zusätzliche Lektionen-Bausteine getrennt von bestehendem HTML ablegen.
+// PDF-/Bild-Daten müssen lokal als geprüfte data:-URL vorliegen. Nie Fremdlinks rendern.
+const PDF_PREFIX='data:application/pdf;base64,';
+const IMAGE_PATTERN=/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/;
+const PDF_PATTERN=/^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
+const NOTE_STYLES=['info','tip','warning'];
+function validateLessonBlocks(blocks){
+ if(!Array.isArray(blocks)||blocks.length>20)throw new Error('Maximal 20 zusätzliche Bausteine pro Lektion.');
+ let total=0;
+ for(const b of blocks){
+  if(!b||typeof b.id!=='string'||b.id.length>100||typeof b.type!=='string')throw new Error('Ungültiger Lektionen-Baustein.');
+  if(b.type==='note'){
+   if(typeof b.title!=='string'||b.title.length>100||typeof b.body!=='string'||b.body.length>4000||!NOTE_STYLES.includes(b.style))throw new Error('Ungültiger Infokasten.');
+  }else if(b.type==='image'||b.type==='gallery'){
+   const images=b.type==='image'?[{data:b.data,name:b.name}]:b.images;
+   if(!Array.isArray(images)||!images.length||images.length>4)throw new Error('Ungültige Bildergalerie.');
+   for(const img of images){if(!img||!IMAGE_PATTERN.test(img.data||'')||img.data.length>1250000||typeof img.name!=='string'||img.name.length>140)throw new Error('Unzulässige Bilddatei.');total+=img.data.length;}
+  }else if(b.type==='pdf'){
+   if(!PDF_PATTERN.test(b.data||'')||b.data.length>2100000||typeof b.name!=='string'||b.name.length>140)throw new Error('Ungültiger PDF-Anhang.');total+=b.data.length;
+  }else throw new Error('Unbekannter Bausteintyp.');
+ }
+ if(total>8500000)throw new Error('Die Medien dieser Lektion sind zu groß (maximal etwa 6 MB Dateien).');
+ return blocks;
+}
+function renderLessonBlocks(blocks){
+ if(!Array.isArray(blocks))return '';
+ return blocks.map(b=>{
+  if(b.type==='note')return `<aside class="ls-content-note ls-note-${escapeHTML(b.style)}"><strong>${escapeHTML(b.title)}</strong><p>${escapeHTML(b.body).replaceAll('\n','<br>')}</p></aside>`;
+  if(b.type==='image'||b.type==='gallery'){
+   const list=b.type==='image'?[{data:b.data,name:b.name}]:b.images;
+   return `<div class="ls-content-gallery">${list.filter(img=>IMAGE_PATTERN.test(img.data||'')).map(img=>`<figure><img loading="lazy" src="${img.data}" alt="${escapeHTML(img.name)}"><figcaption>${escapeHTML(img.name)}</figcaption></figure>`).join('')}</div>`;
+  }
+  if(b.type==='pdf')return `<div class="ls-content-pdf"><span aria-hidden="true">📄</span><div><strong>${escapeHTML(b.name)}</strong><small>PDF · lokal in dieser Lektion gespeichert</small></div><button type="button" data-ls-open-pdf="${escapeHTML(b.id)}">Ansehen</button><button type="button" data-ls-download-pdf="${escapeHTML(b.id)}">Speichern</button><div class="ls-pdf-view" data-ls-pdf-view="${escapeHTML(b.id)}" hidden></div></div>`;
+  return '';
+ }).join('');
+}
+function parseDataFile(base64){
+ const comma=base64.indexOf(','),binary=atob(base64.slice(comma+1)),bytes=new Uint8Array(binary.length);
+ for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+ return new Blob([bytes],{type:base64.startsWith(PDF_PREFIX)?'application/pdf':'application/octet-stream'});
+}
+function bindPdfButtons(root,blocks){
+ const byId=new Map((blocks||[]).filter(b=>b.type==='pdf').map(b=>[b.id,b]));
+ root.querySelectorAll('[data-ls-open-pdf],[data-ls-download-pdf]').forEach(button=>button.addEventListener('click',()=>{
+  const download=button.hasAttribute('data-ls-download-pdf'),id=button.dataset.lsOpenPdf||button.dataset.lsDownloadPdf,block=byId.get(id);
+  if(!block||!PDF_PATTERN.test(block.data))return;
+  if(download){
+   const url=URL.createObjectURL(parseDataFile(block.data));
+   const a=document.createElement('a');a.href=url;a.download=block.name.endsWith('.pdf')?block.name:block.name+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);return;
+  }
+  const slot=root.querySelector(`[data-ls-pdf-view="${CSS.escape(id)}"]`);
+  if(!slot)return;
+  if(!slot.hidden){
+   if(slot.dataset.objectUrl)URL.revokeObjectURL(slot.dataset.objectUrl);
+   slot.removeAttribute('data-object-url');slot.innerHTML='';slot.hidden=true;return;
+  }
+  const url=URL.createObjectURL(parseDataFile(block.data));slot.dataset.objectUrl=url;
+  slot.hidden=false;slot.innerHTML='';
+  const iframe=document.createElement('iframe');iframe.title='PDF: '+block.name;iframe.src=url;iframe.loading='lazy';slot.appendChild(iframe);
+  const fallback=document.createElement('p');fallback.textContent='Falls dein Browser keine PDF-Vorschau unterstützt: „Speichern“ benutzen.';slot.appendChild(fallback);
+  // Blob-URLs nicht sofort freigeben: die PDF-Vorschau muss sie bis zum Neuladen lesen können.
+ }));
+}
 function makeId(){return typeof crypto?.randomUUID==='function'?crypto.randomUUID():randomHex(16);}
 function docCopy(){return structuredClone(library);}
 async function saveLibrary(next){
@@ -190,7 +257,7 @@ function renderLessonEditor(){
  if(!adminSession||editTarget?.kind!=='lesson')return '';
  const existing=editTarget.id?sectionById()?.lessons.find(l=>l.id===editTarget.id):null;
  const html=existing?.draftHtml??existing?.html??'';
- return `<section class="ls-workspace ls-lesson-workspace" id="lsWorkspace"><h3>✍️ ${existing?'Lektion bearbeiten':'Neue Lektion'}</h3><p>Texte einfügen, markieren und über die Werkzeugleiste gestalten. Ein Entwurf ist nur für den Admin sichtbar.</p><form id="lsLessonForm"><label>Titel der Lektion<input type="text" maxlength="140" required name="title" value="${escapeHTML(existing?.title||'')}"></label><div class="ls-editor-toolbar" role="toolbar" aria-label="Text formatieren"><button type="button" data-ls-cmd="bold" title="Fett"><b>B</b></button><button type="button" data-ls-cmd="italic" title="Kursiv"><i>I</i></button><button type="button" data-ls-cmd="underline" title="Unterstrichen"><u>U</u></button><button type="button" data-ls-cmd="insertUnorderedList" title="Liste">☷</button><button type="button" data-ls-cmd="formatBlock" data-ls-value="h3" title="Überschrift">H</button><button type="button" data-ls-cmd="formatBlock" data-ls-value="p" title="Absatz">¶</button><label>Schriftart<select id="lsFont"><option value="">Schrift</option>${FONT_LABELS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label><label>Größe<select id="lsFontSize">${[12,14,16,18,20,24,28,32,36,40,48].map(n=>`<option value="${n}" ${n===16?'selected':''}>${n} px</option>`).join('')}</select></label><label>Textfarbe<input type="color" id="lsTextColor" value="#683250" aria-label="Textfarbe"></label><label>Markierung<input type="color" id="lsMarkColor" value="#f8d7e6" aria-label="Markierungsfarbe"></label><label>Bild<input id="lsImageInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Bild einfügen"></label><button type="button" data-ls-table title="Tabelle einfügen">▦ Tabelle</button></div><div class="ls-emoji-picker" aria-label="Emojis einfügen">${EMOJIS.map(e=>`<button type="button" data-ls-emoji="${e}" aria-label="Emoji ${e} einfügen">${e}</button>`).join('')}</div><label class="ls-editor-label" for="lsEditable">Lektionstext</label><div id="lsEditable" class="ls-editable ls-rich-content" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Lektionstext" data-placeholder="Hier schreiben oder Text aus der Zwischenablage einfügen …">${sanitizeHtml(html)}</div><div class="ls-workspace-actions"><button type="button" class="ls-admin-secondary" id="lsTogglePreview">👁 Vorschau</button><button type="submit" class="ls-admin-secondary" data-ls-save="draft">Entwurf speichern</button><button type="submit" class="ls-admin-primary" data-ls-save="published">Veröffentlichen</button><button type="button" class="ls-admin-secondary" data-ls-cancel>Abbrechen</button></div><div class="ls-editor-message" id="lsEditorMessage" role="status">${escapeHTML(editorMessage)}</div></form><div id="lsPreview" class="ls-rich-content ls-preview" hidden></div></section>`;
+ return `<section class="ls-workspace ls-lesson-workspace" id="lsWorkspace"><h3>✍️ ${existing?'Lektion bearbeiten':'Neue Lektion'}</h3><p>Texte einfügen, markieren und über die Werkzeugleiste gestalten. Ein Entwurf ist nur für den Admin sichtbar.</p><form id="lsLessonForm"><label>Titel der Lektion<input type="text" maxlength="140" required name="title" value="${escapeHTML(existing?.draftTitle??existing?.title??'')}"></label><div class="ls-editor-toolbar" role="toolbar" aria-label="Text formatieren"><button type="button" data-ls-cmd="bold" title="Fett"><b>B</b></button><button type="button" data-ls-cmd="italic" title="Kursiv"><i>I</i></button><button type="button" data-ls-cmd="underline" title="Unterstrichen"><u>U</u></button><button type="button" data-ls-cmd="insertUnorderedList" title="Liste">☷</button><button type="button" data-ls-cmd="formatBlock" data-ls-value="h3" title="Überschrift">H</button><button type="button" data-ls-cmd="formatBlock" data-ls-value="p" title="Absatz">¶</button><label>Schriftart<select id="lsFont"><option value="">Schrift</option>${FONT_LABELS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label><label>Größe<select id="lsFontSize">${[12,14,16,18,20,24,28,32,36,40,48].map(n=>`<option value="${n}" ${n===16?'selected':''}>${n} px</option>`).join('')}</select></label><label>Textfarbe<input type="color" id="lsTextColor" value="#683250" aria-label="Textfarbe"></label><label>Markierung<input type="color" id="lsMarkColor" value="#f8d7e6" aria-label="Markierungsfarbe"></label><label>Bild<input id="lsImageInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Bild einfügen"></label><button type="button" data-ls-table title="Tabelle einfügen">▦ Tabelle</button></div><div class="ls-emoji-picker" aria-label="Emojis einfügen">${EMOJIS.map(e=>`<button type="button" data-ls-emoji="${e}" aria-label="Emoji ${e} einfügen">${e}</button>`).join('')}</div><label class="ls-editor-label" for="lsEditable">Lektionstext</label><div id="lsEditable" class="ls-editable ls-rich-content" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Lektionstext" data-placeholder="Hier schreiben oder Text aus der Zwischenablage einfügen …">${sanitizeHtml(html)}</div><section class="ls-block-editor" aria-label="Lektions-Bausteine"><h4>➕ Weitere Bausteine</h4><p>Füge Bilder, eine Galerie, PDF oder Infokästen direkt zur Lektion hinzu. Mit ↑ und ↓ sortieren.</p><div class="ls-block-tools"><button type="button" data-ls-add-block="note">💡 Infokasten</button><label class="ls-block-file">🖼️ Bild<input type="file" data-ls-block-files="image" accept="image/png,image/jpeg,image/webp" hidden></label><label class="ls-block-file">🖼️ Galerie<input type="file" data-ls-block-files="gallery" accept="image/png,image/jpeg,image/webp" multiple hidden></label><label class="ls-block-file">📄 PDF<input type="file" data-ls-block-files="pdf" accept="application/pdf,.pdf" hidden></label></div><div id="lsBlocksList" class="ls-block-list"></div><div class="ls-block-help" role="status" id="lsBlockHelp"></div></section><div class="ls-workspace-actions"><button type="button" class="ls-admin-secondary" id="lsTogglePreview">👁 Vorschau</button><button type="submit" class="ls-admin-secondary" data-ls-save="draft">Entwurf speichern</button><button type="submit" class="ls-admin-primary" data-ls-save="published">Veröffentlichen</button><button type="button" class="ls-admin-secondary" data-ls-cancel>Abbrechen</button></div><div class="ls-editor-message" id="lsEditorMessage" role="status">${escapeHTML(editorMessage)}</div></form><div id="lsPreview" class="ls-rich-content ls-preview" hidden></div></section>`;
 }
 function renderWorkspace(){return renderSimpleEditor()+renderLessonEditor();}
 async function saveEntity(kind,id,values){
@@ -213,19 +280,25 @@ async function saveEntity(kind,id,values){
  }
  await saveLibrary(next);
 }
-async function saveLesson(id,title,html,status){
+async function saveLesson(id,title,html,status,blocks=[]){
  if(!adminSession)throw new Error('Admin-Anmeldung erforderlich.');
- title=text(title).trim().slice(0,140);html=sanitizeHtml(html);
+ title=text(title).trim().slice(0,140);html=sanitizeHtml(html);validateLessonBlocks(blocks);
  const plain=document.createElement('div');plain.innerHTML=html;
- if(!title||(!plain.textContent.trim()&&!plain.querySelector('img')))throw new Error('Titel und Inhalt eingeben.');
- if(html.length>1000000)throw new Error('Die Lektion überschreitet 1 MB. Bilder bitte verkleinern.');
+ if(!title||(!plain.textContent.trim()&&!plain.querySelector('img')&&!blocks.length))throw new Error('Titel und Inhalt eingeben.');
+ if(html.length>1000000)throw new Error('Der Rich-Text-Bereich ist zu groß (maximal 1 MB).');
  const next=docCopy(),sec=next.topics.find(t=>t.id===topicId)?.chapters.find(c=>c.id===chapterId)?.sections.find(s=>s.id===sectionId);
  if(!sec)throw new Error('Unterkapitel nicht gefunden.');
  const old=sec.lessons.find(l=>l.id===id),now=new Date().toISOString();
  if(old){
-  old.title=title;old.updatedAt=now;
-  if(status==='draft'&&old.status==='published'){old.draftHtml=html;}else{old.html=html;old.status=status;delete old.draftHtml;}
- }else sec.lessons.push({id:makeId(),title,html,status,createdAt:now,updatedAt:now});
+  old.updatedAt=now;
+  if(status==='draft'&&old.status==='published'){
+   // LS04: Bereits veröffentlichte Inhalte inkl. Titel und PDF/Bilder bleiben unverändert.
+   old.draftTitle=title;old.draftHtml=html;old.draftBlocks=structuredClone(blocks);
+  }else{
+   old.title=title;old.html=html;old.blocks=structuredClone(blocks);old.status=status;
+   delete old.draftTitle;delete old.draftHtml;delete old.draftBlocks;
+  }
+ }else sec.lessons.push({id:makeId(),title,html,blocks:structuredClone(blocks),status,createdAt:now,updatedAt:now});
  await saveLibrary(next);
 }
 function bindWorkspace(root,onChange){
@@ -237,6 +310,51 @@ function bindWorkspace(root,onChange){
  });
  const lessonForm=root.querySelector('#lsLessonForm'),editor=root.querySelector('#lsEditable');
  if(lessonForm&&editor){
+  const old=editTarget.id?sectionById()?.lessons.find(l=>l.id===editTarget.id):null;
+  const blocks=structuredClone(old?.draftBlocks??old?.blocks??[]);
+  const help=root.querySelector('#lsBlockHelp'),blockList=root.querySelector('#lsBlocksList');
+  const info=(message)=>{help.textContent=message;};
+  const paintBlocks=()=>{
+   blockList.innerHTML=blocks.map((b,i)=>`<div class="ls-block-item" data-ls-block-i="${i}"><div class="ls-block-item-top"><strong>${escapeHTML({note:'💡 Infokasten',image:'🖼️ Bild',gallery:'🖼️ Galerie',pdf:'📄 PDF'}[b.type]||b.type)} ${i+1}</strong><div><button type="button" data-ls-block-move="up" aria-label="Baustein nach oben" ${i===0?'disabled':''}>↑</button><button type="button" data-ls-block-move="down" aria-label="Baustein nach unten" ${i===blocks.length-1?'disabled':''}>↓</button><button type="button" data-ls-block-move="remove" aria-label="Baustein entfernen">✕</button></div></div>${b.type==='note'?`<label>Titel<input data-ls-note-title maxlength="100" value="${escapeHTML(b.title)}"></label><label>Art<select data-ls-note-style>${NOTE_STYLES.map(st=>`<option value="${st}" ${b.style===st?'selected':''}>${{info:'Information',tip:'Tipp',warning:'Wichtig'}[st]}</option>`).join('')}</select></label><label>Text<textarea data-ls-note-body rows="3" maxlength="4000">${escapeHTML(b.body)}</textarea></label>`:`<span class="ls-block-filename">${escapeHTML(b.type==='gallery'?`${b.images.length} Bilder`:b.name)}</span>`}</div>`).join('')||'<p class="ls-block-empty">Noch keine weiteren Bausteine. Der Rich-Text bleibt oben.</p>';
+   blockList.querySelectorAll('[data-ls-block-move]').forEach(button=>button.addEventListener('click',()=>{
+    const i=Number(button.closest('[data-ls-block-i]').dataset.lsBlockI),action=button.dataset.lsBlockMove;
+    if(action==='remove'){blocks.splice(i,1);}else{const to=i+(action==='up'?-1:1);if(to<0||to>=blocks.length)return;[blocks[i],blocks[to]]=[blocks[to],blocks[i]];}
+    editorDirty=true;paintBlocks();
+   }));
+   blockList.querySelectorAll('[data-ls-note-title],[data-ls-note-style],[data-ls-note-body]').forEach(input=>input.addEventListener('input',()=>{
+    const b=blocks[Number(input.closest('[data-ls-block-i]').dataset.lsBlockI)];
+    if(input.hasAttribute('data-ls-note-title'))b.title=input.value;
+    if(input.hasAttribute('data-ls-note-style'))b.style=input.value;
+    if(input.hasAttribute('data-ls-note-body'))b.body=input.value;
+    editorDirty=true;
+   }));
+  };
+  paintBlocks();
+  root.querySelector('[data-ls-add-block="note"]')?.addEventListener('click',()=>{
+   if(blocks.length>=20){info('Maximal 20 Bausteine.');return;}
+   blocks.push({id:makeId(),type:'note',title:'Wissenswert',body:'Hier den Infotext eintragen.',style:'info'});
+   editorDirty=true;paintBlocks();
+  });
+  root.querySelectorAll('[data-ls-block-files]').forEach(input=>input.addEventListener('change',async()=>{
+   const kind=input.dataset.lsBlockFiles,files=[...input.files];if(!files.length)return;
+   try{
+    if(blocks.length>=20)throw new Error('Maximal 20 Bausteine pro Lektion.');
+    if(kind==='gallery'&&files.length>4)throw new Error('Höchstens 4 Bilder pro Galerie.');
+    const images=[];
+    for(const file of files){
+     if(kind==='pdf'){
+      if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf'))throw new Error('Nur PDF-Dateien erlaubt.');
+      if(file.size>1500000)throw new Error('PDF darf höchstens 1,5 MB haben.');
+      const sig=new Uint8Array(await file.slice(0,5).arrayBuffer());
+      if(String.fromCharCode(...sig)!=='%PDF-')throw new Error('Ungültige PDF-Datei.');
+     }else if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>900000)throw new Error('Nur JPG/PNG/WebP bis 900 KB pro Bild.');
+     const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Datei konnte nicht gelesen werden.'));r.readAsDataURL(file);});
+     images.push({data,name:file.name.slice(0,140)});
+    }
+    const b=kind==='pdf'?{id:makeId(),type:'pdf',...images[0]}:kind==='gallery'?{id:makeId(),type:'gallery',images}:{id:makeId(),type:'image',...images[0]};
+    validateLessonBlocks([...blocks,b]);blocks.push(b);editorDirty=true;paintBlocks();info('Baustein hinzugefügt. Bitte Lektion speichern.');
+   }catch(e){info(e.message);}finally{input.value='';}
+  }));
   let selected=null;
   const remember=()=>{const selection=getSelection();if(selection?.rangeCount&&editor.contains(selection.anchorNode))selected=selection.getRangeAt(0).cloneRange();};
   const restore=()=>{editor.focus();if(!selected)return;const selection=getSelection();selection.removeAllRanges();selection.addRange(selected);};
@@ -274,12 +392,12 @@ function bindWorkspace(root,onChange){
   });
   root.querySelector('#lsTogglePreview')?.addEventListener('click',()=>{
    const preview=root.querySelector('#lsPreview');preview.hidden=!preview.hidden;
-   if(!preview.hidden){preview.innerHTML=sanitizeHtml(editor.innerHTML);preview.scrollIntoView({block:'nearest'});}
+   if(!preview.hidden){preview.innerHTML=sanitizeHtml(editor.innerHTML)+renderLessonBlocks(blocks);bindPdfButtons(preview,blocks);preview.scrollIntoView({block:'nearest'});}
   });
   lessonForm.addEventListener('submit',async e=>{e.preventDefault();
    const box=root.querySelector('#lsEditorMessage'),buttons=lessonForm.querySelectorAll('[type=submit]');
    const status=e.submitter?.dataset.lsSave==='published'?'published':'draft';buttons.forEach(b=>b.disabled=true);
-   try{await saveLesson(editTarget.id,lessonForm.elements.title.value,editor.innerHTML,status);editorDirty=false;editorMessage='';editTarget=null;onChange();}
+   try{await saveLesson(editTarget.id,lessonForm.elements.title.value,editor.innerHTML,status,blocks);editorDirty=false;editorMessage='';editTarget=null;onChange();}
    catch(err){box.textContent='Speichern fehlgeschlagen: '+err.message;}
    finally{buttons.forEach(b=>b.disabled=false);}
   });
@@ -301,7 +419,7 @@ function renderLearningBase(){
  const trail=`<div class="ls-trail">${crumb('Alle Themen','topics')}${topic?crumb(topic.title,'chapters'):''}${chapter?crumb(chapter.title,'sections'):''}${section?crumb(section.title,'lessons'):''}</div>`;
  if(lesson){
   if(lesson.status!=='published'&&!adminSession)return `${intro}${trail}<div class="ls-notice">Diese Lektion ist noch nicht veröffentlicht.</div>`;
-  return `${intro}${trail}<section class="ls-detail"><span class="ls-overline">LEKTION ${lesson.status==='draft'?'· ENTWURF':''}</span><h3>${escapeHTML(lesson.title)}</h3>${editButtons('lesson',lesson.id)}<div class="ls-rich-content ls-reader">${sanitizeHtml(lesson.html)}</div>${adminSession&&lesson.draftHtml?'<p class="ls-draft-note">Es existiert eine unveröffentlichte Bearbeitung dieser Lektion.</p>':''}</section>${renderWorkspace()}`;
+  return `${intro}${trail}<section class="ls-detail"><span class="ls-overline">LEKTION ${lesson.status==='draft'?'· ENTWURF':''}</span><h3>${escapeHTML(lesson.title)}</h3>${editButtons('lesson',lesson.id)}<div class="ls-rich-content ls-reader">${sanitizeHtml(lesson.html)}${renderLessonBlocks(lesson.blocks||[])}</div>${adminSession&&lesson.draftHtml?'<p class="ls-draft-note">Es existiert eine unveröffentlichte Bearbeitung dieser Lektion.</p>':''}</section>${renderWorkspace()}`;
  }
  if(section){
   const visible=section.lessons.filter(l=>adminSession||l.status==='published');
@@ -329,6 +447,7 @@ export function bindLearning(root,onChange){
  root.querySelector('[data-ls-admin-ack]')?.addEventListener('click',()=>{oneTimeCode='';adminNotice='Admin-Modus aktiv. Den Code außerhalb der App aufbewahren.';onChange();});
  root.querySelectorAll('[data-ls-admin-show]').forEach(b=>b.addEventListener('click',()=>{adminView=b.dataset.lsAdminShow;adminError='';adminNotice='';onChange();}));
  bindWorkspace(root,onChange);
+ const lesson=lessonById();if(lesson)bindPdfButtons(root,lesson.blocks||[]);
  root.querySelectorAll('[data-ls-new]').forEach(b=>b.addEventListener('click',()=>guardedChange(()=>{if(!adminSession)return;editTarget={kind:b.dataset.lsNew,id:''};editorMessage='';},onChange)));
  root.querySelectorAll('[data-ls-edit]').forEach(b=>b.addEventListener('click',()=>guardedChange(()=>{if(!adminSession)return;const kind=b.dataset.lsEdit,id=b.dataset.lsEditId;editTarget={kind,id};if(kind==='topic'){topicId=id;chapterId='';sectionId='';lessonId='';}if(kind==='chapter'){chapterId=id;sectionId='';lessonId='';}if(kind==='section'){sectionId=id;lessonId='';}if(kind==='lesson')lessonId='';editorMessage='';},onChange)));
  root.querySelector('#lsSearch')?.addEventListener('input',e=>{query=e.target.value;const temp=document.createElement('div');temp.innerHTML=renderLearning();root.querySelector('#lsTopicResults')?.replaceWith(temp.querySelector('#lsTopicResults'));root.querySelector('#lsResultCount')?.replaceWith(temp.querySelector('#lsResultCount'));bindTopicButtons(root,onChange);});

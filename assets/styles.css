@@ -719,3 +719,41 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-app .ls-draft-note{font-size:12px;color:#9d4779}
 .health-app .ls-workspace :focus-visible,.health-app .ls-admin-add:focus-visible,.health-app .ls-edit-link:focus-visible{outline:3px solid #953f6d;outline-offset:2px}
 @media (max-width:370px){.health-app .ls-editor-toolbar{gap:4px;padding:6px}.health-app .ls-editor-toolbar button{min-width:39px}.health-app .ls-workspace{padding:10px}}
+
+/* LS04: mobile media/info content blocks within Lernschule */
+.health-app .ls-block-editor{margin-top:16px;padding:14px;background:#fff9fc;border:1px solid #eac8d8;border-radius:18px}
+.health-app .ls-block-editor h4{font-size:16px;color:#6b3051;margin:0 0 6px}
+.health-app .ls-block-editor>p{font-size:13px;line-height:1.45;margin:5px 0 12px;color:#885e73}
+.health-app .ls-block-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.health-app .ls-block-tools button,.health-app .ls-block-file{display:flex;align-items:center;justify-content:center;min-height:46px;border:1px solid #ddb1c6;border-radius:11px;background:#fff;color:#773d5e;font-family:inherit;font-weight:700;font-size:13px;line-height:1.2;cursor:pointer;text-align:center;padding:8px;box-sizing:border-box}
+.health-app .ls-block-list{display:grid;gap:10px}
+.health-app .ls-block-item{background:#fff;border:1px solid #e7c6d8;border-radius:12px;padding:12px;min-width:0}
+.health-app .ls-block-item-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:9px}
+.health-app .ls-block-item-top strong{font-size:13px;color:#753653}
+.health-app .ls-block-item-top>div{display:flex;gap:5px}
+.health-app .ls-block-item-top button{min-width:33px;min-height:34px;border:1px solid #e3bfd0;border-radius:9px;background:#fdf4f9;color:#783455;font-size:17px}
+.health-app .ls-block-item-top button:disabled{opacity:.38}
+.health-app .ls-block-item label{display:block;margin:6px 0 9px;font-size:12px;color:#70445b}
+.health-app .ls-block-item input,.health-app .ls-block-item select,.health-app .ls-block-item textarea{display:block;width:100%;min-width:0;box-sizing:border-box;margin-top:5px;border:1px solid #e0c2d0;border-radius:9px;padding:9px;color:#5c2d45;background:#fff;font:inherit}
+.health-app .ls-block-filename,.health-app .ls-block-empty,.health-app .ls-block-help{display:block;font-size:12px;line-height:1.45;color:#835d73;overflow-wrap:anywhere}
+.health-app .ls-block-help{min-height:16px;margin-top:10px}
+.health-app .ls-content-note{display:block;border-left:4px solid #bd7da4;border-radius:12px;padding:13px 15px;margin:14px 0;background:#fdf0f6;color:#67374f}
+.health-app .ls-content-note strong{font-size:15px;display:block}
+.health-app .ls-content-note p{white-space:normal;font-size:14px;line-height:1.55;margin:7px 0 0}
+.health-app .ls-note-tip{background:#f0f8f1;border-left-color:#52956e;color:#365c43}
+.health-app .ls-note-warning{background:#fff5e9;border-left-color:#d5a049;color:#6f4d26}
+.health-app .ls-content-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
+.health-app .ls-content-gallery figure{margin:0;background:#fff;border:1px solid #e9cfdd;border-radius:12px;overflow:hidden;min-width:0}
+.health-app .ls-content-gallery img{display:block;width:100%;max-height:300px;object-fit:contain}
+.health-app .ls-content-gallery figcaption{font-size:11px;overflow-wrap:anywhere;padding:7px;color:#79546c}
+.health-app .ls-content-pdf{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px;margin:12px 0;background:#fff;border:1px solid #e6c3d5;border-radius:13px;color:#79405e}
+.health-app .ls-content-pdf>span{font-size:22px}
+.health-app .ls-content-pdf>div:not(.ls-pdf-view){min-width:0;flex:1}
+.health-app .ls-content-pdf strong{display:block;font-size:13px;overflow-wrap:anywhere}
+.health-app .ls-content-pdf small{display:block;color:#8d637b;font-size:11px}
+.health-app .ls-content-pdf button{min-height:40px;min-width:68px;font-size:12px;font-weight:750;color:#713b59;border-radius:10px;border:1px solid #ddb7ca;background:#fff7fb}
+.health-app .ls-pdf-view{flex:0 0 100%;width:100%}
+.health-app .ls-pdf-view iframe{border:1px solid #e5cbd8;border-radius:9px;width:100%;box-sizing:border-box;height:360px;background:#fff}
+.health-app .ls-pdf-view p{font-size:12px;color:#805d73;line-height:1.45}
+.health-app .ls-block-file:focus-within,.health-app .ls-block-editor button:focus-visible{outline:3px solid #b43e77;outline-offset:2px}
+@media(max-width:390px){.health-app .ls-content-pdf{gap:5px}.health-app .ls-content-pdf button{min-width:58px}}

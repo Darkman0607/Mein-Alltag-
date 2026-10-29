@@ -1,3 +1,11 @@
+## LS04 V0.21.0 – Lernschule Bausteine
+
+- `python test-ls04-blocks.py` – Chromium 390px, simulierte IndexedDB/Crypto-Schnittstelle, PDF-/Galerie-/Info-Bausteine, Sicherheit, Veröffentlichung und getrennte Entwürfe.
+- Regressionen: `python test-ls03-editor.py`, `python test-ls02-ui.py`, `python test-ls01-ui.py`, `node test-ls02-crypto.mjs`.
+- JavaScript: `node --check` aller JS-Dateien. Reale Android-/Pages-Endtests stehen aus.
+
+---
+
 ## LS03 – Rich-Text-Editor (V0.20.0)
 
 - `python test-ls03-editor.py`: isolierter mobiler Chromium-Test (390 px). Browser-Oberfläche echt; Datenspeicher und Crypto-Adapter simuliert. Prüft Authentifizierung, Erstellung von Thema/Kapitel/Unterkapitel, Lektion, HTML-Paste, Sicherheit, Vorschau, Entwurf, Veröffentlichung, Wiederladen.
