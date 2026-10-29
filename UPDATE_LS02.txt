@@ -1,0 +1,25 @@
+MEIN ALLTAG · LERNSCHULE LS02 · BETA V0.19.0 · 29.10.2026
+
+ÄNDERUNGEN
+- Nur in Frauengesundheit → Lernschule: eigener Admin-Zugang mit Passwort-Einrichtung.
+- Passwort mindestens 12 Zeichen, zwei Eingaben; sichere Speicherung als PBKDF2-SHA-256-Hash
+  mit individuellem Salt und 250.000 Iterationen (kein Klartext in der Datenbank).
+- 40-stelliger Wiederherstellungscode, bei Einrichtung einmal angezeigt; offline zurücksetzbar.
+- Nach Reset sind altes Passwort und alter Wiederherstellungscode ungültig.
+- Admin-Status gilt für die laufende App-Sitzung; manuell abmeldbar; Browser-Neuladung erfordert neue Anmeldung.
+- Kein Inaktivitäts-Timeout. Wechsel zwischen Bereichen loggt nicht aus.
+- Pinke Admin-Oberfläche mit großem Zugriffsknopf; Lernbibliothek ohne Passwort lesbar.
+- Andere Module und bestehende Daten unverändert; IndexedDB-Version bleibt 1.
+
+PRÜFUNGEN
+- JavaScript-Syntaxprüfung: alle *.js-Dateien bestanden.
+- node test-ls02-crypto.mjs: 14 Funktionsprüfungen, echte WebCrypto-PBKDF2; Datenspeicher simuliert.
+- python test-ls02-ui.py: mobil 390 px, echte Chromium-Oberfläche mit simuliertem Kryptografieadapter.
+- python test-ls01-ui.py: 7 Themen/19 Kapitel, Suche, Navigation, Tagebuch unverändert.
+- Echtes Android-Gerät und vollständiger GitHub-Pages-/HTTPS-Test bleiben offen.
+
+WICHTIG
+- Der Admin-Editor für eigene Lektionen kommt erst in LS03.
+- Die Backup-Detailentscheidungen bleiben bis kurz vor dem letzten Update zurückgestellt.
+- Der Wiederherstellungscode wird nur bei Einrichtung/Reset gezeigt: extern sicher notieren!
+- Lokale PWA-Sicherheit ist kein Schutz vor Manipulation des Geräts oder Entwicklertools.
