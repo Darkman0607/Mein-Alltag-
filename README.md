@@ -1,3 +1,15 @@
+# Mein Alltag – Lernschule LS02 / V0.19.0 (29.10.2026)
+
+- **Frauengesundheit → Lernschule → 🔐 Admin-Zugang**: Admin-Passwort einmalig einrichten, anmelden und manuell abmelden; kein Inaktivitäts-Timeout. Nach vollständigem Neuladen ist erneute Anmeldung nötig.
+- **Wiederherstellungscode**: 160 Bit, einmalig angezeigt, offline nutzbar, rotiert nach Passwort-Reset. Bitte außerhalb der App sicher verwahren.
+- **Passwortspeicherung**: PBKDF2-SHA-256 mit 250.000 Iterationen und individuellen Salts in einem separaten Schlüssel des bestehenden Frauengesundheit-Speichers. Kein Klartext-Passwort.
+- Bestehende Lernbibliothek mit 7 Themen / 19 Kapiteln und andere Gesundheitsdaten bleiben unberührt; der Editor eigener Lektionen folgt erst in LS03.
+- **Tests**: `node test-ls02-crypto.mjs`, `python test-ls02-ui.py`, `python test-ls01-ui.py`; realer Android-/Pages-Test noch offen.
+- **Wichtige Einschränkung**: rein lokaler Browser-Adminschutz kann durch Manipulation des Geräts/Browsers umgangen werden.
+- Aktuelle Checkliste: `Lernschule_LS02_Mastercheckliste.docx`. Details: `UPDATE_LS02.txt`.
+
+---
+
 # Mein Alltag – Lernschule LS01 / V0.18.0 (29.10.2026)
 
 - **Frauengesundheit → Lernschule**: neue lesbare Themenbibliothek in Rosa/Pink mit sieben vorgegebenen Fachthemen und vorbereiteten Kapiteln.
