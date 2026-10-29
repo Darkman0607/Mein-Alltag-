@@ -1,5 +1,6 @@
 /* Mein Alltag – F02–F07: private, locally stored health journal; F07 all-entry filtering and unsaved-form protection. */
 import {getModuleValue,setModuleValue,setModuleValues} from '../assets/database.js';
+import {renderLearning,bindLearning,loadLearning,clearLearningView} from './lernschule.js';
 const STORE='frauengesundheit', ENTRIES='health.entries.v1', CYCLE='health.cycle.v1', PREG='health.pregnancy.v1';
 const SECTIONS=[
  ['zyklus','Zyklus','Verlauf, Kalender und Zykluslänge.'],
@@ -7,7 +8,7 @@ const SECTIONS=[
  ['ausfluss','Ausfluss','Farbe, Menge und Beschwerden.'],
  ['sex','Sex','Freiwillige Einträge zu Sexualität und Verhütung.'],
  ['schwangerschaft','Schwangerschaft','Status, Tests und Schwangerschaftswochen.'],
- ['lernzentrum','Lernzentrum','Für ein späteres Update vorgemerkt.'],
+ ['lernzentrum','Lernschule','Wissen entdecken und lernen.'],
  ['tagebuch','Tagebuch','Tagesübersicht, freie Texte und Symptome.'],
  ['untersuchungen','Untersuchungen & Notizen','Termine, Fragen, Befunde und Selbstbeobachtungen.']
 ];
@@ -123,7 +124,7 @@ function journalDayMarkup(){
 }
 function sectionMarkup(){
  const sec=SECTIONS.find(x=>x[0]===category);if(!sec)return startMarkup();
- if(category==='lernzentrum')return `<button type="button" class="health-breadcrumb" data-health-go="start">‹ Zur Übersicht</button><div class="health-section-heading"><img src="${icon(category)}" alt=""/><h2>Lernzentrum</h2></div><div class="health-info">Das Lernzentrum bleibt in dieser Basisversion zurückgestellt.</div>`;
+ if(category==='lernzentrum')return `<button type="button" class="health-breadcrumb" data-health-go="start">‹ Zur Übersicht</button>${renderLearning()}`;
  const list=records.filter(r=>r.category===category),f05=['ausfluss','tagebuch','sex'].includes(category);const appointments=list.filter(r=>r.details?.kind==='frauenarzt'&&r.details?.visitStatus!=='abgeschlossen');
  return `<button type="button" class="health-breadcrumb" data-health-go="start">‹ Zur Übersicht</button><div class="health-section-heading"><img alt="" src="${icon(category)}"/><div><h2>${esc(sec[1])}</h2><p>${esc(sec[2])}</p></div></div>${category==='zyklus'?cycleMarkup():''}${category==='schwangerschaft'?pregnancyMarkup():''}${['zyklus','periode'].includes(category)?periodCalendarMarkup():''}
  ${category==='untersuchungen'?`<div class="health-info"><strong>Vor und nach dem Termin</strong><p><b>Vorher:</b> Fragen, Beschwerden und gewünschte Themen notieren. <b>Nachher:</b> denselben Eintrag bearbeiten, Status auf „Durchgeführt“ ändern und Befunde sowie nächste Schritte ergänzen.</p><p>Bitte ärztliche Aussagen von eigenen Beobachtungen unterscheiden. Keine automatische Diagnose.</p></div>`:''}
@@ -191,6 +192,7 @@ async function savePregnancy(e){e.preventDefault();const d=new FormData(e.curren
 async function deleteEntry(id){if(!window.confirm('Diesen Eintrag und seine Anhänge endgültig löschen?'))return;const removed=records.find(r=>r.id===id),next=records.filter(r=>r.id!==id);try{if(removed?.category==='periode'){const updated=updatedCycle(next);await setModuleValues(STORE,[[ENTRIES,next],[CYCLE,updated]]);cycle=updated;}else await setModuleValue(STORE,ENTRIES,next);records=next;message='Eintrag gelöscht.';updateUI();}catch(err){setMsg(err.message);}}
 function openEntry(id){const r=records.find(x=>x.id===id);if(!r)return;tab='start';category=r.category;editId=r.id;formOpen=true;message='';updateUI();document.getElementById('healthEntryForm')?.scrollIntoView({block:'start'});}
 function bindHealth(){const app=document.getElementById('healthApp');if(!app)return;
+ if(tab==='start'&&category==='lernzentrum')bindLearning(app,updateUI);
  formBaseline=formFingerprint(app);
  const guardedButtons='[data-health-section],[data-health-quick],[data-health-tab],[data-health-go],[data-health-home],[data-health-settings],[data-health-edit],[data-health-delete],[data-health-month],[data-health-day],[data-health-period-month],[data-health-period-day],[data-health-newperiod],[data-health-resetday],[data-health-journal-step],#healthJournalToday,#healthJournalNew,#healthAdd,#healthCancel,[data-health-newtest]';
  app.addEventListener('click',e=>{if(e.target.closest(guardedButtons)&&!confirmHealthExit()){e.preventDefault();e.stopImmediatePropagation();}},true);
@@ -231,4 +233,4 @@ function bindHealth(){const app=document.getElementById('healthApp');if(!app)ret
  app.querySelector('#healthPregnancyForm')?.addEventListener('submit',savePregnancy);
 }
 if(typeof window!=='undefined')window.addEventListener('beforeunload',e=>{if(healthHasUnsavedChanges()){e.preventDefault();e.returnValue='';}});
-export async function mountHealth(){tab='start';category='';formOpen=false;editId='';message='';calendarMonth=today().slice(0,7);selectedDay='';periodMonth=today().slice(0,7);periodDay='';journalDay=today();observationSearch='';observationFrom='';observationTo='';allFilterSection='alle';allFilterFrom='';allFilterTo='';allFilterSearch='';formBaseline='';try{const [items,c,p]=await Promise.all([getModuleValue(STORE,ENTRIES),getModuleValue(STORE,CYCLE),getModuleValue(STORE,PREG)]);records=Array.isArray(items)?items:[];cycle=c||{};pregnancy=p||{};}catch(e){message='Speicher nicht verfügbar: '+e.message;}updateUI();}
+export async function mountHealth(){tab='start';category='';formOpen=false;editId='';message='';calendarMonth=today().slice(0,7);selectedDay='';periodMonth=today().slice(0,7);periodDay='';journalDay=today();observationSearch='';observationFrom='';observationTo='';allFilterSection='alle';allFilterFrom='';allFilterTo='';allFilterSearch='';formBaseline='';clearLearningView();try{const [items,c,p]=await Promise.all([getModuleValue(STORE,ENTRIES),getModuleValue(STORE,CYCLE),getModuleValue(STORE,PREG)]);records=Array.isArray(items)?items:[];cycle=c||{};pregnancy=p||{};}catch(e){message='Speicher nicht verfügbar: '+e.message;}await loadLearning();updateUI();}

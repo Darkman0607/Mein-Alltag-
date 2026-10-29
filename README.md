@@ -1,3 +1,14 @@
+# Mein Alltag – Lernschule LS01 / V0.18.0 (29.10.2026)
+
+- **Frauengesundheit → Lernschule**: neue lesbare Themenbibliothek in Rosa/Pink mit sieben vorgegebenen Fachthemen und vorbereiteten Kapiteln.
+- Navigation Thema → Kapitel mit Zurück-Buttons; Suche über Themen- und Kapiteltitel, Ergebniszähler.
+- Die leere Vorlage wird beim ersten Start getrennt unter `health.lernschule.library.v1` im bestehenden Frauengesundheit-Store der IndexedDB gesichert. Kein Eingriff in Tagebuch, Periode oder andere Module.
+- Noch **nicht** enthalten: Admin-Passwort und -Editor, echte Lektionen, PDFs, Tests, Fortschritt, separate ZIP-Lernschul-Sicherung. Diese Schritte bleiben offen, insbesondere Backup-Detailfragen bis kurz vor Schluss.
+- Offline-Dateiliste/Service Worker und Versionsanzeige aktualisiert.
+- `Lernschule_Frauengesundheit_LS01_Mastercheckliste.docx` dokumentiert die Planungsentscheidungen und den Umsetzungsstand.
+
+---
+
 # Mein Alltag – F07 V0.16.9 (28.10.2026)
 
 - Zentrale Liste aller Gesundheitsaufzeichnungen, Bereichsfilter, Datumsfilter (Von/Bis), Textsuche, Zurücksetzen und Live-Trefferzahl.

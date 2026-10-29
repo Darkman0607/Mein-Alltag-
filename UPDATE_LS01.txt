@@ -1,0 +1,16 @@
+MEIN ALLTAG · LS01 LERNSCHULE · V0.18.0 · 29.10.2026
+
+Umgesetzt:
+- Neuer Lernschule-Einstieg in Frauengesundheit mit Rosa/Pink-Oberfläche.
+- 7 Lernthemen und 19 vorbereitete Kapitel (keine erfundenen medizinischen Texte).
+- Thema/Kapitel-Navigation und Live-Suche; lokale IndexedDB-Vorlage.
+- Vorhandene Frauengesundheits-Einträge bleiben unverändert.
+
+Prüfungen:
+- Sämtliche JavaScript-Dateien: node --check bestanden.
+- Service-Worker-Dateiliste: vollständig (49 Einträge, 0 fehlende).
+- Isolierter mobiler Chromium-Test (390px): bestanden; manuelle Nachprüfung auf Android/GitHub Pages noch offen.
+- Word-Mastercheckliste enthalten, umgesetzte Punkte abgehakt.
+
+Noch nicht umgesetzt: Admin-Editor, Admin-Passwort, eigene Lektionen, Tests, Lernfortschritt, separate ZIP-Lernschul-Sicherung.
+Backup-Fragen werden wie vereinbart erst zum Schluss geklärt.
