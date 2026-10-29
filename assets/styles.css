@@ -654,3 +654,23 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-app .ls-item-main small{color:#896878;font-size:11px}
 .health-app .ls-empty,.health-app .ls-notice{padding:18px;text-align:center;border:1px dashed #d69bb6;border-radius:14px;font-size:13px;line-height:1.5;color:#83556b;background:#fff9fb;margin:12px 0}
 @media(max-width:360px){.health-app .ls-grid{gap:7px}.health-app .ls-topic{padding:12px 9px;min-height:154px}.health-app .ls-topic strong{font-size:14px}}
+
+/* LS02 – separater mobiler Admin-Zugang der Lernschule. */
+.health-app .ls-admin{background:linear-gradient(140deg,#fff9fc,#f9e5ed);border:1px solid #eac4d7;border-radius:20px;padding:16px;margin:17px 0 22px;color:#66324e;box-shadow:0 5px 16px #ba92a43d}
+.health-app .ls-admin-heading{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.health-app .ls-admin-heading>span{display:grid;place-items:center;width:44px;height:44px;background:#edc5da;border-radius:13px;font-size:23px;flex:none}
+.health-app .ls-admin-heading strong{display:block;font-size:16px;color:#67304f}
+.health-app .ls-admin p,.health-app .ls-admin-heading p{font-size:13px;line-height:1.5;margin:5px 0 11px;color:#7a586c}
+.health-app .ls-admin-form{display:flex;flex-direction:column;gap:12px;margin-top:13px}
+.health-app .ls-admin-label{display:block;font-size:13px;font-weight:700;color:#78415e}
+.health-app .ls-admin-label input{display:block;margin-top:7px;width:100%;min-width:0;height:46px;border:1px solid #dcb0c7;border-radius:12px;padding:9px 12px;box-sizing:border-box;color:#632f4d;background:white;font-size:15px}
+.health-app .ls-admin-primary,.health-app .ls-admin-secondary{display:block;width:100%;min-height:47px;margin-top:7px;padding:10px 12px;border-radius:13px;font-size:14px;font-weight:800;touch-action:manipulation}
+.health-app .ls-admin-primary{background:#973c70;color:#fff;border:0}
+.health-app .ls-admin-secondary{background:#fff;border:1px solid #cf9eb9;color:#79385d}
+.health-app .ls-admin-text{margin-top:14px;display:block;width:100%;padding:10px 3px;border:0;background:transparent;color:#864363;text-decoration:underline;font-size:13px;min-height:42px}
+.health-app .ls-admin-pill{display:inline-block;padding:8px 10px;background:#f2d6e4;color:#5b2850;border-radius:40px;font-size:13px;font-weight:800}
+.health-app .ls-admin-success{background:#fff;border:1px solid #dcb8ca;border-radius:12px;padding:11px;line-height:1.4;font-size:13px;margin:10px 0;color:#5e2a4b}
+.health-app #lsRecoveryCode{display:block;overflow-wrap:anywhere;word-break:break-word;user-select:all;font:700 13px/1.6 monospace;letter-spacing:.5px;background:#f9eaf2;border-radius:10px;padding:10px;color:#562342}
+.health-app .ls-admin :focus-visible{outline:3px solid #963961;outline-offset:2px}
+
+.health-app .ls-admin-jump{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 14px;border:1px solid #dcb5c9;border-radius:13px;color:#813e65;background:#fff5fa;font-size:13px;font-weight:750;box-sizing:border-box;text-decoration:none;margin:0 0 10px}
