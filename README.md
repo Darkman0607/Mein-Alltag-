@@ -1,3 +1,14 @@
+# Mein Alltag – W01.1 / V0.22.1 (29.10.2026)
+
+- **Putzmanager**: privater Import strukturierter 3D-Raumdateien (.json) in bestehende Räume; drehbare, offlinefähige SVG-3D-Ansicht mit Wänden, Fenstern, Türen und schematischen Möbeln.
+- **Datenschutz**: Im öffentlichen Repository nur allgemeiner Programmcode. Wohnungsdateien und Bilder lokal importieren und separat sichern, nicht mit GitHub veröffentlichen.
+- **Bedienung**: Raum öffnen → 3D-Raumdatei importieren. Test via unpersönliche Beispieldatei.
+- **Grenzen**: keine automatische Foto-zu-3D-Erkennung und keine GLB/OBJ-Unterstützung. Echte zwei Zimmer folgen nach Fotoabstimmung in W02.
+- **Tests**: JS-Syntax und isolierte mobile Import-/Dreh-/Export-/Validierungsprüfungen. Android-/PWA-/Offline-Abnahme noch offen.
+- Details: `UPDATE_W011.txt`; Mastercheckliste: `Wohnungsplan_Checkliste.docx` (in ZIP, bewusst nicht als öffentliches Wohnungsdokument veröffentlichen).
+
+---
+
 # Mein Alltag – LS04 / V0.21.0 (29.10.2026)
 
 - Lernschule: PDF-Anhänge, Einzelbilder/Galerien, Info-/Warn-/Tippkästen, sortierbare Zusatzbausteine und lokale PDF-Vorschau.

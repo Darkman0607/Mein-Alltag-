@@ -83,3 +83,23 @@ export async function deleteRoomPhoto(roomId,pid){
  });
 }
 export async function readRoomPhoto(pid){return getModuleValue('putzmanager',photoKey(pid));}
+
+/** W01.1: Only serializable, already validated room geometry goes into this user's local IndexedDB. */
+export async function savePrivate3DScene(roomId,scene){
+ if(!scene||scene.format!=='mein-alltag-raum3d'||scene.schemaVersion!==1||!scene.room||!Array.isArray(scene.objects))throw Error('Ungültige 3D-Raumdatei.');
+ await mutateModuleValues('putzmanager',[ROOMS_KEY],values=>{
+  const rooms=ensureList(values[ROOMS_KEY]);const room=rooms.find(r=>r.id===roomId);
+  if(!room)throw Error('Zielraum wurde gelöscht.');
+  room.sketch3d=structuredClone(scene);room.width=scene.room.width;room.depth=scene.room.depth;
+  room.updatedAt=new Date().toISOString();
+  return [[ROOMS_KEY,rooms]];
+ });
+}
+export async function removePrivate3DScene(roomId){
+ await mutateModuleValues('putzmanager',[ROOMS_KEY],values=>{
+  const rooms=ensureList(values[ROOMS_KEY]);const room=rooms.find(r=>r.id===roomId);
+  if(!room)throw Error('Zielraum nicht vorhanden.');
+  delete room.sketch3d;room.updatedAt=new Date().toISOString();
+  return [[ROOMS_KEY,rooms]];
+ });
+}

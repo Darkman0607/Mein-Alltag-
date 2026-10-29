@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.22.0",
-  "build": "W01 Putzmanager Raumverwaltung, lokale Fotos und 2D-Raumgrundstruktur",
+  "version": "0.22.1",
+  "build": "W01.1 Privater 3D-Raumdateiimport mit drehbarer, offlinefähiger Raumansicht",
   "release_date": "2026-10-29"
 }

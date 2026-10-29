@@ -1,0 +1,54 @@
+MEIN ALLTAG · ZWISCHENUPDATE W01.1 · VERSION 0.22.1 · 29.10.2026
+
+ZIEL
+Die vorhandene Raumverwaltung erhält vor den ersten zwei echten Zimmern
+(W02) einen sicheren lokalen Import drehbarer 3D-Raumskizzen.
+
+NEU
+- Putzmanager → Meine Wohnung → Zimmer: einfache 3D-Raumansicht.
+- 3D-Darstellung aus realen X/Y/Z-Koordinaten, SVG-isometrische Projektion.
+  Raum drehen (Finger/Schaltflächen/Regler) und Blickwinkel verändern.
+- Fußboden, Wandflächen, Türen, Fenster und schematische 3D-Möbel.
+- Private 3D-Datei (.json) in genau den ausgewählten Raum importieren.
+- Dateiformat: mein-alltag-raum3d, schemaVersion 1, Einheit Meter.
+- Datei vor Import prüfen: max. 128 KB, max. 60 Möbel, nur feste Typen
+  und numerische Werte, keine Web-Adressen, Scripts oder fremde Ressourcen.
+- Fehlermeldung bei ungültiger Datei; Nutzerdaten bleiben unverändert.
+- Private Raumdatei manuell exportieren oder lokale 3D-Skizze entfernen.
+- Rein erfundene Beispielraumdatei über einen Button herunterladen.
+- Bestehende Zimmer und Fotos bleiben unverändert.
+
+DATENSCHUTZ / GITHUB
+- Auf GitHub veröffentlichen wir nur App-Funktionen und generische Beispiele.
+- Keine privaten Zimmerfotos, Maße, Möbelpositionen oder Raumszenen im Code.
+- Private 3D-Skizzen verbleiben im lokalen IndexedDB-Speicher des Putzmanagers.
+- Wenn du Fotos zum Erstellen einer Skizze in ChatGPT hochlädst, gehen diese
+  an ChatGPT; sie werden dadurch NICHT öffentlich auf GitHub veröffentlicht.
+- Keine automatische Cloud-Sicherung; Backup vor Gerätewechsel/Löschen.
+- Auf dem eigenen Gerät sind die lokalen App-Daten nicht separat verschlüsselt.
+
+BENUTZUNG
+1. Im Putzmanager einen Raum auswählen/anlegen.
+2. Für einen Test im Zimmer „Unpersönliche Beispieldatei herunterladen“.
+3. „3D-Raumdatei (.json) importieren“ und diese Datei auswählen.
+4. Raum-Zuordnung und Maße bestätigen; Ansicht mit Finger drehen.
+5. Für echte Zimmer künftig private 3D-JSON-Datei aus Fotos erstellen lassen
+   und dieselbe Importfunktion verwenden, ohne GitHub-Dateien zu ändern.
+
+WICHTIG
+- Eine normale JPG-Datei ist KEIN importierbares 3D-Modell.
+- Es werden keine GLB/OBJ-Dateien importiert und keine echten Fotos automatisch
+  in 3D umgerechnet. Das ist erst für ein sehr viel späteres Update vorgesehen.
+- Auch die 3D-Möbel hier sind bewusst vereinfachte Quader und keine Fotomodelle.
+- Eine importierte 3D-Skizze wird nicht automatisch mit W01-2D-Objektmarkern
+  oder Putzaufgaben synchronisiert. Diese Verbindung folgt später.
+
+PRÜFUNG
+- Syntaxchecks für JS/CSS/relevante Dateien.
+- Isolierte mobile Chromium-Simulation (390 px): Import, Rotation,
+  simuliertes Speichern/Wiederöffnen, invaliden Import abweisen, HTML im
+  Möbeltitel sicher escapen, Datei-Export und Beispieldownload bestanden.
+- Echte GitHub-Pages-/Android-/Offline- und IndexedDB-Hardwaretests stehen aus.
+
+WORD: Wohnungsplan_Checkliste.docx mit abgehaktem W01.1 im ZIP.
+NÄCHSTES UPDATE W02: Fotos von zwei echten Zimmern, private JSON-Skizzen.
