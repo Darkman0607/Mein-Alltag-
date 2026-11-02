@@ -13,7 +13,7 @@ const palette={
 };
 const sh=(hex,f)=>{const h=hex.replace('#','');const n=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16));return `rgb(${n.map(v=>archClamp(Math.round(v*f),0,255)).join(' ')})`;};
 function objectKind(o){if(o.type!=='schrank'&&o.type!=='sonst')return o.type;const n=(o.name||'').toLocaleLowerCase('de');if(n.includes('geschirrspüler')||n.includes('spülmaschine'))return 'geschirrspueler';if(n.includes('oberschrank')||n.includes('hängeschrank'))return 'oberschrank';if(n.includes('unterschrank'))return 'unterschrank';if(n.includes('heizkörper'))return 'heizkoerper';if(n.includes('backofen'))return 'backofen';if(n.includes('stuhl')||n.includes('sessel'))return 'stuhl';if(n.includes('abfall')||n.includes('müll'))return 'muelleimer';return o.type;}
-export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1}={}){
+export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1,panX=0,panY=0}={}){
  const w=scene.room.width,d=scene.room.depth,h=scene.room.height,rad=Math.PI/180,a=angle*rad,el=elevation*rad;
  // Fit the full room at default zoom regardless of orientation; zooming in may intentionally crop.
  const raw=([x,y,z])=>{const dx=x-w/2,dz=z-d/2,xx=dx*Math.cos(a)+dz*Math.sin(a),zz=-dx*Math.sin(a)+dz*Math.cos(a);return [xx,zz*Math.sin(el)-y*Math.cos(el),zz*Math.cos(el)+y*Math.sin(el)];};
@@ -21,17 +21,17 @@ export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1}={}
  const xs=corners.map(v=>v[0]),ys=corners.map(v=>v[1]);
  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
  const scale=Math.min(430/Math.max(.1,maxX-minX),370/Math.max(.1,maxY-minY))*.84*zoom;
- const cx=240-((minX+maxX)/2)*scale,cy=200-((minY+maxY)/2)*scale;
+ const cx=240+panX-((minX+maxX)/2)*scale,cy=200+panY-((minY+maxY)/2)*scale;
  const project=p=>{const v=raw(p);return [cx+v[0]*scale,cy+v[1]*scale,v[2]];};
- let idx=0;const pieces=[];
+ let idx=0;const pieces=[];let visualLayer=-1; // floor, then far walls, then furniture; never paint a wall over a cabinet
  const n=x=>Number(x.toFixed(1));
  const polygon=(vertices,fill,stroke='none',strokeWidth=0,opacity=1,priority=0,extra='')=>{
   const p=vertices.map(project),depth=p.reduce((s,q)=>s+q[2],0)/p.length;
-  pieces.push({depth:depth+priority/10000,order:idx++,markup:`<polygon points="${p.map(q=>`${n(q[0])},${n(q[1])}`).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" opacity="${opacity}" stroke-linejoin="round" ${extra}/>`});
+  pieces.push({layer:visualLayer,depth:depth+priority/10000,order:idx++,markup:`<polygon points="${p.map(q=>`${n(q[0])},${n(q[1])}`).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" opacity="${opacity}" stroke-linejoin="round" ${extra}/>`});
  };
  const line=(points,color,width=1,opacity=1,priority=.5)=>{
   const p=points.map(project),depth=p.reduce((s,q)=>s+q[2],0)/p.length;
-  pieces.push({depth:depth+priority/10000,order:idx++,markup:`<polyline points="${p.map(q=>`${n(q[0])},${n(q[1])}`).join(' ')}" stroke="${color}" stroke-width="${width}" opacity="${opacity}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`});
+  pieces.push({layer:visualLayer,depth:depth+priority/10000,order:idx++,markup:`<polyline points="${p.map(q=>`${n(q[0])},${n(q[1])}`).join(' ')}" stroke="${color}" stroke-width="${width}" opacity="${opacity}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`});
  };
  const box=(x1,x2,y1,y2,z1,z2,color,light,tag='')=>{
   const sides=[[[x1,y1,z1],[x1,y1,z2],[x1,y2,z2],[x1,y2,z1]],[[x2,y1,z1],[x2,y1,z2],[x2,y2,z2],[x2,y2,z1]],[[x1,y1,z1],[x2,y1,z1],[x2,y2,z1],[x1,y2,z1]],[[x1,y1,z2],[x2,y1,z2],[x2,y2,z2],[x1,y2,z2]],[[x1,y2,z1],[x2,y2,z1],[x2,y2,z2],[x1,y2,z2]]];
@@ -47,12 +47,13 @@ export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1}={}
  polygon([[0,0,0],[w,0,0],[w,0,d],[0,0,d]],'#a99983','#f2dfbe',1.2);
  for(let z=.27;z<d;z+=.36)line([[.015,.006,z],[w-.015,.006,z]],'#6f655a',.65,.38);
  for(let z=0,j=0;z<d;z+=.72,j++)for(let x=(j%2)*.67;x<w;x+=1.34)line([[x,.009,z],[x,.009,Math.min(d,z+.36)]],'#dfcfb8',.55,.3);
- // White plaster walls on the far two sides only: the furniture remains visible while rotating.
+ visualLayer=0;
+ // Auto cutaway: only far walls are visible. Keep all wall decoration BEHIND furniture at every orbit angle.
  const walls={north:[[0,0,0],[w,0,0],[w,h,0],[0,h,0]],south:[[0,0,d],[w,0,d],[w,h,d],[0,h,d]],west:[[0,0,0],[0,0,d],[0,h,d],[0,h,0]],east:[[w,0,0],[w,0,d],[w,h,d],[w,h,0]]};
  const far=new Set([Math.cos(a)>=0?'north':'south',Math.sin(a)>=0?'east':'west']);
  for(const [wall,points] of Object.entries(walls))if(far.has(wall))polygon(points,wall==='north'?'#e7e4dd':'#f3f3ed','#e8e7e1',1,.43,-4,`data-wall="${wall}"`);
  // Window / door shapes support opposite walls when the room is rotated.
- for(const win of scene.windows||[]){
+ for(const win of (scene.windows||[]).filter(v=>far.has(v.wall))){
   const v=frame(win.wall,win.offset,win.width,win.sill,win.sill+win.height,.019,'#c0dbe0','#f9ffff','data-window="true"');
   polygon(insetRect(v,.08),'#a4cbd2','#dffaff',1,.85,3);
   // Window mullions, parallel slats like the blinds in the supplied reference photos.
@@ -60,7 +61,8 @@ export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1}={}
   line([[ (a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2],[ (c[0]+dd[0])/2,(c[1]+dd[1])/2,(c[2]+dd[2])/2]],'#f5f9f3',2.6,.95,3);
   for(let t=.2;t<.92;t+=.135){const p=v[0].map((q,k)=>q*(1-t)+v[3][k]*t),q=v[1].map((v2,k)=>v2*(1-t)+v[2][k]*t);line([p,q],'#f2f5ec',1.35,.77,4);}
  }
- for(const door of scene.doors||[]){const v=frame(door.wall,door.offset,door.width,.01,Math.min(2.12,h),.03,'#bfc7c2','#ffffff','data-door="true"');polygon(insetRect(v,.08),'#e4e5de','#fbfdf9',1,1,3);}
+ for(const door of (scene.doors||[]).filter(v=>far.has(v.wall))){const v=frame(door.wall,door.offset,door.width,.01,Math.min(2.12,h),.03,'#bfc7c2','#ffffff','data-door="true"');polygon(insetRect(v,.08),'#e4e5de','#fbfdf9',1,1,3);}
+ visualLayer=1;
  const objs=scene.objects||[];
  for(const [i,o] of objs.entries()){
   const swapped=o.rotation===90||o.rotation===270,ww=swapped?o.depth:o.width,dd=swapped?o.width:o.depth;
@@ -141,7 +143,7 @@ export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1}={}
   }
   if(k==='oberschrank')line([[frontX-.015,y1+.11,z2-.10],[frontX-.015,y1+.21,z2-.10]],'#c5c9c7',2.5,1,9);
  }
- pieces.sort((a,b)=>a.depth-b.depth||a.order-b.order);
+ pieces.sort((a,b)=>a.layer-b.layer||a.depth-b.depth||a.order-b.order);
  const result=pieces.map(t=>t.markup).join('');
  return `<svg class="pm-3d-svg pm-architect-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" role="img" aria-label="Räumliche 3D-Ansicht mit Möbeln, Geräten, Türen und Fenstern"><defs><radialGradient id="pmArchSky" cx="50%" cy="36%" r="90%"><stop stop-color="#3a5553"/><stop offset="1" stop-color="#0b1a1c"/></radialGradient><filter id="pmArchShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".15"/></filter></defs><rect width="480" height="400" fill="url(#pmArchSky)"/>${result}</svg>`;
 }
