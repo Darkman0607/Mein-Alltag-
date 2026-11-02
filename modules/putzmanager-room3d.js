@@ -1,3 +1,4 @@
+import {renderArchitectural3DSVG} from './putzmanager-architecture.js';
 /** W01.1 – Private, offline-capable isometric 3D room renderer and safe scene importer.
  * File format: mein-alltag-raum3d/v1 (declarative JSON, NO executable content).
  * Room models are stored in the existing per-module IndexedDB store, never bundled with app code.
@@ -8,8 +9,33 @@ const finite=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=ma
 const text=(value,len=60)=>typeof value==='string'?value.trim().slice(0,len):'';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const wallNames=['north','south','west','east'];
-const defaults=Object.freeze({wc:[.62,.76,.72],waschbecken:[.65,.46,.83],dusche:[.9,.9,1.82],wanne:[1.6,.75,.65],spiegel:[.65,.1,1.45],schrank:[.9,.47,1.58],waschmaschine:[.65,.65,.9],spuele:[.75,.61,.9],herd:[.65,.65,.86],kuehlschrank:[.7,.7,1.85],arbeitsplatte:[1.4,.65,.89],tisch:[1.1,.7,.75],sofa:[1.65,.85,.83],bett:[1.8,2,.52],regal:[.8,.42,1.75],sonst:[.8,.6,.84]});
+const defaults=Object.freeze({wc:[.62,.76,.72],waschbecken:[.65,.46,.83],dusche:[.9,.9,1.82],wanne:[1.6,.75,.65],spiegel:[.65,.1,1.45],schrank:[.9,.47,1.58],waschmaschine:[.65,.65,.9],spuele:[.75,.61,.9],herd:[.65,.65,.86],kuehlschrank:[.7,.7,1.85],arbeitsplatte:[1.4,.65,.89],tisch:[1.1,.7,.75],sofa:[1.65,.85,.83],bett:[1.8,2,.52],regal:[.8,.42,1.75],unterschrank:[.6,.6,.9],oberschrank:[.45,.65,.65],geschirrspueler:[.6,.6,.86],backofen:[.6,.6,.86],stuhl:[.55,.55,.9],heizkoerper:[.15,1,.7],muelleimer:[.38,.38,.52],dunstabzug:[.5,.6,.5],sonst:[.8,.6,.84]});
 const colors={wc:'#e5f9fa',waschbecken:'#92d9f0',dusche:'#75e2d9',wanne:'#96c3f2',spiegel:'#8dd8ee',schrank:'#bf926b',waschmaschine:'#b5cbd0',spuele:'#83c1cf',herd:'#74818a',kuehlschrank:'#c9dadd',arbeitsplatte:'#c68e61',tisch:'#b98261',sofa:'#6dbf96',bett:'#9da7ef',regal:'#b38f6d',sonst:'#e9b970'};
+/** W02: generic narrow-kitchen layout reflecting user's verbal arrangement (not the actual private photos or precise room data).
+ * Copy ONLY after a local confirmation; do not silently overwrite a previously saved sketch.
+ */
+export function createKitchenTemplate(){
+ const objects=[];
+ const add=(type,name,x,z,width,depth,height,baseY=0)=>objects.push({type,name,x,z,width,depth,height,baseY,rotation:0});
+ // View from the entrance (south): complete kitchenette RIGHT, fridge at the rear window.
+ add('kuehlschrank','Kühl-Gefrierkombi hinten beim Fenster',2.47,.41,.65,.68,2.19);
+ add('unterschrank','Unterschrank Kaffeeecke',2.50,1.20,.58,.61,.87);
+ add('herd','Herd und Backofen',2.50,1.91,.58,.66,.88);
+ add('geschirrspueler','Geschirrspüler – Mitte der Küchenzeile',2.50,2.64,.58,.62,.87);
+ add('spuele','Abwasch links vom Geschirrspüler',2.50,3.33,.58,.65,.88);
+ add('unterschrank','Schubladenschrank am Eingang',2.50,4.10,.58,.59,.87);
+ add('oberschrank','Heller Oberschrank vorne',2.59,3.86,.43,.84,.63,1.67);
+ add('oberschrank','Heller Oberschrank Mitte',2.59,2.62,.43,.83,.63,1.67);
+ add('oberschrank','Heller Oberschrank hinten',2.59,1.51,.43,.72,.63,1.67);
+ // Opposite side: fixed dining table and chair(s). Left of entrance: shelving.
+ add('tisch','Fixer Esstisch gegenüber',.74,2.28,1.25,1.05,.77);
+ add('stuhl','Stuhl beim Esstisch',.72,1.44,.54,.54,.91);
+ add('stuhl','Stuhl am Eingang',.65,3.07,.54,.54,.91);
+ add('regal','Regal links beim Eingang',.30,4.12,.50,.66,1.82);
+ add('muelleimer','Abfalleimer beim Fenster',.31,.46,.38,.41,.57);
+ add('heizkoerper','Heizkörper unter dem Fenster',1.42,.15,.18,.26,.69);
+ return validate3DScene({format:FORMAT,schemaVersion:1,name:'Küche – optische Vorlage',unit:'m',room:{width:2.85,depth:4.5,height:2.58},doors:[{wall:'south',offset:.93,width:.85}],windows:[{wall:'north',offset:.67,width:1.4,sill:.94,height:1.2}],objects,note:'Unpersönliche unvermessene Küchenvorlage: Zeile rechts, Kühlschrank hinten, Spüler mittig, Spüle links davon, Tisch und Regal gegenüber. Nach Bedarf verschieben.'});
+}
 export const SAMPLE_3D_ROOM=Object.freeze({format:FORMAT,schemaVersion:1,name:'BEISPIEL – frei erfundener Raum',unit:'m',room:{width:3.8,depth:3.1,height:2.45},doors:[{wall:'south',offset:.35,width:.9}],windows:[{wall:'north',offset:1.15,width:1.3,sill:1.05,height:1.05}],objects:[{type:'waschbecken',name:'Beispiel-Waschbecken',x:.52,z:.7,width:.65,depth:.46,height:.83,rotation:0},{type:'dusche',name:'Beispiel-Dusche',x:3.05,z:.62,width:.9,depth:.9,height:1.82,rotation:0},{type:'wc',name:'Beispiel-WC',x:1.95,z:2.45,width:.62,depth:.76,height:.72,rotation:0}],note:'Dieses Beispiel zeigt keine echte Wohnung. Später durch deine private Skizze ersetzen.'});
 /** Validate all imported numbers and strings, with bounded geometry and NO SVG/HTML/URLs/scripts. */
 export function validate3DScene(data){
@@ -29,10 +55,10 @@ export function validate3DScene(data){
  const objects=objs.map((o,i)=>{
   if(!o||typeof o!=='object'||!Object.hasOwn(OBJECT_TYPES,o.type))throw Error(`Objekt ${i+1}: ungültiger Typ.`);
   const name=text(o.name);if(!name)throw Error(`Objekt ${i+1}: Name fehlt.`);
-  if(!finite(o.x,0,room.width)||!finite(o.z,0,room.depth)||!finite(o.width,.1,5)||!finite(o.depth,.1,5)||!finite(o.height,.1,room.height)||![0,90,180,270].includes(o.rotation??0))throw Error(`Objekt ${i+1}: Position, Größe oder Drehung ungültig.`);
+  if(!finite(o.x,0,room.width)||!finite(o.z,0,room.depth)||!finite(o.width,.1,5)||!finite(o.depth,.1,5)||!finite(o.height,.1,room.height)||!finite(o.baseY??0,0,room.height)||o.height+(o.baseY??0)>room.height+.001||![0,90,180,270].includes(o.rotation??0))throw Error(`Objekt ${i+1}: Position, Größe oder Drehung ungültig.`);
   const swap=(o.rotation===90||o.rotation===270);
   if(o.x-(swap?o.depth:o.width)/2<-.001||o.x+(swap?o.depth:o.width)/2>room.width+.001||o.z-(swap?o.width:o.depth)/2<-.001||o.z+(swap?o.width:o.depth)/2>room.depth+.001)throw Error(`Objekt „${name}“ liegt außerhalb des Raums.`);
-  return {type:o.type,name,x:o.x,z:o.z,width:o.width,depth:o.depth,height:o.height,rotation:o.rotation??0};
+  return {type:o.type,name,x:o.x,z:o.z,width:o.width,depth:o.depth,height:o.height,baseY:o.baseY??0,rotation:o.rotation??0};
  });
  return {format:FORMAT,schemaVersion:1,name:text(data.name,85)||'Raumskizze',unit:'m',room,doors,windows,objects,note:text(data.note,300)};
 }
@@ -47,50 +73,9 @@ export function fallback3DScene(room){
 const rgb=c=>{const n=c.replace('#','');return [0,2,4].map(i=>parseInt(n.slice(i,i+2),16));};
 function shade(c,f){const s=rgb(c).map(n=>Math.min(255,Math.max(0,Math.round(n*f))));return `rgb(${s.join(' ')})`;}
 /** Quiet isometric scene: only rear walls, no overlapping furniture names. */
+/** W02: richer room view, furniture details are generated from the editable geometry. */
 export function render3DSVG(scene,{angle=36,elevation=53,zoom=1}={}){
- const {width:w,depth:d,height:h}=scene.room,rad=Math.PI/180,a=angle*rad,el=elevation*rad;
- const sc=Math.min(99,315/Math.max(w,d))*zoom, cx=240,cy=238;
- const project=p=>{const dx=p[0]-w/2,dz=p[2]-d/2,X=dx*Math.cos(a)+dz*Math.sin(a),Z=-dx*Math.sin(a)+dz*Math.cos(a);return [cx+sc*X,cy+sc*(Z*Math.sin(el)-p[1]*Math.cos(el))+22,Z*Math.cos(el)+p[1]*Math.sin(el)];};
- const polys=[];
- function add(points,fill,stroke='#ffffff28',opacity=1,extra=''){
-  const pts=points.map(project);polys.push({points:pts.map(p=>p.slice(0,2).map(n=>n.toFixed(2)).join(',')).join(' '),depth:pts.reduce((sum,p)=>sum+p[2],0)/pts.length,fill,stroke,opacity,extra});
- }
- const surface=[[0,0,0],[w,0,0],[w,0,d],[0,0,d]];
- add(surface,'#365a51','#88c9ab',1,'data-floor="true"');
- const walls={north:[[0,0,0],[w,0,0],[w,h,0],[0,h,0]],south:[[0,0,d],[w,0,d],[w,h,d],[0,h,d]],west:[[0,0,0],[0,0,d],[0,h,d],[0,h,0]],east:[[w,0,0],[w,0,d],[w,h,d],[w,h,0]]};
- // Hide nearer walls to keep furniture visible; rotate to inspect other sides.
- const rearWalls=new Set([Math.cos(a)>=0?'north':'south',Math.sin(a)>=0?'east':'west']);
- Object.entries(walls).forEach(([wall,pts])=>{
-  if(rearWalls.has(wall))add(pts,'#75a79e','#a4d9c9',.22,`data-wall="${wall}"`);
- });
- function openingFace(wall,offset,size,y0,y1){
-  const eps=wall==='north'?-.022:wall==='south'?.022:wall==='west'?-.022:.022;
-  if(wall==='north'||wall==='south'){const z=(wall==='north'?0:d)+eps;return [[offset,y0,z],[offset+size,y0,z],[offset+size,y1,z],[offset,y1,z]];}
-  const x=(wall==='west'?0:w)+eps;return [[x,y0,offset],[x,y0,offset+size],[x,y1,offset+size],[x,y1,offset]];
- }
- (scene.doors||[]).forEach((o,i)=>{
-  const face=openingFace(o.wall,o.offset,o.width,0,Math.min(2.08,h));
-  // Door frame: visible as a frame with translucent centre, not a solid brown block.
-  add(face,'#b3d7c0','#f2c68a',.24,`data-door="${i}"`);
- });
- (scene.windows||[]).forEach((o,i)=>{
-  const face=openingFace(o.wall,o.offset,o.width,o.sill,o.sill+o.height);
-  add(face,'#72d5fa','#e4fcff',.79,`data-window="${i}"`);
- });
- const badges=[];
- for(const [index,o] of (scene.objects||[]).entries()){
-  const swap=o.rotation===90||o.rotation===270,wx=(swap?o.depth:o.width),dz=(swap?o.width:o.depth);
-  const x1=o.x-wx/2,x2=o.x+wx/2,z1=o.z-dz/2,z2=o.z+dz/2,y2=o.height;
-  const v=[[x1,0,z1],[x2,0,z1],[x2,0,z2],[x1,0,z2],[x1,y2,z1],[x2,y2,z1],[x2,y2,z2],[x1,y2,z2]];
-  const c=colors[o.type]||colors.sonst;
-  for(const [face,k] of [[[0,1,5,4],.68],[[1,2,6,5],.82],[[2,3,7,6],.7],[[3,0,4,7],.9],[[4,5,6,7],1.13]])add(face.map(i=>v[i]),shade(c,k),'#193c39',1,`data-object="${index}"`);
-  if(index<16){const at=project([o.x,Math.min(h+.2,y2+.12),o.z]);badges.push({x:at[0],y:at[1]-6,index});}
- }
- polys.sort((a,b)=>a.depth-b.depth);
- let body=polys.map(p=>`<polygon points="${p.points}" fill="${p.fill}" stroke="${p.stroke}" stroke-width="1.4" stroke-linejoin="round" opacity="${p.opacity}" ${p.extra}/>`).join('');
- // Short numeric markers keep the picture legible; full object names are in the legend below.
- body+=badges.map(b=>`<g><circle cx="${b.x.toFixed(1)}" cy="${b.y.toFixed(1)}" r="10" fill="#0d302c" stroke="#b8f4d2" stroke-width="1.2"/><text x="${b.x.toFixed(1)}" y="${(b.y+3.7).toFixed(1)}" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="700" font-size="10" fill="#eafff3">${b.index+1}</text></g>`).join('');
- return `<svg class="pm-3d-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" role="img" aria-label="Drehbare 3D-Raumskizze, ${scene.objects.length} Möbel und nummerierte Legende"><defs><radialGradient id="pmFloorGlow"><stop stop-color="#254c45"/><stop offset="1" stop-color="#0a1b1b"/></radialGradient></defs><rect width="480" height="400" fill="url(#pmFloorGlow)"/>${body}</svg>`;
+ return renderArchitectural3DSVG(scene,{angle,elevation,zoom});
 }
 /** Metric 2D floor plan. Dataset hit areas on openings support finger dragging. */
 export function renderPlanSVG(scene,selected=null){
@@ -170,10 +155,10 @@ export function editFurniture(scene,index,patch){
  next.name=text(next.name);
  if(!Object.hasOwn(OBJECT_TYPES,next.type))throw Error('Möbeltyp nicht vorhanden.');
  if(![0,90,180,270].includes(next.rotation))throw Error('Drehung muss 0°, 90°, 180° oder 270° sein.');
- for(const key of ['width','depth','height','x','z'])next[key]=Number(next[key]);
+ for(const key of ['width','depth','height','baseY','x','z'])next[key]=Number(next[key]);
  const size=furnitureFootprint(next);
  // A resize/rotation near a wall moves only as far as necessary to stay inside the room.
- if(!finite(next.width,.1,5)||!finite(next.depth,.1,5)||!finite(next.height,.1,base.room.height)||size.width>base.room.width||size.depth>base.room.depth)throw Error('Die Möbelmaße passen nicht in den Raum.');
+ if(!finite(next.width,.1,5)||!finite(next.depth,.1,5)||!finite(next.height,.1,base.room.height)||!finite(next.baseY,0,base.room.height)||next.baseY+next.height>base.room.height+.001||size.width>base.room.width||size.depth>base.room.depth)throw Error('Die Möbelmaße passen nicht in den Raum.');
  if(!Number.isFinite(next.x)||!Number.isFinite(next.z))throw Error('Position ungültig.');
  next.x=Math.round(clamp(next.x,size.width/2,base.room.width-size.width/2)*100)/100;
  next.z=Math.round(clamp(next.z,size.depth/2,base.room.depth-size.depth/2)*100)/100;
@@ -193,7 +178,7 @@ export function addFurniture(scene,type='schrank'){
  const locations=[];
  for(let iy=0;iy<5;iy++)for(let ix=0;ix<5;ix++)locations.push({x:width/2+(base.room.width-width)*ix/4,z:depth/2+(base.room.depth-depth)*iy/4});
  const target=locations.find(p=>clear(p.x,p.z))||locations[12];
- base.objects.push({type,name:OBJECT_TYPES[type],x:Math.round(target.x*100)/100,z:Math.round(target.z*100)/100,width,depth,height,rotation:0});
+ base.objects.push({type,name:OBJECT_TYPES[type],x:Math.round(target.x*100)/100,z:Math.round(target.z*100)/100,width,depth,height,baseY:0,rotation:0});
  return validate3DScene(base);
 }
 export function removeFurniture(scene,index){
@@ -204,25 +189,27 @@ export function removeFurniture(scene,index){
 export function countFurnitureOverlaps(scene,index){
  const a=scene.objects[index];if(!a)return 0;
  const d=furnitureFootprint(a);
- return scene.objects.filter((b,j)=>j!==index&&Math.abs(a.x-b.x)<(d.width+furnitureFootprint(b).width)/2-.001&&Math.abs(a.z-b.z)<(d.depth+furnitureFootprint(b).depth)/2-.001).length;
+ return scene.objects.filter((b,j)=>j!==index&&(a.baseY??0)<(b.baseY??0)+b.height-.001&&(b.baseY??0)<(a.baseY??0)+a.height-.001&&Math.abs(a.x-b.x)<(d.width+furnitureFootprint(b).width)/2-.001&&Math.abs(a.z-b.z)<(d.depth+furnitureFootprint(b).depth)/2-.001).length;
 }
 /** Full designer with save-on-confirm, explicit selection, metric slider and touch plan dragging. */
 export function installRoomDesigner(container,source,{save,onMessage}={}){
  const host=container.querySelector('.pm-3d-viewport'),tools=container.querySelector('.pm-3d-tools'),pitchBox=container.querySelector('.pm-3d-pitch');
- const rotation=container.querySelector('#pmAngle'),elevation=container.querySelector('#pmElevation');
+ const rotation=container.querySelector('#pmAngle'),elevation=container.querySelector('#pmElevation'),zoomSlider=container.querySelector('#pmZoom');
  const editor=container.querySelector('#pmOpeningEditor'),legend=container.querySelector('#pmObjectLegend');
  if(!host||!editor)return;
  let committed=structuredClone(validate3DScene(source));
- let scene=structuredClone(committed),angle=36,pitch=53,mode='plan',selected=null,dirty=false,drag=null,saving=false;
+ let scene=structuredClone(committed),angle=36,pitch=53,zoom=1.15,mode=source.name==='Küche – optische Vorlage'?'3d':'plan',selected=null,dirty=false,drag=null,saving=false;
  const wallLabels={north:'Nordwand (oben)',south:'Südwand (unten)',west:'Westwand (links)',east:'Ostwand (rechts)'};
  const showStatus=(text,error=false)=>onMessage?.(text,error);
  const selectedOpening=()=>{if(!selected)return null;const [kind,i]=selected.split(':');if(!['door','window'].includes(kind))return null;return openingList(scene,kind)[Number(i)]?{kind,index:Number(i),value:openingList(scene,kind)[Number(i)]}:null;};
  const selectedFurniture=()=>{if(!selected?.startsWith('object:'))return null;const index=Number(selected.split(':')[1]);return scene.objects[index]?{index,value:scene.objects[index]}:null;};
  function paint(){
-  host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch});
+  host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch,zoom});
   host.classList.toggle('pm-plan-mode',mode==='plan');
   container.querySelectorAll('[data-pm-mode]').forEach(b=>{b.classList.toggle('pm-mode-active',b.dataset.pmMode===mode);b.setAttribute('aria-pressed',String(b.dataset.pmMode===mode));});
   if(tools)tools.hidden=mode==='plan';if(pitchBox)pitchBox.hidden=mode==='plan';
+  const zoomBox=container.querySelector('.pm-3d-zoom');if(zoomBox)zoomBox.hidden=mode==='plan';
+  const zoomValue=container.querySelector('#pmZoomVal');if(zoomValue)zoomValue.textContent=Math.round(zoom*100)+' %';
   const hint=container.querySelector('#pmViewHint');if(hint)hint.textContent=mode==='plan'?'Tür, Fenster oder Möbel antippen und verschieben. Genaue Maße darunter einstellen.':'3D mit dem Finger drehen. Möbelnummern stehen in der Legende; die Positionen bearbeitest du im Grundriss.';
   if(legend){const list=scene.objects||[];legend.innerHTML=list.length?list.map((o,i)=>`<button type="button" data-pm-legend="object:${i}" class="${selected===`object:${i}`?'pm-selected':''}"><b>${i+1}</b> ${esc(o.name)}</button>`).join(''):'<span>Noch keine Möbel in dieser Skizze</span>';}
   renderControls();
@@ -239,7 +226,7 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   <label>Art<select id="pmFurnitureKind">${Object.entries(OBJECT_TYPES).map(([k,v])=>`<option value="${k}" ${obj.value.type===k?'selected':''}>${esc(v)}</option>`).join('')}</select></label>
   <div class="pm-editor-dims"><label>X-Position (m)<input id="pmFurnitureX" type="number" inputmode="decimal" step="0.01" min="0" max="${scene.room.width}" value="${obj.value.x.toFixed(2)}"/></label><label>Y-Position (m)<input id="pmFurnitureZ" type="number" inputmode="decimal" step="0.01" min="0" max="${scene.room.depth}" value="${obj.value.z.toFixed(2)}"/></label></div>
   <div class="pm-editor-dims"><label>Breite (m)<input id="pmFurnitureWidth" type="number" inputmode="decimal" step="0.01" min="0.1" max="5" value="${obj.value.width.toFixed(2)}"/></label><label>Tiefe (m)<input id="pmFurnitureDepth" type="number" inputmode="decimal" step="0.01" min="0.1" max="5" value="${obj.value.depth.toFixed(2)}"/></label></div>
-  <div class="pm-editor-dims"><label>Höhe (m)<input id="pmFurnitureHeight" type="number" inputmode="decimal" step="0.01" min="0.1" max="${scene.room.height}" value="${obj.value.height.toFixed(2)}"/></label><label>Drehung<select id="pmFurnitureRotation">${[0,90,180,270].map(a=>`<option value="${a}" ${obj.value.rotation===a?'selected':''}>${a}°</option>`).join('')}</select></label></div>
+  <div class="pm-editor-dims"><label>Höhe (m)<input id="pmFurnitureHeight" type="number" inputmode="decimal" step="0.01" min="0.1" max="${scene.room.height}" value="${obj.value.height.toFixed(2)}"/></label><label>Drehung<select id="pmFurnitureRotation">${[0,90,180,270].map(a=>`<option value="${a}" ${obj.value.rotation===a?'selected':''}>${a}°</option>`).join('')}</select></label></div><label>Höhe über dem Boden (m) – z. B. Hängeschrank<input id="pmFurnitureBaseY" type="number" inputmode="decimal" min="0" max="${scene.room.height}" step="0.01" value="${(obj.value.baseY??0).toFixed(2)}"/></label>
   ${countFurnitureOverlaps(scene,obj.index)?`<p class="pm-editor-warning">⚠️ Achtung: Möbel überschneiden sich (${countFurnitureOverlaps(scene,obj.index)}). Bitte Position prüfen.</p>`:''}
   <p class="pm-editor-tip">Am einfachsten oben im Grundriss mit dem Finger verschieben. Maßänderungen werden auf den Raum begrenzt.</p></div>`:'<p class="pm-hint">Ein Möbel aus dem Grundriss oder aus der Liste auswählen und bearbeiten.</p>'}</div>
   <div class="pm-editor-save"><button type="button" data-pm-save="1" class="primary-button pm-accent" ${dirty?'':'disabled'}>${saving?'Speichere …':dirty?'✓ Änderungen speichern':'✓ Alles gespeichert'}</button><button type="button" data-pm-reset="1" ${dirty?'':'disabled'}>Verwerfen</button></div><p class="pm-editor-footnote">Speicherung nur auf diesem Gerät. Änderungen erst nach „Speichern“ dauerhaft.</p>`;
@@ -258,6 +245,7 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
  container.querySelectorAll('[data-pm-mode]').forEach(btn=>btn.addEventListener('click',()=>{mode=btn.dataset.pmMode;drag=null;paint();}));
  rotation?.addEventListener('input',()=>{angle=Number(rotation.value);if(mode==='3d')paint();});
  elevation?.addEventListener('input',()=>{pitch=Number(elevation.value);if(mode==='3d')paint();});
+ zoomSlider?.addEventListener('input',()=>{zoom=Number(zoomSlider.value)/100;if(mode==='3d')paint();});
  container.querySelectorAll('[data-3d-turn]').forEach(btn=>btn.addEventListener('click',()=>{angle=(angle+Number(btn.dataset['3dTurn'])+360)%360;if(rotation)rotation.value=angle;if(mode==='3d')paint();}));
  host.addEventListener('pointerdown',e=>{
   if(mode==='3d'){drag={kind:'orbit',x:e.clientX,base:angle,id:e.pointerId};host.setPointerCapture?.(e.pointerId);return;}
@@ -304,7 +292,7 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   if(e.target.id==='pmOpeningOffset'){
    try{
     scene=editOpening(scene,sel.kind,sel.index,{offset:Number(e.target.value)});dirty=true;
-    host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch});
+    host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch,zoom});
     const val=scene[sel.kind==='door'?'doors':'windows'][sel.index].offset.toFixed(2);
     const lbl=editor.querySelector('#pmOpeningPositionLabel'),num=editor.querySelector('#pmOpeningOffsetNumber'),saveBtn=editor.querySelector('[data-pm-save]'),resetBtn=editor.querySelector('[data-pm-reset]');
     if(lbl)lbl.textContent=val+' m';if(num)num.value=val;if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='✓ Änderungen speichern';}if(resetBtn)resetBtn.disabled=false;
@@ -318,7 +306,7 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   apply({[prop]:prop==='wall'?e.target.value:Number(e.target.value)});
  });
  editor.addEventListener('change',e=>{
-  const fields={pmFurnitureName:'name',pmFurnitureKind:'type',pmFurnitureX:'x',pmFurnitureZ:'z',pmFurnitureWidth:'width',pmFurnitureDepth:'depth',pmFurnitureHeight:'height',pmFurnitureRotation:'rotation'};
+  const fields={pmFurnitureName:'name',pmFurnitureKind:'type',pmFurnitureX:'x',pmFurnitureZ:'z',pmFurnitureWidth:'width',pmFurnitureDepth:'depth',pmFurnitureHeight:'height',pmFurnitureBaseY:'baseY',pmFurnitureRotation:'rotation'};
   const key=fields[e.target.id];if(!key)return;
   applyFurniture({[key]:['name','type'].includes(key)?e.target.value:Number(e.target.value)});
  });
