@@ -104,8 +104,8 @@ export function renderPlanSVG(scene,selected=null){
  const objectSizes={};
  (scene.objects||[]).forEach((o,i)=>{
   const swap=o.rotation===90||o.rotation===270,ww=(swap?o.depth:o.width),dd=(swap?o.width:o.depth);
-  const tx=x(o.x-ww/2),ty=y(o.z-dd/2);
-  b+=`<rect x="${round(tx)}" y="${round(ty)}" width="${round(ww*scale)}" height="${round(dd*scale)}" rx="3" fill="${colors[o.type]||colors.sonst}" fill-opacity=".70" stroke="#091f1a" stroke-width="1.6"/><text x="${round(x(o.x))}" y="${round(y(o.z)+3)}" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="750" font-size="10" fill="#073429">${i+1}</text>`;
+  const tx=x(o.x-ww/2),ty=y(o.z-dd/2),key=`object:${i}`,active=selected===key;
+  b+=`<g data-pm-furniture="${key}" role="button" aria-label="Möbel ${i+1}: ${esc(o.name)} verschieben"><rect data-pm-furniture="${key}" x="${round(tx)}" y="${round(ty)}" width="${round(ww*scale)}" height="${round(dd*scale)}" rx="4" fill="${colors[o.type]||colors.sonst}" fill-opacity=".83" stroke="${active?'#baffd1':'#102a24'}" stroke-width="${active?4:1.7}"/><text x="${round(x(o.x))}" y="${round(y(o.z)+4)}" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="13" pointer-events="none" fill="#062d23">${i+1}</text></g>`;
  });
  const bounds=(opening)=>{const t1=opening.offset,t2=opening.offset+opening.width;
   if(opening.wall==='north')return [x(t1),top,x(t2),top];
@@ -160,6 +160,52 @@ export function addOpening(scene,kind){
  const item=kind==='door'?{wall,offset,width}:{wall,offset,width,sill:.85,height:Math.min(1.1,Math.round((base.room.height-.85)*100)/100)};
  arr.push(item);return validate3DScene(base);
 }
+/** A piece of furniture is a rectangular 3D footprint. Keep all imported rooms schema v1 compatible. */
+const furnitureFootprint=o=>({width:([90,270].includes(o.rotation)?o.depth:o.width),depth:([90,270].includes(o.rotation)?o.width:o.depth)});
+export function editFurniture(scene,index,patch){
+ const base=validate3DScene(scene),old=base.objects[index];
+ if(!old)throw Error('Möbel nicht gefunden.');
+ const next={...old,...patch};
+ if(typeof next.name!=='string'||!next.name.trim())throw Error('Möbelname fehlt.');
+ next.name=text(next.name);
+ if(!Object.hasOwn(OBJECT_TYPES,next.type))throw Error('Möbeltyp nicht vorhanden.');
+ if(![0,90,180,270].includes(next.rotation))throw Error('Drehung muss 0°, 90°, 180° oder 270° sein.');
+ for(const key of ['width','depth','height','x','z'])next[key]=Number(next[key]);
+ const size=furnitureFootprint(next);
+ // A resize/rotation near a wall moves only as far as necessary to stay inside the room.
+ if(!finite(next.width,.1,5)||!finite(next.depth,.1,5)||!finite(next.height,.1,base.room.height)||size.width>base.room.width||size.depth>base.room.depth)throw Error('Die Möbelmaße passen nicht in den Raum.');
+ if(!Number.isFinite(next.x)||!Number.isFinite(next.z))throw Error('Position ungültig.');
+ next.x=Math.round(clamp(next.x,size.width/2,base.room.width-size.width/2)*100)/100;
+ next.z=Math.round(clamp(next.z,size.depth/2,base.room.depth-size.depth/2)*100)/100;
+ base.objects[index]=next;return validate3DScene(base);
+}
+export function addFurniture(scene,type='schrank'){
+ const base=validate3DScene(scene);
+ if(!Object.hasOwn(OBJECT_TYPES,type))throw Error('Objekttyp nicht vorhanden.');
+ if(base.objects.length>=60)throw Error('Maximal 60 Möbel in einem Raum.');
+ const [dw,dd,dh]=defaults[type]||defaults.sonst;
+ const width=Math.min(dw,base.room.width),depth=Math.min(dd,base.room.depth),height=Math.min(dh,base.room.height);
+ // Prefer free positions in a 5 × 5 grid to prevent stacking newly added furniture.
+ const clear=(x,z)=>base.objects.every(o=>{
+  const a=furnitureFootprint(o);
+  return Math.abs(x-o.x)>=(width+a.width)/2+.06||Math.abs(z-o.z)>=(depth+a.depth)/2+.06;
+ });
+ const locations=[];
+ for(let iy=0;iy<5;iy++)for(let ix=0;ix<5;ix++)locations.push({x:width/2+(base.room.width-width)*ix/4,z:depth/2+(base.room.depth-depth)*iy/4});
+ const target=locations.find(p=>clear(p.x,p.z))||locations[12];
+ base.objects.push({type,name:OBJECT_TYPES[type],x:Math.round(target.x*100)/100,z:Math.round(target.z*100)/100,width,depth,height,rotation:0});
+ return validate3DScene(base);
+}
+export function removeFurniture(scene,index){
+ const base=validate3DScene(scene);
+ if(!Number.isInteger(index)||index<0||index>=base.objects.length)throw Error('Möbel nicht gefunden.');
+ base.objects.splice(index,1);return validate3DScene(base);
+}
+export function countFurnitureOverlaps(scene,index){
+ const a=scene.objects[index];if(!a)return 0;
+ const d=furnitureFootprint(a);
+ return scene.objects.filter((b,j)=>j!==index&&Math.abs(a.x-b.x)<(d.width+furnitureFootprint(b).width)/2-.001&&Math.abs(a.z-b.z)<(d.depth+furnitureFootprint(b).depth)/2-.001).length;
+}
 /** Full designer with save-on-confirm, explicit selection, metric slider and touch plan dragging. */
 export function installRoomDesigner(container,source,{save,onMessage}={}){
  const host=container.querySelector('.pm-3d-viewport'),tools=container.querySelector('.pm-3d-tools'),pitchBox=container.querySelector('.pm-3d-pitch');
@@ -170,21 +216,32 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
  let scene=structuredClone(committed),angle=36,pitch=53,mode='plan',selected=null,dirty=false,drag=null,saving=false;
  const wallLabels={north:'Nordwand (oben)',south:'Südwand (unten)',west:'Westwand (links)',east:'Ostwand (rechts)'};
  const showStatus=(text,error=false)=>onMessage?.(text,error);
- const selectedOpening=()=>{if(!selected)return null;const [kind,i]=selected.split(':');return openingList(scene,kind)[Number(i)]?{kind,index:Number(i),value:openingList(scene,kind)[Number(i)]}:null;};
+ const selectedOpening=()=>{if(!selected)return null;const [kind,i]=selected.split(':');if(!['door','window'].includes(kind))return null;return openingList(scene,kind)[Number(i)]?{kind,index:Number(i),value:openingList(scene,kind)[Number(i)]}:null;};
+ const selectedFurniture=()=>{if(!selected?.startsWith('object:'))return null;const index=Number(selected.split(':')[1]);return scene.objects[index]?{index,value:scene.objects[index]}:null;};
  function paint(){
   host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch});
   host.classList.toggle('pm-plan-mode',mode==='plan');
   container.querySelectorAll('[data-pm-mode]').forEach(b=>{b.classList.toggle('pm-mode-active',b.dataset.pmMode===mode);b.setAttribute('aria-pressed',String(b.dataset.pmMode===mode));});
   if(tools)tools.hidden=mode==='plan';if(pitchBox)pitchBox.hidden=mode==='plan';
-  const hint=container.querySelector('#pmViewHint');if(hint)hint.textContent=mode==='plan'?'Tür oder Fenster antippen und entlang seiner Wand verschieben. Genaue Werte darunter einstellen.':'3D mit dem Finger drehen. Möbelnummern stehen in der Legende; die Positionen bearbeitest du im Grundriss.';
-  if(legend){const list=scene.objects||[];legend.innerHTML=list.length?list.map((o,i)=>`<span title="${esc(o.name)}"><b>${i+1}</b> ${esc(o.name)}</span>`).join(''):'<span>Noch keine Möbel in dieser Skizze</span>';}
+  const hint=container.querySelector('#pmViewHint');if(hint)hint.textContent=mode==='plan'?'Tür, Fenster oder Möbel antippen und verschieben. Genaue Maße darunter einstellen.':'3D mit dem Finger drehen. Möbelnummern stehen in der Legende; die Positionen bearbeitest du im Grundriss.';
+  if(legend){const list=scene.objects||[];legend.innerHTML=list.length?list.map((o,i)=>`<button type="button" data-pm-legend="object:${i}" class="${selected===`object:${i}`?'pm-selected':''}"><b>${i+1}</b> ${esc(o.name)}</button>`).join(''):'<span>Noch keine Möbel in dieser Skizze</span>';}
   renderControls();
  }
  function renderControls(){
-  const sel=selectedOpening();
+  const sel=selectedOpening(),obj=selectedFurniture();
   editor.innerHTML=`<div class="pm-editor-heading"><strong>🚪 Türen <em>${scene.doors.length}</em> · 🪟 Fenster <em>${scene.windows.length}</em></strong><div class="pm-opening-add"><button type="button" data-pm-add="door">＋ Tür</button><button type="button" data-pm-add="window">＋ Fenster</button></div></div>
   <div class="pm-opening-list">${[['door',scene.doors],['window',scene.windows]].flatMap(([kind,items])=>items.map((o,i)=>`<button type="button" data-pm-select="${kind}:${i}" class="${selected===`${kind}:${i}`?'pm-selected':''}">${kind==='door'?'🚪 Tür':'🪟 Fenster'} ${i+1}<small>${wallLabels[o.wall].split(' ')[0]} · ${o.offset.toFixed(2)} m</small></button>`)).join('')||'<p class="pm-hint">Noch keine Türen oder Fenster eingezeichnet. Über + hinzufügen.</p>'}</div>
   ${sel?`<div class="pm-editor-fields"><div class="pm-editor-title"><strong>${sel.kind==='door'?'🚪 Tür':'🪟 Fenster'} ${sel.index+1} bearbeiten</strong><button type="button" class="pm-editor-remove" data-pm-remove="1">Entfernen</button></div><label>Wand<select id="pmOpeningWall">${Object.entries(wallLabels).map(([k,v])=>`<option value="${k}" ${sel.value.wall===k?'selected':''}>${v}</option>`).join('')}</select></label><label>Position ab Wandecke <strong id="pmOpeningPositionLabel">${sel.value.offset.toFixed(2)} m</strong><input id="pmOpeningOffset" type="range" step="0.01" min="0" max="${Math.max(0,wallSize(scene,sel.value.wall)-sel.value.width).toFixed(2)}" value="${sel.value.offset}"/></label><div class="pm-editor-dims"><label>Abstand (m)<input id="pmOpeningOffsetNumber" type="number" inputmode="decimal" min="0" step="0.01" max="${Math.max(0,wallSize(scene,sel.value.wall)-sel.value.width).toFixed(2)}" value="${sel.value.offset.toFixed(2)}"/></label><label>Breite (m)<input id="pmOpeningWidth" type="number" inputmode="decimal" min="0.35" max="${Math.min(5,wallSize(scene,sel.value.wall)).toFixed(2)}" step="0.01" value="${sel.value.width.toFixed(2)}"/></label></div>${sel.kind==='window'?`<div class="pm-editor-dims"><label>Brüstung (m)<input id="pmOpeningSill" type="number" min="0.2" max="3" step="0.01" value="${sel.value.sill.toFixed(2)}"/></label><label>Fensterhöhe (m)<input id="pmOpeningHeight" type="number" min="0.3" max="2.6" step="0.01" value="${sel.value.height.toFixed(2)}"/></label></div>`:''}</div>`:'<p class="pm-hint">Wähle oben eine Tür oder ein Fenster aus, um Maße und Position zu ändern.</p>'}
+  <div class="pm-furniture-section"><div class="pm-editor-heading"><strong>🛋 Möbel <em>${scene.objects.length}</em></strong><div class="pm-furniture-add"><select id="pmFurnitureType" aria-label="Möbelart auswählen">${Object.entries(OBJECT_TYPES).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join('')}</select><button type="button" data-pm-add-furniture="1">＋ Möbel hinzufügen</button></div></div>
+  <div class="pm-opening-list pm-furniture-list">${scene.objects.map((o,i)=>`<button type="button" data-pm-select="object:${i}" class="${selected===`object:${i}`?'pm-selected':''}"><b>${i+1}</b> ${esc(o.name)}<small>${o.width.toFixed(2)} × ${o.depth.toFixed(2)} m</small></button>`).join('')||'<p class="pm-hint">Noch keine Möbel vorhanden. Wähle eine Möbelart und füge sie hinzu.</p>'}</div>
+  ${obj?`<div class="pm-editor-fields pm-furniture-fields"><div class="pm-editor-title"><strong>🛋 Möbel ${obj.index+1} bearbeiten</strong><button type="button" class="pm-editor-remove" data-pm-remove-furniture="1">Entfernen</button></div>
+  <label>Name<input id="pmFurnitureName" type="text" maxlength="60" value="${esc(obj.value.name)}"/></label>
+  <label>Art<select id="pmFurnitureKind">${Object.entries(OBJECT_TYPES).map(([k,v])=>`<option value="${k}" ${obj.value.type===k?'selected':''}>${esc(v)}</option>`).join('')}</select></label>
+  <div class="pm-editor-dims"><label>X-Position (m)<input id="pmFurnitureX" type="number" inputmode="decimal" step="0.01" min="0" max="${scene.room.width}" value="${obj.value.x.toFixed(2)}"/></label><label>Y-Position (m)<input id="pmFurnitureZ" type="number" inputmode="decimal" step="0.01" min="0" max="${scene.room.depth}" value="${obj.value.z.toFixed(2)}"/></label></div>
+  <div class="pm-editor-dims"><label>Breite (m)<input id="pmFurnitureWidth" type="number" inputmode="decimal" step="0.01" min="0.1" max="5" value="${obj.value.width.toFixed(2)}"/></label><label>Tiefe (m)<input id="pmFurnitureDepth" type="number" inputmode="decimal" step="0.01" min="0.1" max="5" value="${obj.value.depth.toFixed(2)}"/></label></div>
+  <div class="pm-editor-dims"><label>Höhe (m)<input id="pmFurnitureHeight" type="number" inputmode="decimal" step="0.01" min="0.1" max="${scene.room.height}" value="${obj.value.height.toFixed(2)}"/></label><label>Drehung<select id="pmFurnitureRotation">${[0,90,180,270].map(a=>`<option value="${a}" ${obj.value.rotation===a?'selected':''}>${a}°</option>`).join('')}</select></label></div>
+  ${countFurnitureOverlaps(scene,obj.index)?`<p class="pm-editor-warning">⚠️ Achtung: Möbel überschneiden sich (${countFurnitureOverlaps(scene,obj.index)}). Bitte Position prüfen.</p>`:''}
+  <p class="pm-editor-tip">Am einfachsten oben im Grundriss mit dem Finger verschieben. Maßänderungen werden auf den Raum begrenzt.</p></div>`:'<p class="pm-hint">Ein Möbel aus dem Grundriss oder aus der Liste auswählen und bearbeiten.</p>'}</div>
   <div class="pm-editor-save"><button type="button" data-pm-save="1" class="primary-button pm-accent" ${dirty?'':'disabled'}>${saving?'Speichere …':dirty?'✓ Änderungen speichern':'✓ Alles gespeichert'}</button><button type="button" data-pm-reset="1" ${dirty?'':'disabled'}>Verwerfen</button></div><p class="pm-editor-footnote">Speicherung nur auf diesem Gerät. Änderungen erst nach „Speichern“ dauerhaft.</p>`;
  }
  function apply(patch,quiet=false){
@@ -192,33 +249,55 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   try{scene=editOpening(scene,sel.kind,sel.index,patch);dirty=true;paint();if(!quiet)showStatus('Noch nicht gespeichert – „Änderungen speichern“ antippen.');}
   catch(err){showStatus(err.message,true);renderControls();}
  }
+ function applyFurniture(patch,quiet=false){
+  const obj=selectedFurniture();if(!obj)return;
+  try{scene=editFurniture(scene,obj.index,patch);dirty=true;paint();if(!quiet)showStatus('Möbel geändert – noch nicht gespeichert.');}
+  catch(err){showStatus(err.message,true);renderControls();}
+ }
+ legend?.addEventListener('click',e=>{const button=e.target.closest('[data-pm-legend]');if(button){selected=button.dataset.pmLegend;mode='plan';paint();}});
  container.querySelectorAll('[data-pm-mode]').forEach(btn=>btn.addEventListener('click',()=>{mode=btn.dataset.pmMode;drag=null;paint();}));
  rotation?.addEventListener('input',()=>{angle=Number(rotation.value);if(mode==='3d')paint();});
  elevation?.addEventListener('input',()=>{pitch=Number(elevation.value);if(mode==='3d')paint();});
  container.querySelectorAll('[data-3d-turn]').forEach(btn=>btn.addEventListener('click',()=>{angle=(angle+Number(btn.dataset['3dTurn'])+360)%360;if(rotation)rotation.value=angle;if(mode==='3d')paint();}));
  host.addEventListener('pointerdown',e=>{
   if(mode==='3d'){drag={kind:'orbit',x:e.clientX,base:angle,id:e.pointerId};host.setPointerCapture?.(e.pointerId);return;}
-  const hit=e.target.closest('[data-pm-opening]');if(!hit)return;
-  selected=hit.getAttribute('data-pm-opening');drag={kind:'opening',id:e.pointerId};host.setPointerCapture?.(e.pointerId);paint();
+  const hit=e.target.closest('[data-pm-opening], [data-pm-furniture]');if(!hit)return;
+  const furniture=hit.getAttribute('data-pm-furniture'),opening=hit.getAttribute('data-pm-opening');
+  selected=furniture||opening;
+  if(furniture){
+   const index=Number(furniture.split(':')[1]),svg=host.querySelector('svg'),ctm=svg?.getScreenCTM();
+   const p=ctm?new DOMPoint(e.clientX,e.clientY).matrixTransform(ctm.inverse()):null;
+   const {width:w,depth:d}=scene.room,sc=Math.min(360/w,295/d),left=(480-w*sc)/2,top=(385-d*sc)/2;
+   drag={kind:'object',id:e.pointerId,index,dx:p?(p.x-left)/sc-scene.objects[index].x:0,dz:p?(p.y-top)/sc-scene.objects[index].z:0};
+  }else drag={kind:'opening',id:e.pointerId};
+  host.setPointerCapture?.(e.pointerId);paint();
  });
  host.addEventListener('pointermove',e=>{
   if(!drag||drag.id!==e.pointerId)return;
   if(drag.kind==='orbit'){angle=(drag.base+(e.clientX-drag.x)*.8+3600)%360;if(rotation)rotation.value=Math.round(angle);paint();return;}
-  const sel=selectedOpening(),svg=host.querySelector('svg');if(!svg||!sel)return;
+  const svg=host.querySelector('svg');if(!svg)return;
   const ctm=svg.getScreenCTM();if(!ctm)return;const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(ctm.inverse());
   const {width:w,depth:d}=scene.room,sc=Math.min(360/w,295/d),left=(480-w*sc)/2,top=(385-d*sc)/2;
+  if(drag.kind==='object'){
+   const x=Math.round(((p.x-left)/sc-drag.dx)*100)/100,z=Math.round(((p.y-top)/sc-drag.dz)*100)/100;
+   const old=scene.objects[drag.index];if(!old||old.x===x&&old.z===z)return;
+   applyFurniture({x,z},true);return;
+  }
+  const sel=selectedOpening();if(!sel)return;
   const dist=sel.value.wall==='north'||sel.value.wall==='south'?(p.x-left)/sc:(p.y-top)/sc;
   const next=Math.round(clamp(dist-sel.value.width/2,0,wallSize(scene,sel.value.wall)-sel.value.width)*100)/100;
   if(next!==sel.value.offset)apply({offset:next},true);
  });
- for(const event of ['pointerup','pointercancel','lostpointercapture'])host.addEventListener(event,()=>{if(drag?.kind==='opening'&&dirty)showStatus('Position geändert – jetzt speichern.');drag=null;});
+ for(const event of ['pointerup','pointercancel','lostpointercapture'])host.addEventListener(event,()=>{if(['opening','object'].includes(drag?.kind)&&dirty)showStatus('Position geändert – jetzt speichern.');drag=null;});
  editor.addEventListener('click',async e=>{
   const btn=e.target.closest('button');if(!btn||saving)return;
   if(btn.dataset.pmSelect){selected=btn.dataset.pmSelect;paint();}
+  if(btn.dataset.pmAddFurniture){try{const type=editor.querySelector('#pmFurnitureType')?.value||'schrank';scene=addFurniture(scene,type);selected=`object:${scene.objects.length-1}`;dirty=true;mode='plan';paint();showStatus('Möbel hinzugefügt – bitte platzieren und speichern.');}catch(err){showStatus(err.message,true);}}
+  if(btn.dataset.pmRemoveFurniture){const obj=selectedFurniture();if(!obj)return;scene=removeFurniture(scene,obj.index);selected=null;dirty=true;paint();showStatus('Möbel entfernt – noch nicht gespeichert.');}
   if(btn.dataset.pmAdd){try{scene=addOpening(scene,btn.dataset.pmAdd);selected=`${btn.dataset.pmAdd}:${openingList(scene,btn.dataset.pmAdd).length-1}`;dirty=true;mode='plan';paint();showStatus('Neue Öffnung hinzugefügt. Position auswählen und speichern.');}catch(err){showStatus(err.message,true);}}
   if(btn.dataset.pmRemove){const sel=selectedOpening();if(!sel)return;openingList(scene,sel.kind).splice(sel.index,1);selected=null;dirty=true;paint();showStatus('Öffnung entfernt – noch nicht gespeichert.');}
   if(btn.dataset.pmReset){scene=structuredClone(committed);selected=null;dirty=false;paint();showStatus('Nicht gespeicherte Änderungen verworfen.');}
-  if(btn.dataset.pmSave&&dirty){saving=true;renderControls();try{const validated=validate3DScene(scene);await save?.(validated);committed=structuredClone(validated);scene=structuredClone(validated);dirty=false;showStatus('✓ Türen und Fenster gespeichert.');paint();}catch(err){showStatus('Speichern fehlgeschlagen: '+err.message,true);}finally{saving=false;renderControls();}}
+  if(btn.dataset.pmSave&&dirty){saving=true;renderControls();try{const validated=validate3DScene(scene);await save?.(validated);committed=structuredClone(validated);scene=structuredClone(validated);dirty=false;showStatus('✓ Wohnungsplan mit Möbeln, Türen und Fenstern gespeichert.');paint();}catch(err){showStatus('Speichern fehlgeschlagen: '+err.message,true);}finally{saving=false;renderControls();}}
  });
  editor.addEventListener('input',e=>{
   const sel=selectedOpening();if(!sel)return;
@@ -237,6 +316,11 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   const names={pmOpeningWall:'wall',pmOpeningOffset:'offset',pmOpeningOffsetNumber:'offset',pmOpeningWidth:'width',pmOpeningSill:'sill',pmOpeningHeight:'height'};
   const prop=names[e.target.id];if(!prop)return;
   apply({[prop]:prop==='wall'?e.target.value:Number(e.target.value)});
+ });
+ editor.addEventListener('change',e=>{
+  const fields={pmFurnitureName:'name',pmFurnitureKind:'type',pmFurnitureX:'x',pmFurnitureZ:'z',pmFurnitureWidth:'width',pmFurnitureDepth:'depth',pmFurnitureHeight:'height',pmFurnitureRotation:'rotation'};
+  const key=fields[e.target.id];if(!key)return;
+  applyFurniture({[key]:['name','type'].includes(key)?e.target.value:Number(e.target.value)});
  });
  paint();
 }
