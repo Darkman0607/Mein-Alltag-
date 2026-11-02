@@ -12,12 +12,12 @@ function editForm(room){return `${intro()}<form id="pmRoomForm" class="pm-panel"
 function sketch(room){
  const imported=!!room.sketch3d;
  const title=imported?'Dein bearbeitbarer Wohnungsplan':'Dein Raum als Grundriss';
- return `<section class="pm-sketch pm-3d-card"><div class="pm-3d-head"><div><div class="pm-sketch-caption">🏠 ${esc(title)}</div><p class="pm-hint">${imported?'Privat gespeichert · du kannst Türen und Fenster selbst verschieben.':'Schematischer Entwurf aus den Raumangaben. Du kannst Türen und Fenster ergänzen.'}</p></div><span class="pm-private">🔒 Privat</span></div>
+ return `<section class="pm-sketch pm-3d-card"><div class="pm-3d-head"><div><div class="pm-sketch-caption">🏠 ${esc(title)}</div><p class="pm-hint">${imported?'Privat gespeichert · du kannst Möbel, Türen und Fenster selbst verschieben.':'Schematischer Entwurf aus den Raumangaben. Du kannst Möbel, Türen und Fenster ergänzen.'}</p></div><span class="pm-private">🔒 Privat</span></div>
  <div class="pm-view-modes"><button type="button" data-pm-mode="plan" class="pm-mode-active" aria-pressed="true">▦ Grundriss bearbeiten</button><button type="button" data-pm-mode="3d" aria-pressed="false">⌂ 3D ansehen</button></div>
  <div class="pm-3d-viewport pm-plan-mode" aria-label="Interaktiver Wohnungsgrundriss" tabindex="0"></div>
  <div class="pm-3d-tools" hidden><button type="button" class="secondary-button" data-3d-turn="-45">↶ Links</button><label for="pmAngle">Drehen<input type="range" id="pmAngle" min="0" max="360" value="36" step="1"/></label><button type="button" class="secondary-button" data-3d-turn="45">Rechts ↷</button></div>
  <div class="pm-3d-pitch" hidden><label for="pmElevation">Blickhöhe</label><input type="range" id="pmElevation" min="25" max="77" value="53" step="1"/></div>
- <p class="pm-hint" id="pmViewHint">Tür oder Fenster antippen und entlang der Wand verschieben. Genaue Werte darunter einstellen.</p>
+ <p class="pm-hint" id="pmViewHint">Möbel, Tür oder Fenster antippen und verschieben. Genaue Werte darunter einstellen.</p>
  <div id="pmObjectLegend" class="pm-object-legend"></div>
  <div id="pmOpeningEditor" class="pm-opening-editor"></div>
  <div class="pm-import-panel"><h2>🔒 Private 3D-Skizze importieren oder sichern</h2><p>Du kannst weiterhin eine <strong>.json-Raumdatei</strong> für dieses Zimmer importieren. Dein Plan bleibt auf deinem Gerät.</p>
