@@ -3,7 +3,7 @@
 import {getModuleValue,mutateModuleValues,mutateModuleValuesWithDeletes} from '../assets/database.js';
 export const ROOMS_KEY='wohnung.rooms.v1';
 export const ROOM_TYPES=Object.freeze({bad:'Badezimmer',kueche:'Küche',wc:'WC',wohnen:'Wohnzimmer',schlafen:'Schlafzimmer',kind:'Kinderzimmer',flur:'Flur',abstell:'Abstellraum',arbeiten:'Arbeitszimmer',sonst:'Sonstiges'});
-export const OBJECT_TYPES=Object.freeze({wc:'WC',waschbecken:'Waschbecken',dusche:'Dusche',wanne:'Badewanne',spiegel:'Spiegel',schrank:'Schrank',waschmaschine:'Waschmaschine',spuele:'Spüle',herd:'Herd',kuehlschrank:'Kühlschrank',arbeitsplatte:'Arbeitsplatte',tisch:'Tisch',sofa:'Sofa',bett:'Bett',regal:'Regal',sonst:'Anderes Objekt'});
+export const OBJECT_TYPES=Object.freeze({wc:'WC',waschbecken:'Waschbecken',dusche:'Dusche',wanne:'Badewanne',spiegel:'Spiegel',schrank:'Schrank',waschmaschine:'Waschmaschine',spuele:'Spüle',herd:'Herd',kuehlschrank:'Kühlschrank',arbeitsplatte:'Arbeitsplatte',tisch:'Tisch',sofa:'Sofa',bett:'Bett',regal:'Regal',unterschrank:'Küchen-Unterschrank',oberschrank:'Küchen-Oberschrank',geschirrspueler:'Geschirrspüler',backofen:'Backofen',stuhl:'Stuhl',heizkoerper:'Heizkörper',muelleimer:'Abfalleimer',dunstabzug:'Dunstabzug',sonst:'Anderes Objekt'});
 const MAX_ROOMS=70,MAX_OBJECTS=70,MAX_PHOTOS=24;
 const id=()=>globalThis.crypto?.randomUUID?.()||`pm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 function safeText(v,max){return String(v??'').trim().slice(0,max);}
