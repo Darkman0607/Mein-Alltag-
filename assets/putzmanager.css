@@ -69,3 +69,11 @@
 .pm-3d-zoom span{font-weight:700}
 
 .pm-3d-zoom[hidden]{display:none!important}
+
+/* W02-HF01: distraction-free two-finger 3D camera. Plan editing retains all controls. */
+.pm-3d-viewport:not(.pm-plan-mode){aspect-ratio:1/1;max-height:min(75vh,680px);border-color:#6f998d;overscroll-behavior:contain}
+.pm-3d-gesture{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0 3px;font-size:11px;line-height:1.5;color:#ccefe0}
+.pm-3d-gesture[hidden],.pm-opening-editor[hidden],.pm-object-legend[hidden]{display:none!important}
+.pm-3d-gesture button{background:transparent;border:1px solid #518674;color:#bceace;border-radius:10px;padding:7px 9px;font-size:11px;min-height:38px;white-space:nowrap}
+.pm-3d-viewport:not(.pm-plan-mode) .pm-3d-svg{pointer-events:none}
+@media(max-width:359px){.pm-3d-gesture{flex-wrap:wrap}.pm-3d-gesture button{margin-left:auto}}
