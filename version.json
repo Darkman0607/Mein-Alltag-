@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.22.2",
-  "build": "W01.2 Grundriss-Editor: Türen/Fenster verschieben und übersichtliche 3D-Ansicht",
+  "version": "0.22.3",
+  "build": "W01.3 Bewegliche Möbel: Platzieren, Drehen und Größe bearbeiten",
   "release_date": "2026-11-02"
 }
