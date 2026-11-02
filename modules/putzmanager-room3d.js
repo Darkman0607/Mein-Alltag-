@@ -74,8 +74,8 @@ const rgb=c=>{const n=c.replace('#','');return [0,2,4].map(i=>parseInt(n.slice(i
 function shade(c,f){const s=rgb(c).map(n=>Math.min(255,Math.max(0,Math.round(n*f))));return `rgb(${s.join(' ')})`;}
 /** Quiet isometric scene: only rear walls, no overlapping furniture names. */
 /** W02: richer room view, furniture details are generated from the editable geometry. */
-export function render3DSVG(scene,{angle=36,elevation=53,zoom=1}={}){
- return renderArchitectural3DSVG(scene,{angle,elevation,zoom});
+export function render3DSVG(scene,{angle=36,elevation=53,zoom=1,panX=0,panY=0}={}){
+ return renderArchitectural3DSVG(scene,{angle,elevation,zoom,panX,panY});
 }
 /** Metric 2D floor plan. Dataset hit areas on openings support finger dragging. */
 export function renderPlanSVG(scene,selected=null){
@@ -193,24 +193,31 @@ export function countFurnitureOverlaps(scene,index){
 }
 /** Full designer with save-on-confirm, explicit selection, metric slider and touch plan dragging. */
 export function installRoomDesigner(container,source,{save,onMessage}={}){
- const host=container.querySelector('.pm-3d-viewport'),tools=container.querySelector('.pm-3d-tools'),pitchBox=container.querySelector('.pm-3d-pitch');
- const rotation=container.querySelector('#pmAngle'),elevation=container.querySelector('#pmElevation'),zoomSlider=container.querySelector('#pmZoom');
+ const host=container.querySelector('.pm-3d-viewport');
  const editor=container.querySelector('#pmOpeningEditor'),legend=container.querySelector('#pmObjectLegend');
  if(!host||!editor)return;
  let committed=structuredClone(validate3DScene(source));
- let scene=structuredClone(committed),angle=36,pitch=53,zoom=1.15,mode=source.name==='Küche – optische Vorlage'?'3d':'plan',selected=null,dirty=false,drag=null,saving=false;
+ let scene=structuredClone(committed),angle=36,pitch=53,zoom=1.15,panX=0,panY=0,mode=source.name==='Küche – optische Vorlage'?'3d':'plan',selected=null,dirty=false,drag=null,saving=false;
+ const activePointers=new Map();let gesture=null,rafId=0;
+ const fit=(n,min,max)=>Math.max(min,Math.min(max,n));
+ const resetCamera=()=>{angle=36;pitch=53;zoom=1.15;panX=0;panY=0;};
+ const scheduleView=()=>{if(!rafId)rafId=requestAnimationFrame(()=>{rafId=0;if(mode==='3d')paint();});};
+ const centerOf=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+ const spacing=(a,b)=>Math.max(8,Math.hypot(a.x-b.x,a.y-b.y));
+ function beginPinch(){const [a,b]=[...activePointers.values()];if(!a||!b)return;gesture={kind:'pinch',center:centerOf(a,b),dist:spacing(a,b),zoom,panX,panY};}
+ function beginOrbit(){const p=[...activePointers.values()][0];gesture=p?{kind:'orbit',x:p.x,y:p.y,angle,pitch}:null;}
  const wallLabels={north:'Nordwand (oben)',south:'Südwand (unten)',west:'Westwand (links)',east:'Ostwand (rechts)'};
  const showStatus=(text,error=false)=>onMessage?.(text,error);
  const selectedOpening=()=>{if(!selected)return null;const [kind,i]=selected.split(':');if(!['door','window'].includes(kind))return null;return openingList(scene,kind)[Number(i)]?{kind,index:Number(i),value:openingList(scene,kind)[Number(i)]}:null;};
  const selectedFurniture=()=>{if(!selected?.startsWith('object:'))return null;const index=Number(selected.split(':')[1]);return scene.objects[index]?{index,value:scene.objects[index]}:null;};
  function paint(){
-  host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch,zoom});
+  host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch,zoom,panX,panY});
   host.classList.toggle('pm-plan-mode',mode==='plan');
   container.querySelectorAll('[data-pm-mode]').forEach(b=>{b.classList.toggle('pm-mode-active',b.dataset.pmMode===mode);b.setAttribute('aria-pressed',String(b.dataset.pmMode===mode));});
-  if(tools)tools.hidden=mode==='plan';if(pitchBox)pitchBox.hidden=mode==='plan';
-  const zoomBox=container.querySelector('.pm-3d-zoom');if(zoomBox)zoomBox.hidden=mode==='plan';
-  const zoomValue=container.querySelector('#pmZoomVal');if(zoomValue)zoomValue.textContent=Math.round(zoom*100)+' %';
-  const hint=container.querySelector('#pmViewHint');if(hint)hint.textContent=mode==='plan'?'Tür, Fenster oder Möbel antippen und verschieben. Genaue Maße darunter einstellen.':'3D mit dem Finger drehen. Möbelnummern stehen in der Legende; die Positionen bearbeitest du im Grundriss.';
+  // Keep the 3D viewer spacious; detailed furniture and opening controls belong only to the plan editor.
+  if(editor)editor.hidden=mode==='3d';if(legend)legend.hidden=mode==='3d';
+  const gestures=container.querySelector('.pm-3d-gesture');if(gestures)gestures.hidden=mode!=='3d';
+  const hint=container.querySelector('#pmViewHint');if(hint)hint.textContent=mode==='plan'?'Tür, Fenster oder Möbel antippen und verschieben. Genaue Maße darunter einstellen.':'Wände schalten sich beim Drehen automatisch frei. Im Grundriss kannst du Möbel bearbeiten.';
   if(legend){const list=scene.objects||[];legend.innerHTML=list.length?list.map((o,i)=>`<button type="button" data-pm-legend="object:${i}" class="${selected===`object:${i}`?'pm-selected':''}"><b>${i+1}</b> ${esc(o.name)}</button>`).join(''):'<span>Noch keine Möbel in dieser Skizze</span>';}
   renderControls();
  }
@@ -242,13 +249,13 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   catch(err){showStatus(err.message,true);renderControls();}
  }
  legend?.addEventListener('click',e=>{const button=e.target.closest('[data-pm-legend]');if(button){selected=button.dataset.pmLegend;mode='plan';paint();}});
- container.querySelectorAll('[data-pm-mode]').forEach(btn=>btn.addEventListener('click',()=>{mode=btn.dataset.pmMode;drag=null;paint();}));
- rotation?.addEventListener('input',()=>{angle=Number(rotation.value);if(mode==='3d')paint();});
- elevation?.addEventListener('input',()=>{pitch=Number(elevation.value);if(mode==='3d')paint();});
- zoomSlider?.addEventListener('input',()=>{zoom=Number(zoomSlider.value)/100;if(mode==='3d')paint();});
- container.querySelectorAll('[data-3d-turn]').forEach(btn=>btn.addEventListener('click',()=>{angle=(angle+Number(btn.dataset['3dTurn'])+360)%360;if(rotation)rotation.value=angle;if(mode==='3d')paint();}));
+ container.querySelectorAll('[data-pm-mode]').forEach(btn=>btn.addEventListener('click',()=>{mode=btn.dataset.pmMode;activePointers.clear();gesture=null;drag=null;paint();}));
+ container.querySelector('[data-pm-view-reset]')?.addEventListener('click',()=>{resetCamera();paint();});
+ host.addEventListener('dblclick',e=>{if(mode==='3d'){e.preventDefault();resetCamera();paint();}});
+ host.addEventListener('wheel',e=>{if(mode!=='3d')return;e.preventDefault();zoom=fit(zoom*(e.deltaY<0?1.10:1/1.10),.65,3);scheduleView();},{passive:false});
+ host.addEventListener('keydown',e=>{if(mode!=='3d')return;const k=e.key;if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','0'].includes(k))return;e.preventDefault();if(k==='ArrowLeft')angle=(angle-12+360)%360;if(k==='ArrowRight')angle=(angle+12)%360;if(k==='ArrowUp')pitch=fit(pitch+5,22,82);if(k==='ArrowDown')pitch=fit(pitch-5,22,82);if(k==='+'||k==='=')zoom=fit(zoom*1.1,.65,3);if(k==='-')zoom=fit(zoom/1.1,.65,3);if(k==='0')resetCamera();paint();});
  host.addEventListener('pointerdown',e=>{
-  if(mode==='3d'){drag={kind:'orbit',x:e.clientX,base:angle,id:e.pointerId};host.setPointerCapture?.(e.pointerId);return;}
+  if(mode==='3d'){e.preventDefault();activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});host.setPointerCapture?.(e.pointerId);if(activePointers.size===1)beginOrbit();else beginPinch();return;}
   const hit=e.target.closest('[data-pm-opening], [data-pm-furniture]');if(!hit)return;
   const furniture=hit.getAttribute('data-pm-furniture'),opening=hit.getAttribute('data-pm-opening');
   selected=furniture||opening;
@@ -261,8 +268,25 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   host.setPointerCapture?.(e.pointerId);paint();
  });
  host.addEventListener('pointermove',e=>{
+  if(mode==='3d'){
+   if(!activePointers.has(e.pointerId))return;
+   e.preventDefault();activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+   if(activePointers.size>=2){
+    if(gesture?.kind!=='pinch')beginPinch();
+    const [a,b]=[...activePointers.values()],center=centerOf(a,b);
+    const z=fit(gesture.zoom*spacing(a,b)/gesture.dist,.65,3);
+    const rect=host.getBoundingClientRect(),sx=480/Math.max(1,rect.width),sy=400/Math.max(1,rect.height);
+    // Follow the two-finger midpoint in both directions while the separation controls zoom.
+    panX=fit(gesture.panX+(center.x-gesture.center.x)*sx,-800,800);
+    panY=fit(gesture.panY+(center.y-gesture.center.y)*sy,-700,700);
+    zoom=z;
+   }else if(gesture?.kind==='orbit'){
+    angle=(gesture.angle+(e.clientX-gesture.x)*.65+36000)%360;
+    pitch=fit(gesture.pitch-(e.clientY-gesture.y)*.30,22,82);
+   }
+   scheduleView();return;
+  }
   if(!drag||drag.id!==e.pointerId)return;
-  if(drag.kind==='orbit'){angle=(drag.base+(e.clientX-drag.x)*.8+3600)%360;if(rotation)rotation.value=Math.round(angle);paint();return;}
   const svg=host.querySelector('svg');if(!svg)return;
   const ctm=svg.getScreenCTM();if(!ctm)return;const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(ctm.inverse());
   const {width:w,depth:d}=scene.room,sc=Math.min(360/w,295/d),left=(480-w*sc)/2,top=(385-d*sc)/2;
@@ -276,7 +300,11 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   const next=Math.round(clamp(dist-sel.value.width/2,0,wallSize(scene,sel.value.wall)-sel.value.width)*100)/100;
   if(next!==sel.value.offset)apply({offset:next},true);
  });
- for(const event of ['pointerup','pointercancel','lostpointercapture'])host.addEventListener(event,()=>{if(['opening','object'].includes(drag?.kind)&&dirty)showStatus('Position geändert – jetzt speichern.');drag=null;});
+ for(const event of ['pointerup','pointercancel','lostpointercapture'])host.addEventListener(event,e=>{
+  if(activePointers.has(e.pointerId)){activePointers.delete(e.pointerId);if(activePointers.size>=2)beginPinch();else if(activePointers.size===1)beginOrbit();else gesture=null;return;}
+  if(['opening','object'].includes(drag?.kind)&&dirty)showStatus('Position geändert – jetzt speichern.');
+  if(drag?.id===e.pointerId)drag=null;
+ });
  editor.addEventListener('click',async e=>{
   const btn=e.target.closest('button');if(!btn||saving)return;
   if(btn.dataset.pmSelect){selected=btn.dataset.pmSelect;paint();}
@@ -292,7 +320,7 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
   if(e.target.id==='pmOpeningOffset'){
    try{
     scene=editOpening(scene,sel.kind,sel.index,{offset:Number(e.target.value)});dirty=true;
-    host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch,zoom});
+    host.innerHTML=mode==='plan'?renderPlanSVG(scene,selected):render3DSVG(scene,{angle,elevation:pitch,zoom,panX,panY});
     const val=scene[sel.kind==='door'?'doors':'windows'][sel.index].offset.toFixed(2);
     const lbl=editor.querySelector('#pmOpeningPositionLabel'),num=editor.querySelector('#pmOpeningOffsetNumber'),saveBtn=editor.querySelector('[data-pm-save]'),resetBtn=editor.querySelector('[data-pm-reset]');
     if(lbl)lbl.textContent=val+' m';if(num)num.value=val;if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='✓ Änderungen speichern';}if(resetBtn)resetBtn.disabled=false;
