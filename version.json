@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.22.3",
-  "build": "W01.3 Bewegliche Möbel: Platzieren, Drehen und Größe bearbeiten",
+  "version": "0.23.0",
+  "build": "W02 Küchendarstellung: Fotovorlage rechts, detaillierte 3D-Möbel, sichere Übernahme",
   "release_date": "2026-11-02"
 }
