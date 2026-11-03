@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.23.3",
-  "build": "P01 Raum-Checkliste, Gesamt-Stoppuhr, bestätigter automatischer Lagerverbrauch",
+  "version": "0.23.4",
+  "build": "P01-HF01: Reinigungsaufgaben kompakt ein-/ausklappbar, Fortschritt und Stoppuhr unverändert",
   "release_date": "2026-11-03"
 }
