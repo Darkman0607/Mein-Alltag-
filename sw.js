@@ -1,5 +1,5 @@
 /* Mein Alltag – offline shell cache; increment version when updating assets. */
-const CACHE='mein-alltag-v0-23-7';
+const CACHE='mein-alltag-v0-23-8';
 const ASSETS=[
  './','./index.html','./version.json','./manifest.webmanifest','./assets/styles.css','./assets/putzmanager.css','./assets/app.js','./assets/database.js','./assets/cross-module.js','./assets/backup.js','./assets/google-drive.js',
  './assets/icons/app-192.png','./assets/icons/app-512.png',
@@ -7,7 +7,7 @@ const ASSETS=[
  './assets/icons/lagerhaus.png','./assets/icons/frauengesundheit.png','./assets/icons/familienplaner.png','./assets/icons/putzmanager.png','./assets/icons/hausservice.png',
  './modules/lagerhaus.js','./modules/lagerhaus-app.js','./modules/lagerhaus-compact.js','./modules/lagerhaus-floor.js','./modules/lagerhaus-hierarchy.js','./modules/lagerhaus-items.js','./modules/lagerhaus-templates.js','./modules/lagerhaus-items-view.js','./modules/lagerhaus-stock.js','./modules/lagerhaus-tracking.js','./modules/lagerhaus-fach.js','./modules/lagerhaus-photos.js','./modules/lagerhaus-shelf.js','./modules/lagerhaus-consumption.js','./modules/lagerhaus-categories.js','./modules/lagerhaus-navigator.js','./modules/lagerhaus-navigator-view.js','./modules/lagerhaus-service.js','./modules/lagerhaus-service-view.js','./modules/frauengesundheit.js','./modules/frauengesundheit-ui.js','./modules/lernschule.js','./modules/familienplaner.js','./modules/putzmanager.js','./modules/putzmanager-data.js','./modules/putzmanager-cleaning.js','./modules/putzmanager-cleaning-ui.js','./modules/putzmanager-ui.js','./modules/putzmanager-room3d.js','./modules/putzmanager-architecture.js','./modules/hausservice.js'
 ];
-// W03 0.23.7: new cache for the improved 3D bathroom and unchanged kitchen.
+// UI hotfix 0.23.8: green active bottom navigation. Includes W03 0.23.7 bathroom updates.
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([
  caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('mein-alltag-')&&k!==CACHE).map(k=>caches.delete(k)))),
