@@ -5,6 +5,8 @@ import {renderArchitectural3DSVG} from './putzmanager-architecture.js';
  */
 import {OBJECT_TYPES} from './putzmanager-data.js';
 const FORMAT='mein-alltag-raum3d';
+const objectId=()=>globalThis.crypto?.randomUUID?.()||`pm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const validObjectId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{1,128}$/.test(value);
 const finite=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
 const text=(value,len=60)=>typeof value==='string'?value.trim().slice(0,len):'';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -58,7 +60,7 @@ export function validate3DScene(data){
   if(!finite(o.x,0,room.width)||!finite(o.z,0,room.depth)||!finite(o.width,.1,5)||!finite(o.depth,.1,5)||!finite(o.height,.1,room.height)||!finite(o.baseY??0,0,room.height)||o.height+(o.baseY??0)>room.height+.001||![0,90,180,270].includes(o.rotation??0))throw Error(`Objekt ${i+1}: Position, Größe oder Drehung ungültig.`);
   const swap=(o.rotation===90||o.rotation===270);
   if(o.x-(swap?o.depth:o.width)/2<-.001||o.x+(swap?o.depth:o.width)/2>room.width+.001||o.z-(swap?o.width:o.depth)/2<-.001||o.z+(swap?o.width:o.depth)/2>room.depth+.001)throw Error(`Objekt „${name}“ liegt außerhalb des Raums.`);
-  return {type:o.type,name,x:o.x,z:o.z,width:o.width,depth:o.depth,height:o.height,baseY:o.baseY??0,rotation:o.rotation??0};
+  return {...(validObjectId(o.id)?{id:o.id}:{}),type:o.type,name,x:o.x,z:o.z,width:o.width,depth:o.depth,height:o.height,baseY:o.baseY??0,rotation:o.rotation??0};
  });
  return {format:FORMAT,schemaVersion:1,name:text(data.name,85)||'Raumskizze',unit:'m',room,doors,windows,objects,note:text(data.note,300)};
 }
@@ -178,7 +180,7 @@ export function addFurniture(scene,type='schrank'){
  const locations=[];
  for(let iy=0;iy<5;iy++)for(let ix=0;ix<5;ix++)locations.push({x:width/2+(base.room.width-width)*ix/4,z:depth/2+(base.room.depth-depth)*iy/4});
  const target=locations.find(p=>clear(p.x,p.z))||locations[12];
- base.objects.push({type,name:OBJECT_TYPES[type],x:Math.round(target.x*100)/100,z:Math.round(target.z*100)/100,width,depth,height,baseY:0,rotation:0});
+ base.objects.push({id:objectId(),type,name:OBJECT_TYPES[type],x:Math.round(target.x*1000)/1000,z:Math.round(target.z*1000)/1000,width,depth,height,baseY:0,rotation:0});
  return validate3DScene(base);
 }
 export function removeFurniture(scene,index){

@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.23.1",
-  "build": "W02-HF01 3D-Kamera: Finger drehen, Zwei-Finger-Zoom/Pan, freie Sicht auf Möbel",
-  "release_date": "2026-11-02"
+  "version": "0.23.2",
+  "build": "W02-HF02 Gemeinsame Objektverwaltung: 3D-Grundriss und Reinigungsliste mit Datenmigration",
+  "release_date": "2026-11-03"
 }
