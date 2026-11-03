@@ -4,12 +4,16 @@ import {ITEM_KEY} from './lagerhaus-items.js';
 import {roomTaskGroups,taskCount,loadCleaningState,loadMaterialPresets,saveMaterialPreset,clearMaterialPreset,sessionElapsed,duration,materialSources,startCleaning,setTimer,setTaskDone,addMaterial,removeMaterial,cancelCleaning,finishCleaning} from './putzmanager-cleaning.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=n=>String(Number(n)).replace('.',',');
-function tasksHtml(groups,done,enabled){
+function tasksHtml(groups,done,enabled,expandedGroups){
  const completed=new Set(done||[]);
- return groups.map(group=>`<section class="pm-clean-group"><h3>${esc(group.name)} <small>${group.steps.filter(step=>completed.has(step.id)).length}/${group.steps.length}</small></h3><div class="pm-clean-task-list">${group.steps.map(step=>`<label class="pm-clean-task ${completed.has(step.id)?'pm-clean-done':''}"><input type="checkbox" data-clean-task="${esc(step.id)}" ${completed.has(step.id)?'checked':''} ${enabled?'':'disabled'}><span>${esc(step.title)}</span></label>`).join('')}</div></section>`).join('');
+ return groups.map(group=>{
+  const count=group.steps.filter(step=>completed.has(step.id)).length;
+  return `<details class="pm-clean-group" data-clean-group="${esc(group.id)}" ${expandedGroups.has(group.id)?'open':''}><summary class="pm-clean-group-summary"><span class="pm-clean-group-name">${esc(group.name)}</span><span class="pm-clean-group-count">${count}/${group.steps.length}</span><span class="pm-clean-group-chevron" aria-hidden="true"></span></summary><div class="pm-clean-task-list">${group.steps.map(step=>`<label class="pm-clean-task ${completed.has(step.id)?'pm-clean-done':''}"><input type="checkbox" data-clean-task="${esc(step.id)}" ${completed.has(step.id)?'checked':''} ${enabled?'':'disabled'}><span>${esc(step.title)}</span></label>`).join('')}</div></details>`;
+ }).join('');
 }
+
 const summarizeLine=line=>`${line.itemName}: ${n(line.quantity)} ${line.unit}`;
-function cleanPanel(room,active,history,sources,preset){
+function cleanPanel(room,active,history,sources,preset,expandedGroups){
  const groups=active?.groups||roomTaskGroups(room),total=taskCount(groups),done=active?.doneTaskIds?.length||0;
  const recent=history.filter(h=>h.roomId===room.id).slice(0,3);
  return `<section class="pm-clean-panel" aria-label="Raum reinigen">
@@ -23,7 +27,8 @@ function cleanPanel(room,active,history,sources,preset){
  <button type="button" class="pm-clean-discard" data-clean-action="discard">Reinigung verwerfen</button>`:
  `<button type="button" class="primary-button pm-accent pm-full" data-clean-action="start">▶ Reinigung starten</button>`}</div>
  <div class="pm-clean-summary"><strong>Aufgabenübersicht</strong><span>${done} von ${total} erledigt</span></div>
- <div class="pm-clean-groups">${tasksHtml(groups,active?.doneTaskIds,Boolean(active))}</div>
+ <div class="pm-clean-fold-controls" role="group" aria-label="Aufgabengruppen ein- oder ausklappen"><button type="button" data-clean-toggle-all="collapse">▴ Alle einklappen</button><button type="button" data-clean-toggle-all="expand">▾ Alle aufklappen</button></div>
+ <div class="pm-clean-groups">${tasksHtml(groups,active?.doneTaskIds,Boolean(active),expandedGroups)}</div>
  ${active?`<div class="pm-clean-material"><h3>📦 Lagerhaus-Material</h3><p>Wähle die tatsächlich verwendeten Verbrauchsartikel. Beim <strong>Abschließen</strong> zieht die App diese automatisch und nur einmal vom Lager ab. Geräte bleiben im Lager.</p>
  ${sources.length?`<form id="pmCleanMaterial"><label for="pmCleanSource">Verbrauchsartikel und Lagerort</label><select id="pmCleanSource" name="sourceIndex" required class="search-input">${sources.map((v,i)=>`<option value="${i}">${esc(v.label)}</option>`).join('')}</select><div class="pm-clean-material-grid"><label>Verwendete Menge<input class="search-input" type="number" name="quantity" inputmode="decimal" min="0" step="0.001" value="1" required></label><label>Einheit<select class="search-input" name="mode" id="pmCleanUnit"><option value="units">Grundeinheiten</option><option value="pairs">Paar Handschuhe</option></select></label></div><button class="secondary-button pm-full" type="submit">＋ Material vormerken</button></form>`:'<p class="pm-clean-warning">Kein verfügbares Verbrauchsmaterial im Lagerhaus. Du kannst trotzdem putzen; es wird nichts abgebucht.</p>'}
  ${active.materials.length?'<button class="secondary-button pm-full" type="button" data-clean-action="save-preset">🔁 Materialauswahl für diesen Raum merken</button>':''}${preset?.length?'<button class="pm-clean-discard" type="button" data-clean-action="clear-preset">Gespeicherte Materialvorlage löschen</button>':''}<h4>Für diese Reinigung vorgemerkt</h4>${active.materials.length?`<ul class="pm-clean-basket">${active.materials.map(line=>`<li><span>${esc(summarizeLine(line))}</span><button type="button" data-clean-action="remove-material" data-line-id="${esc(line.id)}" aria-label="${esc(line.itemName)} entfernen">×</button></li>`).join('')}</ul>`:'<p class="pm-hint">Noch kein Material ausgewählt – bisher keine Lagerabbuchung.</p>'}</div>`:''}
@@ -32,13 +37,20 @@ function cleanPanel(room,active,history,sources,preset){
 }
 export async function mountCleaningUi({root,room,notify}){
  const stage=root.querySelector('#pmCleaningStage');if(!stage)return ()=>{};
- let stop=false,timer=0,locked=false,state=null,sources=[],presets={};
+ let stop=false,timer=0,locked=false,state=null,sources=[],presets={},renderedOnce=false;
+ const expandedGroups=new Set();
  async function refresh(){
   const [loaded,items,warehouseRooms,areas,presetData]=await Promise.all([loadCleaningState(),getModuleValue('lagerhaus',ITEM_KEY),getModuleValue('lagerhaus','rooms.v1'),getModuleValue('lagerhaus','areas.v1'),loadMaterialPresets()]);
   if(stop||!stage.isConnected)return;
   state=loaded;presets=presetData;
   try{sources=materialSources(Array.isArray(items)?items:[],Array.isArray(warehouseRooms)?warehouseRooms:[],Array.isArray(areas)?areas:[]);}catch(e){sources=[];notify('Lagerwarnung: '+e.message,true);}
-  stage.innerHTML=cleanPanel(room,state.active[room.id],state.history,sources,presets[room.id]);
+  // The task list is redrawn after every checkmark. Keep whatever groups the user opened.
+  if(renderedOnce){
+   expandedGroups.clear();
+   stage.querySelectorAll('details[data-clean-group][open]').forEach(group=>expandedGroups.add(group.dataset.cleanGroup));
+  }
+  stage.innerHTML=cleanPanel(room,state.active[room.id],state.history,sources,presets[room.id],expandedGroups);
+  renderedOnce=true;
   const material=stage.querySelector('#pmCleanMaterial');
   if(material){material.querySelector('[name="mode"]').disabled=!sources[0]?.pairs;material.querySelector('[name="quantity"]').step=sources[0]?.unit==='stk'?'1':'0.001';}
  }
@@ -48,6 +60,12 @@ export async function mountCleaningUi({root,room,notify}){
  };
  await refresh();timer=setInterval(updateClock,1000);
  stage.addEventListener('click',async e=>{
+  const foldButton=e.target.closest('[data-clean-toggle-all]');
+  if(foldButton){
+   const expand=foldButton.dataset.cleanToggleAll==='expand';
+   stage.querySelectorAll('details[data-clean-group]').forEach(group=>{group.open=expand;});
+   return;
+  }
   const button=e.target.closest('[data-clean-action]');if(!button||locked)return;
   const action=button.dataset.cleanAction,session=state?.active[room.id];
   if(action==='finish'){
