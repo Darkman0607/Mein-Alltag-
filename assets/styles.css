@@ -786,3 +786,35 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .lager-home-advanced summary:focus-visible,.lager-fast-form summary:focus-visible,.lager-fast-main:focus-visible{outline:3px solid #c8f2da;outline-offset:3px}
 .lager-fast-use{font-size:12px;color:#d5fad7;margin:4px 0}
 @media(max-width:345px){.lager-fast-card{padding:11px}.lager-fast-form .lager-fast-fields{gap:6px}}
+
+/* V0.23.9: Startseite – Bildvorlage des Nutzers, restliche Module unverändert. */
+body.home-mode{background:#0a0913}
+body.home-mode .app-shell{background:radial-gradient(ellipse 90% 32% at 50% 2%,#322338 0%,transparent 90%),linear-gradient(180deg,#101525 0%,#120e1d 56%,#090c15 100%)}
+body.home-mode .app-shell::before{background:radial-gradient(ellipse at 50% 8%,rgba(199,124,144,.09),transparent 65%)}
+body.home-mode .topbar{display:none}
+body.home-mode main{padding:0 18px 15px}
+.home-scene{max-width:510px;margin:auto;position:relative;padding-bottom:3px}
+.home-brand-art{display:block;width:calc(100% + 36px);max-width:none;height:auto;margin-left:-18px;pointer-events:none;user-select:none}
+.home-scene .home-intro{font-family:system-ui, sans-serif;text-align:center;font-size:clamp(11px,2.8vw,14px);letter-spacing:.3px;color:#bcb7c7;margin:2px 0 7px}
+.home-scene .module-grid{gap:1px 3px;max-width:none;margin:0 -2px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.home-scene .module-tile{padding:0;min-height:0;border:0;border-radius:0;box-shadow:none;background:transparent;filter:none;display:block;isolation:auto;overflow:visible;aspect-ratio:395 / 304;touch-action:manipulation}
+.home-scene .module-tile::before,.home-scene .module-tile::after{display:none}
+.home-scene .module-tile img{width:100%;height:100%;max-width:none;margin:0;display:block;object-fit:contain;filter:none;pointer-events:none;user-select:none}
+.home-scene .module-tile .tile-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.home-scene .module-tile:active{transform:scale(.965);filter:brightness(1.13)}
+.home-scene .module-tile:focus-visible{outline:3px solid #ffd4a6;outline-offset:-12px;border-radius:25px}
+.home-scene .home-footer{margin:6px auto 0;padding-bottom:6px;text-align:center}
+.home-scene .install-link{background:linear-gradient(#211722,#100e19);border:1px solid #99704a;border-radius:22px;box-shadow:0 0 9px #ba844c33,inset 0 1px #ffffff10;color:#deb18a;padding:8px 18px;min-height:37px;font-size:12px}
+.home-scene .home-footer .home-version{display:block;margin-top:10px;letter-spacing:1.6px;color:#aaa0b7;font-size:10px}
+body.home-mode .bottom-nav{height:calc(73px + env(safe-area-inset-bottom));background:linear-gradient(160deg,#21162d,#0f1222 57%,#101020);border-top:1px solid #6b4a68;border-radius:26px 26px 0 0;box-shadow:0 -5px 26px #8d528c22,inset 0 2px #ffffff13;padding-top:7px}
+body.home-mode .nav-item{color:#f5edf1}
+body.home-mode .nav-item.active{color:#75e9b8;background:radial-gradient(ellipse,#2e625e77,#12353455 58%,transparent 78%)}
+body.home-mode .nav-item svg{height:30px;width:30px}
+body.home-mode .nav-item span{font-size:12px}
+.reward-preview{border-radius:25px;padding:22px 17px;text-align:center;border:1px solid #bf68c9;background:radial-gradient(ellipse at top,#5b245e,#1e142b 69%);box-shadow:0 0 20px #ba5bcb44}
+.reward-preview img{display:block;width:min(250px,80%);max-width:100%;height:auto;margin:0 auto 8px}
+.reward-preview h1{margin:0 0 10px;font-size:25px}
+.reward-preview p{margin:8px auto;max-width:320px;font-size:14px;line-height:1.6;color:#e1d6e7}
+.reward-preview .reward-badge{display:inline-block;color:#fce1a7;border:1px solid #edb660;border-radius:99px;padding:5px 13px;font-size:12px;margin-bottom:14px}
+@media(min-width:550px){.home-brand-art{max-height:160px;object-fit:cover}.home-scene .module-grid{gap:2px 7px}.home-scene .module-tile{aspect-ratio:395/304}}
+@media(max-width:335px){body.home-mode main{padding-left:11px;padding-right:11px}.home-brand-art{width:calc(100% + 22px);margin-left:-11px}.home-scene .home-intro{margin-top:0}.home-scene .module-grid{gap:0}}

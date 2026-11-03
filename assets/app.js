@@ -13,7 +13,7 @@ import {renderHealth,mountHealth,confirmHealthExit} from '../modules/frauengesun
 import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapshot,validateSnapshot} from './backup.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.23.8';
+export const APP_VERSION='0.23.9';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -29,7 +29,7 @@ function hashRoute(){
   if(part[0]==='lagerhaus' && part[1]==='items') return {page:'lagerartikel',roomId:part[2]?decodeURIComponent(part[2]):''};
   if(part[0]==='lagerhaus' && part[1]==='room' && part[2]) return {page:'lagerraum',roomId:decodeURIComponent(part[2]),shelfId:part[3]==='shelf'&&part[4]?decodeURIComponent(part[4]):'',focusId:part[3]==='focus'&&part[4]?decodeURIComponent(part[4]):'',compartmentId:part[5]==='fach'&&part[6]?decodeURIComponent(part[6]):''};
   if(part[0]==='module' && byId[part[1]]) return {page:'module',id:part[1]};
-  if(['home','calendar','search','more'].includes(part[0])) return {page:part[0]};
+  if(['home','calendar','search','more','reward'].includes(part[0])) return {page:part[0]};
   return {page:'home'};
 }
 export function navigate(page,id){
@@ -39,8 +39,17 @@ export function navigate(page,id){
 }
 function section(title,subtitle=''){return `<div class="section-heading"><span class="eyebrow">Mein Alltag · Beta V${APP_VERSION}</span><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>`;}
 function renderHome(){
-  return `<div class="home-intro">Fünf Bereiche. Ein Ort für deinen Alltag.</div><div class="module-grid">${MODULES.map((m,i)=>`<button type="button" class="module-tile ${i===4?'wide':''}" data-open="${m.id}" data-id="${m.id}" aria-label="${esc(m.name)} öffnen"><img src="${icon(m)}" alt="" draggable="false"/><div class="tile-copy"><div class="tile-title">${esc(m.name)}</div><div class="tile-desc">${esc(m.subtitle)}</div></div></button>`).join('')}</div><div class="home-footer"><button class="install-link" id="installAction" type="button">App installieren – Anleitung</button><p id="installHelp" class="install-help" aria-live="polite"></p>MEIN ALLTAG · BETA V${APP_VERSION}</div>`;
+  const reward={id:'belohnungswelt',name:'Belohnungswelt',subtitle:'Sammeln, Ausbauen & Belohnen'};
+  const tiles=[...MODULES,reward];
+  return `<section class="home-scene" aria-label="Startseite Mein Alltag">
+    <img class="home-brand-art" src="./assets/home-art/header.webp" alt="Mein Alltag – strukturiert, einfach, dein" draggable="false" />
+    <p class="home-intro">Sechs Bereiche. Ein Ort für deinen Alltag.</p>
+    <div class="module-grid">${tiles.map(m=>`<button type="button" class="module-tile" data-open="${m.id}" data-id="${m.id}" aria-label="${esc(m.name)} öffnen"><img src="./assets/home-art/${m.id}.webp" alt="" draggable="false"/><span class="tile-copy">${esc(m.name)} – ${esc(m.subtitle)}</span></button>`).join('')}</div>
+    <div class="home-footer"><button class="install-link" id="installAction" type="button">App installieren – Anleitung</button><p id="installHelp" class="install-help" aria-live="polite"></p><span class="home-version">MEIN ALLTAG · BETA V${APP_VERSION}</span></div>
+  </section>`;
 }
+function renderReward(){return `<div class="reward-preview"><span class="reward-badge">✦ Neues Modul – in Planung</span><img src="./assets/home-art/belohnungswelt.webp" alt="Kuschelige Stadt als Vorschau für die Belohnungswelt"/><h1>Belohnungswelt</h1><p>Hier entsteht später deine eigene kleine Stadt. Durch erledigte Aufgaben sammelst du XP, Münzen und Baumaterial für neue Gebäude.</p><p><strong>Noch nicht spielbar.</strong> Dieses Update richtet zunächst den neuen Startbildschirm und den Zugang ein.</p><button type="button" class="primary-button" data-go-home>Zur Hauptseite</button></div>`;}
+
 function renderModule(m){return `<div class="module-hero" data-id="${m.id}"><img src="${icon(m)}" alt=""/><div><h1>${esc(m.name)}</h1><p>${esc(m.subtitle)}</p></div></div><span class="status-pill">Grundgerüst eingerichtet</span><div class="glass-card"><h2>Dein Bereich</h2><p>${esc(m.description)}</p><label class="field-label" for="moduleNote">Meine Startnotiz (nur auf diesem Gerät)</label><textarea maxlength="2000" class="note-input" id="moduleNote" placeholder="Optional: Hier kannst du eine kurze Notiz speichern."></textarea><div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px"><button type="button" class="primary-button" id="saveNote">Notiz speichern</button><span class="inline-message" id="saveMessage" role="status"></span></div></div><div class="glass-card"><h2>Für spätere Updates vorgesehen</h2>${m.features.map(s=>`<p>✓ ${esc(s)}</p>`).join('')}<p class="module-privacy">Diese Funktionen sind noch nicht umgesetzt. V0 liefert Navigation und getrennten lokalen Datenspeicher.</p></div>`;}
 function monthMatrix(date){
  const first=new Date(date.getFullYear(),date.getMonth(),1);const offset=(first.getDay()+6)%7;
@@ -121,7 +130,8 @@ async function loadStorage(){const node=document.getElementById('storageStatus')
 async function loadNote(id){const field=document.getElementById('moduleNote');if(!field)return;try{const data=await getModuleValue(id,'startNote');if(field.isConnected)field.value=typeof data==='string'?data:'';}catch(e){const msg=document.getElementById('saveMessage');if(msg)msg.textContent=`Speicherfehler: ${e.message}`;}}
 async function saveNote(id){const field=document.getElementById('moduleNote');const msg=document.getElementById('saveMessage');if(!field||!msg)return;const value=field.value;try{await setModuleValue(id,'startNote',value);if(msg.isConnected)msg.textContent='Gespeichert ✓';}catch(e){if(msg.isConnected)msg.textContent=`Fehler: ${e.message}`;}}
 function bindView(route){
- view.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click',()=>navigate('module',el.dataset.open)));
+ view.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click',()=>el.dataset.open==='belohnungswelt'?navigate('reward'):navigate('module',el.dataset.open)));
+ view.querySelector('[data-go-home]')?.addEventListener('click',()=>navigate('home'));
  if(route.page==='module'){
    if(route.id==='lagerhaus') mountLagerhaus();
    else if(route.id==='frauengesundheit') mountHealth();
@@ -284,13 +294,14 @@ function bindBackup(){
 }
 export function render(){
  const route=hashRoute();
- const labels={home:['Mein Alltag','STRUKTURIERT. EINFACH. DEIN.'],calendar:['Kalender','DEINE ÜBERSICHT'],search:['Suche','SCHNELL ZUM BEREICH'],more:['Mein Alltag','MEHR & EINSTELLUNGEN']};
+ const labels={home:['Mein Alltag','STRUKTURIERT. EINFACH. DEIN.'],calendar:['Kalender','DEINE ÜBERSICHT'],search:['Suche','SCHNELL ZUM BEREICH'],more:['Mein Alltag','MEHR & EINSTELLUNGEN'],reward:['Belohnungswelt','DEINE KLEINE STADT']};
  const [title,sub]=route.page==='lagerartikel'?['Lagerhaus','ARTIKELVERWALTUNG']:route.page==='lagerraum'?['Lagerhaus','3D-LAGERRAUM']:route.page==='lagernavigator'?['Lagerhaus','LAGER-NAVIGATOR']:route.page==='lagerservice'?['Lagerhaus','GERÄTE & SERVICE']:route.page==='module'?[byId[route.id].name,'DEIN EIGENER BEREICH']:labels[route.page];
  appTitle.textContent=title;appSubtitle.textContent=sub;
  backButton.hidden=route.page==='home';
  document.querySelectorAll('.nav-item').forEach(item=>{const active=item.dataset.route===route.page;item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});
- view.innerHTML=route.page==='home'?renderHome():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():route.id==='frauengesundheit'?renderHealth():route.id==='putzmanager'?renderPutzmanager():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='lagernavigator'?renderLagerNavigator():route.page==='lagerservice'?renderLagerService():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
+ view.innerHTML=route.page==='home'?renderHome():route.page==='reward'?renderReward():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():route.id==='frauengesundheit'?renderHealth():route.id==='putzmanager'?renderPutzmanager():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='lagernavigator'?renderLagerNavigator():route.page==='lagerservice'?renderLagerService():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
  document.body.classList.toggle('health-mode',route.page==='module'&&route.id==='frauengesundheit');
+ document.body.classList.toggle('home-mode',route.page==='home');
  view.scrollTop=0;bindView(route);
  document.getElementById('installAction')?.addEventListener('click',requestInstall);
  refreshInstallUI();

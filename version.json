@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.23.8",
-  "build": "UI-Hotfix: grüne Markierung der aktiven unteren Navigation; W03 Bad-3D aus 0.23.7 beibehalten",
+  "version": "0.23.9",
+  "build": "Startseite nach Bildvorlage: sechs farbige Kacheln, kuschelige Belohnungswelt als Vorschau; fünf bestehende Module unverändert",
   "release_date": "2026-11-03"
 }
