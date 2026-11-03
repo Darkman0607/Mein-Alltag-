@@ -1,0 +1,22 @@
+MEIN ALLTAG V0.23.9 – STARTSEITE / BELOHNUNGSWELT-VORSCHAU
+
+Geändert:
+- Neue Hauptseite nach freigegebener Bildvorlage mit sechs klickbaren Kacheln.
+- Die Kachel Belohnungswelt ist eine Vorschau, noch kein spielbares Aufbauspiel.
+- Bestehende fünf Module und Datenhaltung bleiben bestehen.
+- SW-Offline-Cache, Versionsanzeige und Manifest aktualisiert.
+
+GitHub:
+- Hochgeladen am 03.11.2026 zu https://github.com/Darkman0607/Mein-Alltag-
+- Commit 99fd66976d8b8fa3a6255c650c82fe224847fde2 auf main.
+- GitHub-Repositorystand 0.23.9 verifiziert.
+- Öffentlichen Pages-Stand und echte Android-PWA-Navigation noch auf Nutzergerät prüfen.
+
+Auf dem Handy:
+- Chrome unter https://darkman0607.github.io/Mein-Alltag-/ öffnen.
+- Unter Mehr → Auf Updates prüfen tippen.
+- App vollständig schließen und neu öffnen; notfalls Chrome auf Seitenversion prüfen.
+- Vor Änderungen an Speicher-/Website-Daten ein Backup anlegen.
+- Die App nicht deinstallieren und keine Website-Daten löschen, wenn noch kein Backup existiert.
+
+Word-Checkliste: bauhaus.docx im ZIP.
