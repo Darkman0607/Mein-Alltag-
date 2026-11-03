@@ -199,7 +199,7 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
  const editor=container.querySelector('#pmOpeningEditor'),legend=container.querySelector('#pmObjectLegend');
  if(!host||!editor)return;
  let committed=structuredClone(validate3DScene(source));
- let scene=structuredClone(committed),angle=36,pitch=53,zoom=1.15,panX=0,panY=0,mode=source.name==='Küche – optische Vorlage'?'3d':'plan',selected=null,dirty=false,drag=null,saving=false;
+ let scene=structuredClone(committed),angle=36,pitch=53,zoom=1.15,panX=0,panY=0,mode=(source.name==='Küche – optische Vorlage'||(source.objects||[]).some(o=>['wanne','waschbecken','dusche'].includes(o.type)))?'3d':'plan',selected=null,dirty=false,drag=null,saving=false;
  const activePointers=new Map();let gesture=null,rafId=0;
  const fit=(n,min,max)=>Math.max(min,Math.min(max,n));
  const resetCamera=()=>{angle=36;pitch=53;zoom=1.15;panX=0;panY=0;};

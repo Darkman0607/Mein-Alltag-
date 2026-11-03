@@ -15,6 +15,7 @@ const sh=(hex,f)=>{const h=hex.replace('#','');const n=[0,2,4].map(i=>parseInt(h
 function objectKind(o){if(o.type!=='schrank'&&o.type!=='sonst')return o.type;const n=(o.name||'').toLocaleLowerCase('de');if(n.includes('geschirrspüler')||n.includes('spülmaschine'))return 'geschirrspueler';if(n.includes('oberschrank')||n.includes('hängeschrank'))return 'oberschrank';if(n.includes('unterschrank'))return 'unterschrank';if(n.includes('heizkörper'))return 'heizkoerper';if(n.includes('backofen'))return 'backofen';if(n.includes('stuhl')||n.includes('sessel'))return 'stuhl';if(n.includes('abfall')||n.includes('müll'))return 'muelleimer';return o.type;}
 export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1,panX=0,panY=0}={}){
  const w=scene.room.width,d=scene.room.depth,h=scene.room.height,rad=Math.PI/180,a=angle*rad,el=elevation*rad;
+ const isBathroom=(scene.objects||[]).some(o=>['wanne','waschbecken','dusche','wc','waschmaschine'].includes(o.type));
  // Fit the full room at default zoom regardless of orientation; zooming in may intentionally crop.
  const raw=([x,y,z])=>{const dx=x-w/2,dz=z-d/2,xx=dx*Math.cos(a)+dz*Math.sin(a),zz=-dx*Math.sin(a)+dz*Math.cos(a);return [xx,zz*Math.sin(el)-y*Math.cos(el),zz*Math.cos(el)+y*Math.sin(el)];};
  const corners=[];for(const x of [0,w])for(const y of [0,h])for(const z of [0,d])corners.push(raw([x,y,z]));
@@ -42,16 +43,41 @@ export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1,pan
   else{const x=wall==='west'?-inset:w+inset;p=[[x,y1,offset],[x,y1,offset+width],[x,y2,offset+width],[x,y2,offset]];}
   polygon(p,fill,stroke,2,1,2,tag);return p;
  };
+ // Smooth simplified curves in 3D plane; coordinates remain room-relative and editable.
+ const ovalTop=(x,y,z,rx,rz,fill,stroke='#f7ffff',width=1.1)=>{
+  const pts=[];for(let j=0;j<32;j++){const a=j*2*Math.PI/32;pts.push([x+Math.cos(a)*rx,y,z+Math.sin(a)*rz]);}
+  polygon(pts,fill,stroke,width,1,5);
+ };
+ const ovalFront=(x,y,z,rx,ry,fill,stroke='#c8d3d9',width=1.2)=>{
+  const pts=[];for(let j=0;j<36;j++){const a=j*2*Math.PI/36;pts.push([x+Math.cos(a)*rx,y+Math.sin(a)*ry,z]);}
+  polygon(pts,fill,stroke,width,1,5);
+ };
  const insetRect=(v,rate=.07)=>v.map((p,i)=>p.map((q,k)=>q*(1-rate)+(v.reduce((s,t)=>s+t[k],0)/v.length)*rate));
- // Vinyl/wood floor and subtle plank seams – photo-based palette only, no copied photo textures.
- polygon([[0,0,0],[w,0,0],[w,0,d],[0,0,d]],'#a99983','#f2dfbe',1.2);
- for(let z=.27;z<d;z+=.36)line([[.015,.006,z],[w-.015,.006,z]],'#6f655a',.65,.38);
- for(let z=0,j=0;z<d;z+=.72,j++)for(let x=(j%2)*.67;x<w;x+=1.34)line([[x,.009,z],[x,.009,Math.min(d,z+.36)]],'#dfcfb8',.55,.3);
+ // Bathroom gets grey tiles; kitchen keeps its original warm wood design.
+ polygon([[0,0,0],[w,0,0],[w,0,d],[0,0,d]],isBathroom?'#59626a':'#a99983',isBathroom?'#9ba5aa':'#f2dfbe',1.2);
+ if(isBathroom){
+  for(let z=.48;z<d;z+=.48)line([[.006,.006,z],[w-.006,.006,z]],'#c7d0d0',.9,.48);
+  for(let x=.48;x<w;x+=.48)line([[x,.007,.006],[x,.007,d-.006]],'#c7d0d0',.9,.48);
+ }else{
+  for(let z=.27;z<d;z+=.36)line([[.015,.006,z],[w-.015,.006,z]],'#6f655a',.65,.38);
+  for(let z=0,j=0;z<d;z+=.72,j++)for(let x=(j%2)*.67;x<w;x+=1.34)line([[x,.009,z],[x,.009,Math.min(d,z+.36)]],'#dfcfb8',.55,.3);
+ }
  visualLayer=0;
  // Auto cutaway: only far walls are visible. Keep all wall decoration BEHIND furniture at every orbit angle.
  const walls={north:[[0,0,0],[w,0,0],[w,h,0],[0,h,0]],south:[[0,0,d],[w,0,d],[w,h,d],[0,h,d]],west:[[0,0,0],[0,0,d],[0,h,d],[0,h,0]],east:[[w,0,0],[w,0,d],[w,h,d],[w,h,0]]};
  const far=new Set([Math.cos(a)>=0?'north':'south',Math.sin(a)>=0?'east':'west']);
  for(const [wall,points] of Object.entries(walls))if(far.has(wall))polygon(points,wall==='north'?'#e7e4dd':'#f3f3ed','#e8e7e1',1,.43,-4,`data-wall="${wall}"`);
+ if(isBathroom){
+  // Grout is projected on the same faces as the wall; stays behind furniture.
+  for(const wall of far){
+   const edge=(wall==='north'||wall==='south')?w:d;
+   const position=(wall==='north')?0:(wall==='south')?d:(wall==='west')?0:w;
+   const pt=(t,y)=>wall==='north'||wall==='south'?[t,y,position]:[position,y,t];
+   for(let y=.40;y<h;y+=.4)line([pt(0,y),pt(edge,y)],'#e4e8e8',.65,.56);
+   for(let t=.5;t<edge;t+=.5)line([pt(t,0),pt(t,h)],'#e4e8e8',.65,.49);
+  }
+ }
+
  // Window / door shapes support opposite walls when the room is rotated.
  for(const win of (scene.windows||[]).filter(v=>far.has(v.wall))){
   const v=frame(win.wall,win.offset,win.width,win.sill,win.sill+win.height,.019,'#c0dbe0','#f9ffff','data-window="true"');
@@ -68,6 +94,60 @@ export function renderArchitectural3DSVG(scene,{angle=35,elevation=53,zoom=1,pan
   const swapped=o.rotation===90||o.rotation===270,ww=swapped?o.depth:o.width,dd=swapped?o.width:o.depth;
   const x1=o.x-ww/2,x2=o.x+ww/2,z1=o.z-dd/2,z2=o.z+dd/2,y1=o.baseY||0,y2=y1+o.height,k=objectKind(o),col=palette[k]||palette.sonst;
   if(!o.baseY&&k!=='arbeitsplatte')polygon([[x1-.015,.006,z1-.025],[x2+.015,.006,z1-.025],[x2+.015,.006,z2+.025],[x1-.015,.006,z2+.025]],'#293129', 'none',0,.22,-2);
+  // W03: bathroom object models, never rendered as plain blocks.
+  if(k==='wanne'){
+   // Tub sides with light rim, recessed water-free bowl and a small metal tap.
+   box(x1,x2,y1,y2-.035,z1,z2,'#e4eaec',1.2,`data-object="${i}"`);
+   box(x1-.012,x2+.012,y2-.085,y2+.008,z1-.014,z2+.014,'#ffffff',1.18);
+   const lip=.105,iy=y2+.012;
+   polygon([[x1+lip,iy,z1+lip],[x2-lip,iy,z1+lip],[x2-lip,iy,z2-lip],[x1+lip,iy,z2-lip]],'#a9c2c8','#effcff',1.6,1,6);
+   ovalTop(o.x,iy+.005,o.z,Math.max(.1,ww/2-lip-.045),Math.max(.12,dd/2-lip-.035),'#d8e9ed','#f4ffff',1.2);
+   ovalTop(x2-.22,iy+.013,z1+.20,.032,.032,'#879ba2','#cedddd',.7);
+   line([[x1+.14,y2+.02,z1+.08],[x1+.14,y2+.17,z1+.08],[x1+.25,y2+.17,z1+.08]],'#c6d9de',3.5,1,10);
+   continue;
+  }
+  if(k==='waschbecken'){
+   // Vanity base plus protruding ceramic basin, recessed bowl and faucet.
+   box(x1+.015,x2-.015,y1,y2-.06,z1+.025,z2-.025,'#c0b6aa',1.12,`data-object="${i}"`);
+   const fx=x1+.009;
+   polygon([[fx,y1+.1,z1+.07],[fx,y1+.1,z2-.07],[fx,y2-.18,z2-.07],[fx,y2-.18,z1+.07]],'#dddcd7','#aca6a0',1,1,5);
+   line([[fx-.012,y1+.38,o.z],[fx-.012,y1+.47,o.z]],'#9b8f84',2.8,1,8);
+   box(x1-.032,x2+.032,y2-.1,y2+.017,z1-.025,z2+.025,'#f8faf7',1.25);
+   ovalTop(o.x,y2+.025,o.z,ww*.35,dd*.32,'#acbbc2','#f5ffff',1.8);
+   ovalTop(o.x,y2+.030,o.z,ww*.28,dd*.25,'#eff7f7','#f7ffff',.9);
+   ovalTop(o.x+.035,y2+.034,o.z+.028,.024,.024,'#617881','#b9c8c9',.6);
+   const tapZ=z1+.085;
+   line([[o.x-.12,y2+.02,tapZ],[o.x-.12,y2+.2,tapZ],[o.x+.035,y2+.2,tapZ]],'#dbe3e4',3.8,1,9);
+   continue;
+  }
+  if(k==='waschmaschine'){
+   box(x1,x2,y1,y2,z1,z2,col[0],1.16,`data-object="${i}"`);
+   const face=z2+.014;
+   polygon([[x1+.016,y2-.20,face],[x2-.016,y2-.20,face],[x2-.016,y2-.027,face],[x1+.016,y2-.027,face]],'#3b4148','#bac7d0',1.1,1,6);
+   ovalFront(o.x,y1+o.height*.47,face+.011,ww*.34,o.height*.31,'#dce5e8','#ffffff',2.6);
+   ovalFront(o.x,y1+o.height*.47,face+.02,ww*.285,o.height*.26,'#253d47','#a7bdc5',1.8);
+   ovalFront(o.x+.018,y1+o.height*.48,face+.028,ww*.215,o.height*.185,'#496773','#d9e7ed',.9);
+   ovalFront(o.x+.01,y2-.11,face+.022,.044,.044,'#dce5e5','#586972',1);
+   line([[x2-.17,y2-.11,face+.021],[x2-.075,y2-.11,face+.021]],'#b9c9cd',1.8,1,8);
+   continue;
+  }
+  if(k==='spiegel'){
+   // Thin hanging pane: vertical mirror stays vertical regardless of its editable rotation.
+   box(x1,x2,y1,y2,z1,z2,'#dce5e6',1.14,`data-object="${i}"`);
+   const glass=[[x2+.012,y1+.04,z1+.027],[x2+.012,y1+.04,z2-.027],[x2+.012,y2-.04,z2-.027],[x2+.012,y2-.04,z1+.027]];
+   polygon(glass,'#9fc5ca','#f5faff',2,1,5);
+   line([[x2+.02,y2-.12,z1+.09],[x2+.02,y1+.22,z1+.09]],'#e6ffff',2,.85,9);
+   continue;
+  }
+  if(k==='dusche'){
+   // Shower pipe and round shower head; no invented solid glass enclosure.
+   const bx=o.x,bz=o.z,low=y1,high=y2;
+   line([[bx,low,bz],[bx,high-.11,bz],[bx+.16,high-.11,bz]],'#d7e3e6',4.4,1,8);
+   ovalTop(bx+.16,high-.11,bz,.16,.105,'#c6d6da','#e9f2f4',1.8);
+   for(let u=-2;u<=2;u++)line([[bx+.16+u*.037,high-.12,bz+.015],[bx+.16+u*.037,high-.27,bz+.015]],'#b5dce5',.8,.7,9);
+   polygon([[bx-.012,low,bz-.012],[bx+.012,low,bz-.012],[bx+.012,low+.24,bz-.012],[bx-.012,low+.24,bz-.012]],'#879da7','#dce9eb',1,1,7,`data-object="${i}"`);
+   continue;
+  }
   // An actual chair has a seat/back/legs; tables have an open space under the tabletop.
   if(k==='tisch'){
    for(const x of [x1+.08,x2-.08])for(const z of [z1+.08,z2-.08])box(x-.035,x+.035,0,Math.min(.69,y2-.04),z-.035,z+.035,'#6a5445',1);

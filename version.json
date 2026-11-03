@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.23.6",
-  "build": "Hotfix: doppelten bookStock-Import entfernt, fünf App-Module wieder sichtbar",
+  "version": "0.23.7",
+  "build": "W03: detaillierte 3D-Badobjekte, geflieste Badansicht, korrigierter JSON-Import, Küchenansicht unverändert",
   "release_date": "2026-11-03"
 }
