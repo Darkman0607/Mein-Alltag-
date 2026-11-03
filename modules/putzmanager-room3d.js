@@ -199,10 +199,11 @@ export function installRoomDesigner(container,source,{save,onMessage}={}){
  const editor=container.querySelector('#pmOpeningEditor'),legend=container.querySelector('#pmObjectLegend');
  if(!host||!editor)return;
  let committed=structuredClone(validate3DScene(source));
- let scene=structuredClone(committed),angle=36,pitch=53,zoom=1.15,panX=0,panY=0,mode=(source.name==='Küche – optische Vorlage'||(source.objects||[]).some(o=>['wanne','waschbecken','dusche'].includes(o.type)))?'3d':'plan',selected=null,dirty=false,drag=null,saving=false;
+ const isBathroomView=(source.objects||[]).some(o=>['wanne','waschbecken','dusche'].includes(o.type));
+ let scene=structuredClone(committed),angle=isBathroomView?315:36,pitch=53,zoom=1.15,panX=0,panY=0,mode=(source.name==='Küche – optische Vorlage'||isBathroomView)?'3d':'plan',selected=null,dirty=false,drag=null,saving=false;
  const activePointers=new Map();let gesture=null,rafId=0;
  const fit=(n,min,max)=>Math.max(min,Math.min(max,n));
- const resetCamera=()=>{angle=36;pitch=53;zoom=1.15;panX=0;panY=0;};
+ const resetCamera=()=>{angle=isBathroomView?315:36;pitch=53;zoom=1.15;panX=0;panY=0;};
  const scheduleView=()=>{if(!rafId)rafId=requestAnimationFrame(()=>{rafId=0;if(mode==='3d')paint();});};
  const centerOf=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
  const spacing=(a,b)=>Math.max(8,Math.hypot(a.x-b.x,a.y-b.y));
