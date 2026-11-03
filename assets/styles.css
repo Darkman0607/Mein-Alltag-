@@ -757,3 +757,32 @@ body.health-mode {background:#f3dcd9;color:#583047;color-scheme:light}
 .health-app .ls-pdf-view p{font-size:12px;color:#805d73;line-height:1.45}
 .health-app .ls-block-file:focus-within,.health-app .ls-block-editor button:focus-visible{outline:3px solid #b43e77;outline-offset:2px}
 @media(max-width:390px){.health-app .ls-content-pdf{gap:5px}.health-app .ls-content-pdf button{min-width:58px}}
+
+/* L17 V0.23.5: Lagerhaus-Schnellerfassung, 3D-Einstellungen nachgeordnet */
+.lager-fast-card{border:1px solid #577c79;background:linear-gradient(150deg,#1a373c,#0e1a24);padding:16px;border-radius:19px;margin:16px 0;box-shadow:0 10px 22px #0004}
+.lager-fast-main,.lager-fast-save{display:block;width:100%;min-height:55px;font-size:17px;font-weight:800}
+.lager-fast-card>.lager-hint{margin:11px 0 12px}
+.lager-fast-form{margin:14px 0;padding:13px;border-radius:14px;background:#0c1c27;border:1px solid #548175}
+.lager-fast-form h2{font-size:18px;margin:2px 0 16px;color:#d4ffe0}
+.lager-fast-form label{display:block;font-size:14px;font-weight:700;color:#e1f0ed;margin:13px 0}
+.lager-fast-form input,.lager-fast-form select{display:block;width:100%;margin-top:6px;min-height:49px;background:#0c1a25;border:1px solid #658b8c;border-radius:12px;color:#f5fff9;font-size:16px;padding:10px}
+.lager-fast-form .lager-fast-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;min-width:0}
+.lager-fast-form .lager-fast-fields>*{min-width:0}
+.lager-fast-optional{font-size:11px;font-weight:400;color:#afc8c9}
+.lager-fast-more{border:1px solid #46666a;border-radius:12px;padding:9px 12px;margin:13px 0}
+.lager-fast-more summary{min-height:38px;display:list-item;align-content:center;cursor:pointer;font-size:13px;color:#d7f2ea}
+.lager-fast-save{margin:15px 0 9px}
+.lager-fast-cancel{width:100%;min-height:45px}
+.lager-fast-feedback{min-height:20px;color:#b7f0ce;font-size:13px;font-weight:650;line-height:1.5;margin:10px 0}
+.lager-fast-feedback.is-error{color:#ffb6aa}
+.lager-fast-recent h2{font-size:16px;margin:15px 0 9px}.lager-fast-count{color:#9db9ba}
+.lager-fast-recent-list{display:grid;gap:6px}
+.lager-fast-recent-item{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid #415961;border-radius:11px;padding:11px 10px;background:#14252f}
+.lager-fast-recent-item span{min-width:0;overflow-wrap:anywhere}.lager-fast-recent-item strong{display:block;font-size:14px}.lager-fast-recent-item small{display:block;color:#adc6cc;font-size:11px;margin-top:4px}
+.lager-fast-recent-item b{white-space:nowrap;font-size:13px;color:#f2d08c}
+.lager-fast-all{display:inline-flex;padding:14px 0;color:#d5f5e6;font-weight:700}
+.lager-home-advanced{margin:16px 0;border:1px solid #435661;border-radius:17px;padding:0 13px 12px;background:#12212c}
+.lager-home-advanced>summary{cursor:pointer;font-size:15px;font-weight:750;color:#e2eaf1;min-height:61px;align-content:center}
+.lager-home-advanced summary:focus-visible,.lager-fast-form summary:focus-visible,.lager-fast-main:focus-visible{outline:3px solid #c8f2da;outline-offset:3px}
+.lager-fast-use{font-size:12px;color:#d5fad7;margin:4px 0}
+@media(max-width:345px){.lager-fast-card{padding:11px}.lager-fast-form .lager-fast-fields{gap:6px}}

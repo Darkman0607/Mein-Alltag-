@@ -110,16 +110,16 @@ export async function setTaskDone(roomId,taskId,done){
  });
 }
 export function materialSources(items,rooms,areas){
- const choices=locationChoices(rooms,areas),locName=id=>choices.find(c=>c.id===id)?.label||'Unbekannter Ort';
+ const choices=locationChoices(rooms,areas),locName=id=>choices.find(c=>c.id===id)?.label||'Unbekannter Ort',useLabel=item=>item.useArea?' · für '+item.useArea:'';
  const result=[];
  for(const item of items){
   if(item.type!=='verbrauch'||stockTotal(item)<=0)continue;
   for(const pos of stockPositions(item)){
    const free=untrackedAt(item,pos.locationId);
-   if(free>0)result.push({itemId:item.id,fromId:pos.locationId,containerId:null,name:item.name,unit:item.unit,available:free,pairs:pairEligible(item),label:`${item.name} · ${locName(pos.locationId)} · frei ${free} ${item.unit}`});
+   if(free>0)result.push({itemId:item.id,fromId:pos.locationId,containerId:null,name:item.name,unit:item.unit,available:free,pairs:pairEligible(item),label:`${item.name}${useLabel(item)} · ${locName(pos.locationId)} · frei ${free} ${item.unit}`});
   }
   for(const c of item.containers||[]){
-   if(c.remaining>0)result.push({itemId:item.id,fromId:c.locationId,containerId:c.id,name:item.name,unit:item.unit,available:c.remaining,pairs:pairEligible(item),label:`${item.name} · ${c.label||c.code||'Flasche'} · ${locName(c.locationId)} · Rest ${c.remaining} ${item.unit}`});
+   if(c.remaining>0)result.push({itemId:item.id,fromId:c.locationId,containerId:c.id,name:item.name,unit:item.unit,available:c.remaining,pairs:pairEligible(item),label:`${item.name}${useLabel(item)} · ${c.label||c.code||'Flasche'} · ${locName(c.locationId)} · Rest ${c.remaining} ${item.unit}`});
   }
  }
  return result;
