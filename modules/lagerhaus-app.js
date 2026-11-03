@@ -2,7 +2,7 @@ import {enhanceRoomUi,resetCompactRoomUi} from './lagerhaus-compact.js';
 /** Lagerhaus L04 – stable warehouse hierarchy with compartments. */
 import {getModuleValue,setModuleValues,mutateModuleValues} from '../assets/database.js';
 import {ITEM_KEY,ITEM_SEQ_KEY,upsertItem,assertNodeHasNoItems,assertLocationsRetained} from './lagerhaus-items.js';
-import {MOVEMENT_KEY,bookStock,stockTotal} from './lagerhaus-stock.js';
+import {MOVEMENT_KEY,stockTotal} from './lagerhaus-stock.js';
 import {fachCards,matchFach,fachBooking} from './lagerhaus-fach.js';
 import {shelfLines,roomUnassigned,shelfPackagesSvg,formatAmount} from './lagerhaus-shelf.js';
 import {pairEligible,pairsLabel} from './lagerhaus-consumption.js';

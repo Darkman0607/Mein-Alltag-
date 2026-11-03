@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#080d12"><title>Mein Alltag – Cache reparieren</title>
+<style>body{background:#0b151e;color:#e6f6ef;font:17px/1.5 system-ui,-apple-system,Arial,sans-serif;margin:0;min-height:100dvh;display:grid;place-items:center}main{width:min(460px,calc(100% - 35px));padding:25px 19px;border:1px solid #4f8779;border-radius:19px;background:#152a34}h1{margin:0 0 7px;font-size:25px}p{margin:10px 0}button{width:100%;font-size:17px;font-weight:700;background:#9deaba;color:#10221d;padding:18px;border:0;border-radius:12px;margin-top:12px;cursor:pointer}button:disabled{opacity:.5}a{color:#d5f5e6}#status{min-height:20px;font-size:14px}</style></head>
+<body><main><h1>Mein Alltag – Reparatur</h1><p>Wenn die fünf App-Kacheln fehlen, kannst du hier ausschließlich den App-Cache und die Service-Worker-Registrierung zurücksetzen.</p><p><strong>Deine Artikel, Räume, Fotos und anderen Daten in der lokalen Datenbank werden dabei nicht gelöscht.</strong></p><button id="repair" type="button">App-Cache reparieren</button><p id="status" role="status" aria-live="polite"></p><p><a href="./#/home">Zurück zu Mein Alltag</a></p></main>
+<script>
+const button=document.getElementById('repair'),status=document.getElementById('status');
+button.addEventListener('click',async()=>{
+ button.disabled=true;status.textContent='App-Cache wird repariert …';
+ try{
+  const scope=new URL('./',location.href).href;
+  if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const reg of regs){if(reg.scope.startsWith(scope))await reg.unregister();}}
+  if('caches' in window){const keys=await caches.keys();for(const key of keys){if(key.startsWith('mein-alltag-'))await caches.delete(key);}}
+  status.textContent='Cache zurückgesetzt. Die App wird neu geladen …';
+  location.replace('./?repariert='+Date.now()+'#/home');
+ }catch(e){status.textContent='Reparatur fehlgeschlagen: '+e.message+' – bitte online öffnen und erneut versuchen.';button.disabled=false;}
+});
+</script></body></html>

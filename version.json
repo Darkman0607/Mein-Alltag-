@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.23.5",
-  "build": "L17: Lagerhaus-Schnellerfassung (Name, Menge, Einsatzbereich), 3D-Verwaltung optional",
+  "version": "0.23.6",
+  "build": "Hotfix: doppelten bookStock-Import entfernt, fünf App-Module wieder sichtbar",
   "release_date": "2026-11-03"
 }
