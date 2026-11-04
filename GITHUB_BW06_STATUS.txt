@@ -1,0 +1,22 @@
+MEIN ALLTAG – BW06 / VERSION 0.24.6
+
+GitHub: https://github.com/Darkman0607/Mein-Alltag-
+Branch: main (bestätigt)
+Code-Commit, 122 geänderte/neu hinzugefügte Text-, Bild-, Testdateien:
+2388de76d44c8048b0fd42c390cff721bfe41bce
+README-Commit:
+3b2741e90d3952256cd04bf81c9d4413b1a286ab
+Word-Checklisten-Commit:
+e98f657ec184d6247f0d68fd423b409ca9b4aaf9
+
+Vor der Freigabe wurden 122/122 Git-Blob-Prüfsummen im vorbereiteten Baum
+gegen die lokal getesteten Dateien kontrolliert. Beide Word-Dateien wurden
+bytegenau als Git-Blobs abgeglichen und veröffentlicht.
+
+Die 100 Motive sind eigens programmierte, stilisierte SVG-Vektorgrafiken,
+keine handgezeichneten Premium-Illustrationen. Der Import ist ausdrücklich
+zu starten und kann vorhandene Karten NICHT überschreiben.
+
+Offen: echte Android-PWA-Prüfung und öffentliche GitHub-Pages-HTTPS-Abnahme.
+Historische Releasetests mit fest vorgegebenen alten Versionen bleiben
+unverändert und gelten nicht als BW06-Abnahme.
