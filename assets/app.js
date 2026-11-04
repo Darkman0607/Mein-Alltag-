@@ -12,9 +12,11 @@ import hausservice from '../modules/hausservice.js';
 import {renderHealth,mountHealth,confirmHealthExit} from '../modules/frauengesundheit-ui.js';
 import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapshot,validateSnapshot} from './backup.js';
 import {readRewardOverview} from './reward-data.js';
+import {loadRewardAlbum} from './reward-album.js';
+import {renderRewardAlbum,mountRewardAlbum} from './reward-album-ui.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.24.1';
+export const APP_VERSION='0.24.2';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -82,26 +84,40 @@ function renderReward(route){
      <div class="bw-hero-label"><strong>Deine besondere Karte</strong><span>Designvorschau · noch keine Karte gesammelt</span></div>
     </div>
     <button class="bw-progress" type="button" data-reward="album" aria-label="Sammlungsalbum öffnen"><span class="bw-progress-icon" aria-hidden="true">▤</span><span class="bw-progress-copy"><strong>Sammelfortschritt</strong><span>0 / 100 Karten</span><span class="bw-progress-track"><span style="width:0%"></span></span></span><b>0%</b></button>
-    <p class="bw-note">BW01 hat die getrennten Datenspeicher und die Backup-Migration eingerichtet. Sammelkarten, XP-Vergabe und Booster-Käufe folgen später.</p>`:
-    tab==='album'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">▤</span><h2>Dein Sammelalbum</h2><p>Die vier geplanten Serien starten mit insgesamt 100 Karten: Anime-Frauen, Anime-Tiere, Traktoren & Maschinen und Monster.</p><div class="bw-series-list">${['Anime-Frauen','Anime-Tiere','Traktoren & Maschinen','Monster'].map(n=>`<div><span>${esc(n)}</span><b>0 / 25</b></div>`).join('')}</div><p class="bw-muted">Die Kartendatenbank ist vorbereitet. Echte Serienkarten und das Album folgen in BW02.</p></div>`:
+    <p class="bw-note">BW02: Dein Album mit 100 Kartenplätzen ist bereit. Karten kannst du selbst gestalten; Sammelmechanik, XP und Booster folgen in späteren Updates.</p>`:
+    tab==='album'?renderRewardAlbum():
     tab==='booster'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">✦</span><h2>Booster-Inventar</h2><p>Ein Booster wird später fünf Karten enthalten. Gekaufte, noch ungeöffnete Booster werden hier verwaltet.</p><div class="bw-placeholder-counter">0 ungeöffnete Booster</div><p class="bw-muted">Booster werden noch nicht verkauft oder geöffnet. Der Datenspeicher ist vorbereitet.</p></div>`:
     tab==='shop'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">▥</span><h2>Booster-Shop</h2><p>Geplant sind gemischte Booster, Themen-Booster, Event- und Premium-Booster mit transparenten Ziehchancen.</p><p class="bw-muted">Der Shop ist noch nicht freigeschaltet. Es werden keine Münzen abgebucht.</p></div>`:
     tab==='missionen'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">◎</span><h2>Missionen & Erfolge</h2><p>Tägliche, wöchentliche und monatliche Aufgaben verbinden später deine App-Bereiche mit Münzen und Sammelkarten.</p><p class="bw-muted">Noch keine aktiven Missionen.</p></div>`:
     tab==='wunschliste'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">♡</span><h2>Wunschliste</h2><p>Hier werden später gesuchte Karten und fehlende Lieblingskarten gesammelt.</p><p class="bw-muted">Noch keine Karten vorgemerkt.</p></div>`:
     tab==='herstellung'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">⚒</span><h2>Kartenherstellung</h2><p>Karten bis Mythisch sollen aus Splittern herstellbar sein. Diamant-Karten bleiben exklusiv für Booster und Herausforderungen.</p><p class="bw-muted">Die Herstellung folgt in einem späteren Update.</p></div>`:
-    `<div class="bw-empty-panel"><h2>Weitere Funktionen</h2><p>BW01: Getrennte Belohnungswelt-Datenbank (Serien, Katalog, Booster, Exemplare, Wallet, Inventar und Journal) eingerichtet. Funktionen wie Wunschliste, Herstellung und Belohnungskalender folgen später.</p><p id="bwStorageStatus" role="status">Prüfe neuen Datenspeicher …</p><div class="bw-quicklinks"><button data-reward="wunschliste" type="button">♡ Wunschliste</button><button data-reward="herstellung" type="button">⚒ Herstellung</button><button data-navigate="more" type="button">⚙ App-Einstellungen</button></div></div>`;
+    `<div class="bw-empty-panel"><h2>Weitere Funktionen</h2><p>BW02: Kartenalbum mit vier Themen, insgesamt 100 nummerierten Kartenplätzen, Suchfiltern, Favoriten, eigener Kartengestaltung und Detailansicht. Echte Boosterziehungen, Kartenhandel und Belohnungskalender folgen später.</p><p id="bwStorageStatus" role="status">Prüfe neuen Datenspeicher …</p><div class="bw-quicklinks"><button data-reward="wunschliste" type="button">♡ Wunschliste</button><button data-reward="herstellung" type="button">⚒ Herstellung</button><button data-navigate="more" type="button">⚙ App-Einstellungen</button></div></div>`;
  return `<section class="bw-reward-scene" aria-label="Belohnungswelt"><div class="bw-reward-head"><button class="bw-reward-back" type="button" data-navigate="home" aria-label="Zurück zum Hauptmenü">‹</button><div class="bw-reward-head-center"><span class="bw-reward-logo"><img src="./assets/bw00/belohnungswelt.webp" alt="" draggable="false"/></span><h1>Belohnungswelt</h1><p>${esc(titles[tab])}</p></div><button class="bw-reward-info" type="button" data-reward="more" aria-label="Weitere Funktionen">ⓘ</button></div>
-  <div class="bw-reward-wallet" aria-label="Dein Guthaben"><div class="bw-wallet-xp"><span>★</span><strong>0 XP</strong></div><div class="bw-wallet-coins"><span>🪙</span><strong>0</strong></div><div class="bw-wallet-splitters"><span>💎</span><strong>0</strong></div></div>
+  <div class="bw-reward-wallet" aria-label="Dein Guthaben"><div class="bw-wallet-xp"><span>★</span><strong id="bwWalletXp">0 XP</strong></div><div class="bw-wallet-coins"><span>🪙</span><strong id="bwWalletCoins">0</strong></div><div class="bw-wallet-splitters"><span>💎</span><strong id="bwWalletShards">0</strong></div></div>
   <div class="bw-reward-body">${panel}</div>
   </section>`;
 }
-async function mountRewardStorage(){
+async function mountRewardStorage(route){
  const status=document.getElementById('bwStorageStatus');
- if(!status)return;
+ const container=document.querySelector('.bw-reward-scene');
+ if(!container)return;
  try{
-  const data=await readRewardOverview();
-  if(status.isConnected)status.textContent=`Datenspeicher bereit (Schema ${data.schemaVersion}). ${data.catalogCards} Karten im Katalog · ${data.ownedCopies} Exemplare · ${data.unopenedBoosters} ungeöffnete Booster. Noch keine Spielmechanik freigeschaltet.`;
- }catch(e){if(status.isConnected)status.textContent='Datenspeicher nicht verfügbar: '+e.message;}
+  const summary=await readRewardOverview();
+  if(!container.isConnected)return;
+  const wallet=summary.wallet||{xp:0,coins:0,shards:0};
+  for(const [id,value] of [['bwWalletXp',String(wallet.xp||0)+' XP'],['bwWalletCoins',wallet.coins||0],['bwWalletShards',wallet.shards||0]]){
+   const target=container.querySelector('#'+id);if(target)target.textContent=String(value);
+  }
+  if(status)status.textContent=`Datenspeicher bereit (Schema ${summary.schemaVersion}). ${summary.catalogCards} Karten im Katalog · ${summary.ownedCopies} Exemplare · ${summary.unopenedBoosters} ungeöffnete Booster. Noch keine Spielmechanik freigeschaltet.`;
+  if(route.section==='start'){
+   const album=await loadRewardAlbum();if(!container.isConnected)return;
+   const progress=container.querySelector('.bw-progress');
+   if(progress){progress.querySelector('.bw-progress-copy>span').textContent=`${album.uniqueOwned} / ${album.total} Karten`;
+    progress.querySelector('.bw-progress-track span').style.width=album.percent+'%';
+    progress.querySelector('b').textContent=album.percent+'%';}
+  }
+ }catch(e){if(status&&status.isConnected)status.textContent='Datenspeicher nicht verfügbar: '+e.message;
+  else if(container.isConnected){const note=container.querySelector('.bw-note');if(note)note.textContent='Speicher konnte nicht geladen werden: '+e.message;}}
 }
 function renderOverview(){return `${section('Übersicht','Alles Wichtige schnell erreichen.')}<div class="glass-card"><h2>Deine Übersicht</h2><p>Wähle eine Funktion, die du öffnen möchtest.</p><button type="button" class="row-link" data-navigate="calendar"><span>📅 Kalender</span><span>›</span></button><button type="button" class="row-link" data-navigate="search"><span>⌕ Suche</span><span>›</span></button><button type="button" class="row-link" data-navigate="reward"><span>🎴 Belohnungswelt</span><span>›</span></button></div>`;}
 function renderMessages(){return `${section('Mitteilungen','Deine Informationszentrale.')}<div class="glass-card"><h2>Keine neuen Mitteilungen</h2><p>Benachrichtigungen werden erst angezeigt, wenn die jeweiligen Module entsprechende Ereignisse unterstützen. Die angezeigte Null ist kein erfundener Datenbestand.</p><button type="button" class="secondary-button" data-navigate="home">Zur Startseite</button></div>`;}
@@ -190,7 +206,7 @@ function bindView(route){
  view.querySelector('[data-go-home]')?.addEventListener('click',()=>navigate('home'));
  view.querySelectorAll('[data-navigate]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.navigate)));
  view.querySelectorAll('[data-reward]').forEach(el=>el.addEventListener('click',()=>navigate('reward',el.dataset.reward)));
- if(route.page==='reward')mountRewardStorage();
+ if(route.page==='reward'){mountRewardStorage(route);if(route.section==='album')mountRewardAlbum();}
  if(route.page==='module'){
    if(route.id==='lagerhaus') mountLagerhaus();
    else if(route.id==='frauengesundheit') mountHealth();
