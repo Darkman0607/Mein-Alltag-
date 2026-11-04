@@ -18,7 +18,7 @@ import {renderRewardEconomy,mountRewardEconomy} from './reward-economy-ui.js';
 import {renderRewardShop,mountRewardShop} from './reward-shop-ui.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.24.5';
+export const APP_VERSION='0.24.6';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');

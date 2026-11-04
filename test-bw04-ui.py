@@ -20,6 +20,7 @@ let mock={wallet:{coins:134,xp:100,shards:0},inventory:[],purchases:[],openings:
  pool:i===0?Array.from({length:5},(_,k)=>({id:'card:'+k,name:'Testkarte '+k,rarity:'selten',categoryId:'monster'})):[],
  odds:Object.fromEntries(REWARD_RARITIES.map(r=>[r,r==='selten'&&i===0?100:0]))
  }))};
+function safeStarterAsset(card){return card?.imageAsset||null;}
 async function loadBoosterShop(){return structuredClone(mock);}
 async function openOwnedBooster(id){throw Error('Nicht im alten UI-Test öffnen');}
 async function purchaseBooster(id,quantity,requestId){

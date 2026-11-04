@@ -1,6 +1,7 @@
 /** BW02 – accessible, touch-friendly album. No demo ownership or artificial rewards. */
 import {ALBUM_SLOTS,CATEGORY_APPEARANCE,CATEGORY_FIELDS,loadRewardAlbum,filterAlbum,setAlbumFavorite,saveAlbumCard,prepareAlbumImage} from './reward-album.js';
 import {REWARD_CATEGORIES,REWARD_RARITIES} from './reward-data.js';
+import {installStarterSeries,safeStarterAsset} from './reward-series.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const rarityNames={gewoehnlich:'Gewöhnlich',ungewoehnlich:'Ungewöhnlich',selten:'Selten',episch:'Episch',legendaer:'Legendär',mythisch:'Mythisch',diamant:'Diamant'};
@@ -8,13 +9,14 @@ const pad=n=>String(n).padStart(3,'0');
 const percent=(n,total)=>total?Math.round(n*100/total):0;
 
 export function renderRewardAlbum(){return `<div class="bw-album" id="bwAlbum">
- <div class="bw-album-intro"><span class="bw-album-kicker">SAMMLUNG · 4 THEMEN</span><h2>Dein Kartenalbum</h2><p>100 nummerierte Plätze. Kartenmotive können von dir ergänzt werden; <strong>ein ausgefüllter Kartenplatz ist noch keine gesammelte Karte</strong>.</p></div>
+ <div class="bw-album-intro"><span class="bw-album-kicker">SAMMLUNG · 4 THEMEN</span><h2>Dein Kartenalbum</h2><p>100 nummerierte Plätze in vier Themen. Du kannst jetzt 100 originale, stilisierte Vektormotive als Startserie einspielen. <strong>Gestaltete Karten gelten nicht automatisch als gesammelt.</strong></p></div>
+ <div class="bw-starter-import" aria-label="Startserie"><div><strong>🎨 Startkollektion · 100 Originalmotive</strong><p>25 eigene Vektorbilder je Thema, 7 Seltenheiten. Bereits gestaltete Karten bleiben unverändert. Es werden keine Kartenexemplare, Münzen oder Booster verschenkt.</p><span id="bwStarterStatus" role="status" aria-live="polite">Prüfe freie Kartenplätze …</span></div><button id="bwStarterInstall" class="bw-album-action bw-primary" type="button">Fehlende Motive einspielen</button></div>
  <div class="bw-album-stats" id="bwAlbumStats" role="status" aria-live="polite">Lade Sammelfortschritt …</div>
  <div class="bw-album-categories" id="bwAlbumCategories" role="group" aria-label="Kartenkategorie"></div>
  <div class="bw-album-controls"><label for="bwAlbumSearch">Karte suchen</label><input id="bwAlbumSearch" class="bw-album-search" type="search" maxlength="80" placeholder="Name oder Nummer, z. B. 003" autocomplete="off"/>
  <label for="bwAlbumFilter">Karten anzeigen</label><select id="bwAlbumFilter" class="bw-album-select"><option value="all">Alle Plätze</option><option value="owned">Nur gesammelte</option><option value="missing">Noch fehlende</option><option value="favorites">Meine Favoriten</option></select></div>
  <div class="bw-album-results" id="bwAlbumResults" aria-live="polite"></div><div class="bw-card-grid" id="bwAlbumGrid"><p>Album wird geladen …</p></div>
- <p class="bw-album-explain">✧ Illustrationen in leeren Feldern sind nur Gestaltungsvorlagen, keine freigeschalteten Karten. Booster, Münzen und das Ziehen von Karten folgen in späteren Updates.</p>
+ <p class="bw-album-explain">✧ Startmotive sind stilisierte, eigens erzeugte Vektorgrafiken. Einzelne Figuren und Maschinen sind Fantasiemotive; du kannst eigene Bilder verwenden. Ein Kartenmotiv ist kein gesammeltes Exemplar. Booster und Kartenöffnung sind ab BW05 verfügbar.</p>
  <div class="bw-card-modal" id="bwCardModal" hidden role="dialog" aria-modal="true" aria-labelledby="bwModalTitle"><div class="bw-card-modal-content"><button type="button" class="bw-modal-close" id="bwModalClose" aria-label="Kartendetails schließen">×</button><div id="bwModalBody"></div></div></div>
  </div>`;}
 
@@ -22,9 +24,10 @@ function art(slot,large=false){
  const appearance=CATEGORY_APPEARANCE[slot.categoryId];
  const image=slot.card?.imageData;
  const hasSafeImage=typeof image==='string'&&/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(image)&&image.length<=1150000;
+ const seriesArt=safeStarterAsset(slot.card);
  const rarity=REWARD_RARITIES.includes(slot.card?.rarity)?slot.card.rarity:'unbekannt';
  return `<div class="bw-card-art bw-theme-${appearance.theme} bw-rarity-${rarity} ${slot.owned?'bw-is-owned':'bw-is-missing'} ${large?'bw-art-large':''}">
-  ${hasSafeImage?`<img src="${image}" alt="${esc(slot.card.name)}" loading="lazy"/>`:`<span class="bw-card-emblem" aria-hidden="true">${appearance.icon}</span><span class="bw-card-unavailable">${slot.card?'Motiv fehlt':'Kartenplatz'}</span>`}
+  ${hasSafeImage?`<img src="${image}" alt="${esc(slot.card.name)}" loading="lazy"/>`:seriesArt?`<img src="${seriesArt}" alt="${esc(slot.card.name)} – Original-Vektormotiv" loading="lazy"/>`:`<span class="bw-card-emblem" aria-hidden="true">${appearance.icon}</span><span class="bw-card-unavailable">${slot.card?'Motiv fehlt':'Kartenplatz'}</span>`}
   <span class="bw-card-art-number">#${pad(slot.number)}</span>
  </div>`;
 }
@@ -42,14 +45,23 @@ export function mountRewardAlbum(){
  const modal=root.querySelector('#bwCardModal'),modalBody=root.querySelector('#bwModalBody');
  const closeBtn=root.querySelector('#bwModalClose');
  const findSlot=id=>album?.slots.find(x=>x.id===id);
+ const starterButton=root.querySelector('#bwStarterInstall'),starterStatus=root.querySelector('#bwStarterStatus');
  const paint=()=>{
   if(!root.isConnected||!album)return;
   stats.innerHTML=`<div><strong>${album.uniqueOwned}<small> / ${album.total}</small></strong><span>Verschiedene gesammelt</span></div><div><strong>${album.copies}</strong><span>Exemplare insgesamt</span></div><div><strong>${album.configured}</strong><span>Karten gestaltet</span></div><div class="bw-album-meter"><span style="width:${album.percent}%"></span></div><p>${album.percent}% der geplanten Karten tatsächlich gesammelt</p>`;
   categories.innerHTML=`<button type="button" class="bw-category-chip ${category==='all'?'active':''}" aria-pressed="${category==='all'}" data-bw-cat="all"><b>ALLE</b><span>${album.uniqueOwned} / 100</span></button>`+album.byCategory.map(c=>`<button type="button" class="bw-category-chip ${category===c.id?'active':''}" aria-pressed="${category===c.id}" data-bw-cat="${esc(c.id)}"><b>${CATEGORY_APPEARANCE[c.id].icon} ${esc(c.label)}</b><span>${c.owned} / ${c.total}</span></button>`).join('');
   const matching=filterAlbum(album,{category,status,query});results.textContent=`${matching.length} Kartenplätze angezeigt · ${matching.filter(s=>s.owned).length} gesammelt · ${album.favorites} Favoriten`;
+  if(starterButton){const missing=album.total-album.configured;starterButton.disabled=busy||missing===0;starterButton.textContent=missing===0?'✓ Startserie vollständig':`${missing} freie Kartenplätze füllen`;starterStatus.textContent=missing===0?'100/100 Kartenplätze gestaltet. Bereits gesammelte Karten bleiben separat gezählt.':`${album.configured} von 100 Plätzen bereits gestaltet · ${missing} freie Plätze zum einmaligen Import bereit.`;}
   grid.innerHTML=matching.length?matching.map(tile).join(''):'<div class="bw-album-empty">Keine passenden Kartenplätze. Filter oder Suche ändern.</div>';
  };
  const reload=async()=>{album=await loadRewardAlbum();paint();return album;};
+ starterButton?.addEventListener('click',async()=>{
+  if(busy||!album)return;const count=album.total-album.configured;if(!count)return;
+  if(!window.confirm(`Möchtest du ${count} fehlende Kartenplätze mit den neuen Original-Vektormotiven befüllen? Bestehende Karten, Bilder, Münzen, Booster und gesammelte Exemplare bleiben unangetastet.`))return;
+  busy=true;starterButton.disabled=true;starterStatus.textContent='Speichere neue Motive in einem sicheren Vorgang …';
+  try{const result=await installStarterSeries();await reload();starterStatus.textContent=`✓ ${result.added} Karten hinzugefügt, ${result.preserved} bestehende Karten erhalten. Keine Exemplare oder Münzen verschenkt.`;}
+  catch(e){starterStatus.textContent='Import fehlgeschlagen: '+e.message;}finally{busy=false;starterButton.disabled=album?.configured===100;}
+ });
  const close=()=>{
   if(modal.hidden)return;modal.hidden=true;document.body.classList.remove('bw-card-dialog-open');modalBody.replaceChildren();activeSlot=null;pendingImage=null;
   if(lastFocus?.isConnected)lastFocus.focus();
@@ -58,12 +70,12 @@ export function mountRewardAlbum(){
   const appearance=CATEGORY_APPEARANCE[slot.categoryId],title=slot.card?.name||`Karte #${pad(slot.number)}`;
   const rarity=slot.card?.rarity||'gewoehnlich';
   return `<h2 id="bwModalTitle">${esc(title)}</h2><p class="bw-modal-meta">${esc(appearance.label)} · #${pad(slot.number)} von 025</p>
-    ${art(slot,true)}<div class="bw-modal-status"><strong>${slot.owned?`✓ ${slot.owned} Exemplar${slot.owned===1?'':'e'} im Besitz`:'Noch nicht gesammelt'}</strong>${slot.card?`<span>${esc(rarityNames[rarity]||'Unbekannt')} · ${slot.card.imageData?'Motiv hinterlegt':'Ohne Motiv'}</span>`:'<span>Dieser Kartenplatz hat noch keinen Katalogeintrag.</span>'}</div>
+    ${art(slot,true)}<div class="bw-modal-status"><strong>${slot.owned?`✓ ${slot.owned} Exemplar${slot.owned===1?'':'e'} im Besitz`:'Noch nicht gesammelt'}</strong>${slot.card?`<span>${esc(rarityNames[rarity]||'Unbekannt')} · ${(slot.card.imageData||safeStarterAsset(slot.card))?'Motiv hinterlegt':'Ohne Motiv'}</span>`:'<span>Dieser Kartenplatz hat noch keinen Katalogeintrag.</span>'}</div>
     ${slot.card?.description?`<p class="bw-card-description">${esc(slot.card.description)}</p>`:''}
     ${CATEGORY_FIELDS[slot.categoryId].filter(f=>slot.card?.details?.[f.key]).map(f=>`<div class="bw-card-detail-row"><b>${esc(f.label)}</b><span>${esc(slot.card.details[f.key])}</span></div>`).join('')}
     ${slot.owned?`<details class="bw-card-copies"><summary>Gesammelte Exemplare (${slot.owned})</summary>${slot.copies.map(copy=>`<p>Exemplar ${esc(copy.id||'ohne ID')} · ${esc(copy.obtainedAt||'Datum unbekannt')} ${copy.locked?'· 🔒 geschützt':''}</p>`).join('')}</details>`:''}
     <div class="bw-card-modal-actions"><button type="button" class="bw-album-action" data-bw-detailfav="${esc(slot.id)}">${slot.favorite?'★ Favorit entfernen':'☆ Als Favorit merken'}</button><button type="button" class="bw-album-action bw-primary" id="bwCardEditButton">${slot.card?'Karte bearbeiten':'Karte gestalten'}</button></div>
-    <p class="bw-album-disclaimer">Karten selbst gestalten erzeugt keine Sammlung und vergibt keine Münzen. Erst eine spätere Boosterziehung kann Exemplare hinzufügen.</p>`;
+    <p class="bw-album-disclaimer">Karten gestalten oder die Startserie importieren erzeugt keine Sammlung und vergibt keine Münzen. Exemplare entstehen nur beim tatsächlichen Booster-Öffnen.</p>`;
  };
  const edit=slot=>{
   const name=slot.card?.name||'',note=slot.card?.description||'',rarity=slot.card?.rarity||'gewoehnlich';
@@ -74,7 +86,7 @@ export function mountRewardAlbum(){
    <label for="bwCardDescription">Beschreibung (optional)</label><textarea id="bwCardDescription" name="description" maxlength="600" rows="3" placeholder="Eigene Details zur Karte">${esc(note)}</textarea>
    ${CATEGORY_FIELDS[slot.categoryId].map(f=>`<label for="bwAttr_${f.key}">${esc(f.label)} (optional)</label><input id="bwAttr_${f.key}" name="bwAttr_${f.key}" maxlength="120" value="${esc(slot.card?.details?.[f.key]||'')}"/>`).join('')}
    <label class="bw-card-event-toggle"><input id="bwEventCard" type="checkbox" name="eventCard" ${slot.card?.eventCard===true?'checked':''}/><span>Als Eventkarte markieren (für spätere Event-Booster)</span></label>
-   <label for="bwCardImage">Eigenes Bild (PNG, JPG, WebP, maximal 8 MB)</label><input id="bwCardImage" name="picture" type="file" accept="image/png,image/jpeg,image/webp"/>
+   <label for="bwCardImage">Eigenes Bild statt des Startmotivs verwenden (PNG, JPG, WebP, maximal 8 MB)</label><input id="bwCardImage" name="picture" type="file" accept="image/png,image/jpeg,image/webp"/>
    <p class="bw-album-disclaimer">Bild wird auf deinem Gerät verkleinert und offline gespeichert. Ohne Auswahl bleibt ein bisher vorhandenes Motiv erhalten. Keine automatische Vergabe einer Karte.</p>
    <p class="bw-card-form-error" id="bwCardFormMessage" role="status" aria-live="polite"></p>
    <div class="bw-card-modal-actions"><button type="button" class="bw-album-action" id="bwCardEditCancel">Zurück</button><button class="bw-album-action bw-primary" id="bwCardSave" type="submit">Karte speichern</button></div>

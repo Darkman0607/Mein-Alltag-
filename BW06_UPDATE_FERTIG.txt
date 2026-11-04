@@ -1,0 +1,13 @@
+Mein Alltag · BW06 · V0.24.6
+
+100 eigene stilisierte SVG-Vektor-Kartenmotive (4x25) und Katalogdefinitionen;
+Album-Import nur auf ausdrücklichen Klick, nur leere Plätze, ohne Änderungen an
+Münzen, Booster-Inventar, individuellen Karten oder gesammelten Exemplaren.
+Motivanzeige im Album und bei BW05-Boosteröffnungen. Offline-Cache aktualisiert.
+
+Bitte zuerst Backup erstellen. Dann unter Belohnungswelt → Album die
+Startkollektion einmalig einspielen. Bereits gespeicherte Karten bleiben erhalten.
+
+Quelle der Grafiken: DOKUMENTATION/BW06_Kartenquellen_Generator.py
+
+Echte Android-PWA- und öffentliche GitHub-Pages-Abnahme ist offen.

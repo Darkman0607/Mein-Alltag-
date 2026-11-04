@@ -10,6 +10,7 @@ const BOOSTER_PRESETS=[{id:'booster:mixed',name:'Entdecker-Mix',kind:'mixed'}];
 let mock={wallet:{xp:20,coins:35,shards:0},inventory:[{id:'pack:00000000-0000-4000-8000-000000000000:1',boosterTypeId:'booster:mixed',purchasedAt:'2026-11-04T12:00:00Z',priceCoins:20}],
  purchases:[],openings:[],catalog:Array.from({length:5},(_,i)=>({id:'card:'+i,name:'Karte '+(i+1),rarity:i%2?'episch':'selten',number:i+1,categoryId:'monster'})),
  types:[{id:'booster:mixed',name:'Entdecker-Mix',kind:'mixed',categoryId:null,description:'Test',priceCoins:20,eligible:true,reason:'',favorite:false,pool:Array.from({length:5},(_,i)=>({id:'card:'+i,name:'Karte '+(i+1),rarity:'selten',categoryId:'monster'})),odds:Object.fromEntries(REWARD_RARITIES.map(r=>[r,r==='selten'?100:0]))}]};
+function safeStarterAsset(card){return card?.imageAsset||null;}
 async function loadBoosterShop(){return structuredClone(mock);}
 async function openOwnedBooster(id){
  const index=mock.inventory.findIndex(p=>p.id===id);if(index===-1)throw Error('Booster not found');
