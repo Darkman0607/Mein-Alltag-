@@ -1,0 +1,70 @@
+/* BW02 – Kartenalbum. Visual motifs are placeholders, not distributable card art. */
+.bw-album{--bw-border:#306b9d;--bw-soft:#bed7ef;color:#e8f3ff;padding-bottom:26px}
+.bw-album-intro{margin:11px 0 15px;text-align:center}
+.bw-album-kicker{color:#8ccfff;font-size:10px;font-weight:800;letter-spacing:2.1px}
+.bw-album-intro h2{margin:5px 0 7px;font-size:25px;line-height:1.15}
+.bw-album-intro p{margin:0;color:#bfd1e8;font-size:12px;line-height:1.55}
+.bw-album-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:13px 10px 11px;border:1px solid #3d87b5;background:linear-gradient(135deg,#0d3151,#041a2e);border-radius:17px;text-align:center}
+.bw-album-stats>div:not(.bw-album-meter){display:flex;flex-direction:column;gap:5px;align-items:center;min-width:0}
+.bw-album-stats strong{font-size:23px;color:#91f1ff;font-variant-numeric:tabular-nums}
+.bw-album-stats strong small{font-size:11px;color:#afc4da}
+.bw-album-stats>div>span{color:#c4d6eb;font-size:10px;line-height:1.25}
+.bw-album-meter{grid-column:1/-1;height:10px;background:#031525;border:1px solid #296083;border-radius:20px;overflow:hidden;margin-top:4px}
+.bw-album-meter span{display:block;height:100%;background:linear-gradient(90deg,#20aadf,#77f5a8);border-radius:20px}
+.bw-album-stats>p{grid-column:1/-1;margin:0;font-size:11px;color:#bfd7ed}
+.bw-album-categories{display:flex;overflow-x:auto;scroll-snap-type:x proximity;gap:9px;padding:16px 2px 12px;scrollbar-width:thin}
+.bw-category-chip{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;justify-content:center;min-height:58px;padding:8px 12px;color:#d7eaff;border:1px solid #315d88;border-radius:13px;background:#091e35;text-align:left;scroll-snap-align:start}
+.bw-category-chip.active{background:#12395e;border-color:#74cfff;box-shadow:inset 0 0 0 1px #306b9d,0 0 13px #107cdd33}
+.bw-category-chip b{font-size:12px;white-space:nowrap}.bw-category-chip span{font-size:11px;color:#b5d7eb}
+.bw-album-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.7fr);gap:6px 10px;margin:2px 0 9px}
+.bw-album-controls label{font-size:11px;font-weight:700;color:#a9d4ed}.bw-album-controls label:nth-child(3){grid-column:2;grid-row:1}
+.bw-album-search,.bw-album-select{background:#071b30!important;border:1px solid #35729f!important;border-radius:10px!important;padding:11px 10px!important;color:#f0f9ff!important;min-width:0;width:100%;font:inherit;font-size:13px!important;height:44px}
+.bw-album-search{grid-column:1;grid-row:2}.bw-album-select{grid-column:2;grid-row:2}
+.bw-album-results{font-size:11px;color:#a5c3db;margin:9px 2px 13px}
+.bw-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px 9px;align-items:start}
+.bw-card-tile{position:relative;min-width:0;background:#071b30;border:1px solid #235e8f;border-radius:13px;padding:6px 6px 10px;box-shadow:0 5px 13px #0006;overflow:hidden}
+.bw-card-tile.has-copy{border-color:#42b6c5;box-shadow:0 0 0 1px #42b6c540,0 4px 16px #0677a733}
+.bw-card-open{display:flex;flex-direction:column;gap:4px;align-items:stretch;width:100%;min-width:0;padding:0;text-align:left;border:0;background:transparent;color:inherit}
+.bw-card-open:focus-visible,.bw-card-favorite:focus-visible{outline:2px solid #91e0ff;outline-offset:2px}
+.bw-card-art{aspect-ratio:2/3;border-radius:8px;border:3px solid #4b7795;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;overflow:hidden;background:radial-gradient(circle at 50% 30%,#627dad,#1c2a4b 70%,#0b192d);color:#d8efff;text-align:center;isolation:isolate}
+.bw-card-art:before{content:"";position:absolute;inset:5px;border:1px solid #d5e9fc40;border-radius:4px;pointer-events:none;z-index:2}
+.bw-theme-violet{background:radial-gradient(circle at 47% 30%,#6e4a98,#261a45 65%,#121831)}
+.bw-theme-mint{background:radial-gradient(circle at 45% 30%,#3b917b,#153d51 67%,#0b1d32)}
+.bw-theme-gold{background:radial-gradient(circle at 47% 30%,#927d39,#3f321d 67%,#161b2c)}
+.bw-theme-blue{background:radial-gradient(circle at 47% 30%,#2e8ac1,#172e56 67%,#111729)}
+.bw-card-art.bw-rarity-selten{border-color:#4d9cf5}.bw-card-art.bw-rarity-episch{border-color:#ba75f2}.bw-card-art.bw-rarity-legendaer{border-color:#e2b84b}.bw-card-art.bw-rarity-mythisch{border-color:#f185b1}.bw-card-art.bw-rarity-diamant{border-color:#90f9ff;box-shadow:inset 0 0 18px #90f9ff65}
+.bw-card-art.bw-is-missing{filter:saturate(.75)}
+.bw-card-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.bw-card-emblem{font-size:clamp(32px,9vw,48px);line-height:1;opacity:.9;text-shadow:0 0 17px #cce4ff80}
+.bw-card-unavailable{font-size:9px;font-weight:750;letter-spacing:.5px;text-transform:uppercase;color:#cfe6ff;z-index:2;text-shadow:0 1px 4px #000}
+.bw-card-art-number{position:absolute;right:7px;top:7px;font-size:9px;font-weight:800;color:white;background:#061324b0;border-radius:5px;padding:3px 5px;z-index:2}
+.bw-card-name{font-size:12px;font-weight:800;line-height:1.22;min-height:30px;margin-top:4px;overflow-wrap:anywhere}
+.bw-card-state{font-size:10px;color:#bed2e7;line-height:1.3;min-height:26px}.has-copy .bw-card-state{color:#89f4b6}
+.bw-card-favorite{position:absolute;z-index:3;top:11px;right:10px;width:30px;height:30px;background:#07182dcf;border:1px solid #86b0cc;border-radius:50%;color:#d1e6f9;font-size:21px;display:grid;place-items:center;padding:0;line-height:1}
+.bw-card-favorite.is-favorite{color:#ffdb73;border-color:#f3c35f}
+.bw-album-empty{grid-column:1/-1;padding:24px 10px;border:1px dashed #4381a2;color:#d5e7fb;border-radius:12px;text-align:center}
+.bw-album-explain,.bw-album-disclaimer{font-size:11px!important;line-height:1.45!important;color:#a3bdd5!important;margin:15px 2px}
+.bw-card-dialog-open{overflow:hidden}
+.bw-card-modal{position:fixed;inset:0;z-index:1000;background:#020b19ee;display:flex;justify-content:center;align-items:flex-start;padding:12px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
+.bw-card-modal[hidden]{display:none!important}
+.bw-card-modal-content{position:relative;width:min(100%,440px);padding:19px 17px 28px;background:linear-gradient(150deg,#102e4e,#05172c 75%);border:1px solid #428ab8;border-radius:18px;color:#e9f5ff;box-shadow:0 18px 55px #000a;margin:auto 0}
+.bw-card-modal-content h2{margin:0 40px 5px 0;font-size:23px}.bw-modal-meta{font-size:12px;color:#a8c7e4;margin:0 0 14px}
+.bw-modal-close{position:absolute;right:10px;top:10px;width:44px;height:44px;border-radius:50%;border:1px solid #77b5dd;background:#103452;color:white;font-size:28px;line-height:1}
+.bw-art-large{width:min(100%,270px);margin:0 auto 16px;max-height:420px}.bw-art-large .bw-card-emblem{font-size:80px}.bw-art-large .bw-card-unavailable{font-size:14px}.bw-art-large .bw-card-art-number{font-size:13px}
+.bw-modal-status{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#bfd7eb;font-size:12px;margin:0 0 12px}.bw-modal-status strong{color:#8de7f5}
+.bw-card-description{font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.bw-card-copies{font-size:11px;color:#c7ddf2}.bw-card-copies p{overflow-wrap:anywhere}
+.bw-card-modal-actions{display:flex;gap:9px;margin-top:17px;flex-wrap:wrap}
+.bw-album-action{flex:1;min-width:130px;min-height:45px;border-radius:11px;border:1px solid #3c8fc2;background:#0b3152;color:#ecf8ff;font-size:13px;font-weight:800;padding:10px 12px}
+.bw-album-action.bw-primary{background:linear-gradient(#1479ae,#085885);border-color:#66c1ed}
+.bw-album-action:disabled{opacity:.55}
+.bw-card-form{display:grid;gap:7px}.bw-card-form label{font-size:12px;font-weight:750;color:#c4e1f4;margin-top:7px}
+.bw-card-form input,.bw-card-form select,.bw-card-form textarea{background:#071a2d;border:1px solid #3f729d;color:white;font-size:14px;border-radius:10px;padding:11px;width:100%;min-width:0}
+.bw-card-form input[type=file]{font-size:12px}.bw-card-form-error{min-height:16px;color:#ffd697;font-size:12px;margin:2px 0}
+@media(max-width:350px){.bw-card-grid{gap:9px 6px}.bw-card-tile{padding:4px}.bw-card-name{font-size:11px}.bw-card-state{font-size:9px}.bw-card-favorite{top:8px;right:7px}}
+@media(min-width:500px){.bw-card-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.bw-card-tile,.bw-category-chip{transition:none}}
+/* Keep favorite control and the printed card number separate. */
+.bw-card-tile .bw-card-art-number{left:6px;right:auto}
+
+.bw-card-detail-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #ffffff22;font-size:12px}.bw-card-detail-row b{color:#accfe8}.bw-card-detail-row span{text-align:right;overflow-wrap:anywhere}
