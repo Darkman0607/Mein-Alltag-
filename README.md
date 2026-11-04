@@ -1,3 +1,11 @@
+# Mein Alltag – BW09 Belohnungskalender / V0.25.0 (04.11.2026)
+
+**Neu:** Tagesgeschenk, verifizierter Putzaufgabenbonus und kumulative Meilensteine 3/7/14/30 ohne Fehlzeiten-Strafe. Alle Auszahlungen ausdrücklich per Klick und atomar gespeichert.
+
+**Reihenfolge:** BW11 ✓ → BW08 ✓ → BW09 ✓ → **BW10 Diamantgarantie** → weitere Updates später. Details: `README_BW09.md`; Tests: `TESTS_BW09.md`; Word: `bauhaus.docx`, `Belohnungswelt_Mastercheckliste.docx`. Android-Liveabnahme offen.
+
+---
+
 # Mein Alltag – BW08 Missionen / V0.24.9 (04.11.2026)
 
 **Neu:** 12 echte Tages-, Wochen-, Monats- und dauerhafte Sammelmissionen. Nach ausdrücklicher Aktivierung zählen neue, bereits in der App bestätigte Reinigungen und Boosteröffnungen; vorhandene Sammelkarten zählen zu Sammlerzielen. Auszahlung ausschließlich per „Belohnung abholen“, jeweils einmal pro Zeitraum durch eine gemeinsame Wallet-/Journal-Transaktion. Gesundheitseinträge bleiben ausgeschlossen.

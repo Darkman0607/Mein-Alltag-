@@ -7,6 +7,7 @@ const periodLabel={day:'Heute',week:'Diese Woche',month:'Dieser Monat',all:'Daue
 export function renderMissionCenter(){return `<section class="bw-mission-center" id="bwMissionCenter" aria-label="Missionen und Erfolge">
  <div class="bw-mission-hero"><span class="bw-mission-kicker">BW08 · MISSIONEN</span><h2>Deine Missionen</h2><p>Erledigte Aufgaben und echte Sammelfortschritte bringen dir zusätzliche Münzen und XP. Du holst dir fertige Belohnungen selbst ab.</p><div class="bw-mission-hero-stats" id="bwMissionStats" aria-live="polite">Missionen werden geladen …</div></div>
  <div id="bwMissionContent" role="region" aria-label="Missionsübersicht"><p>Missionen werden geladen …</p></div>
+ <div class="bw-mission-calendar-link"><button type="button" data-bw09-open-calendar>🎁 Belohnungskalender öffnen</button></div>
  <p id="bwMissionMessage" class="bw-mission-message" role="status" aria-live="polite"></p>
  <details class="bw-mission-rules"><summary>⚙ XP-Regeln, Freigaben und Belohnungsverlauf</summary>${renderRewardEconomy()}</details>
  </section>`;}
@@ -29,6 +30,7 @@ export async function mountMissionCenter(onChanged=()=>{}){
   stats.textContent=board.settings.enabled?`${board.summary.ready} bereit zum Abholen · ${board.summary.claimed} bereits abgeholt · ${board.missions.length} Ziele`:'Noch nicht aktiviert · keine automatische Belohnung';
   area.innerHTML=boardHtml(board,filter);
  }
+ root.querySelector('[data-bw09-open-calendar]')?.addEventListener('click',()=>{location.hash='#/reward/belohnungskalender';});
  area.addEventListener('click',async event=>{
   const control=event.target.closest('button');if(!control||busy)return;
   if(control.hasAttribute('data-mission-filter')){filter=control.dataset.missionFilter;try{await refresh();}catch(e){feedback(e.message,true);}return;}

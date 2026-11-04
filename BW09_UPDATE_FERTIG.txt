@@ -1,0 +1,13 @@
+MEIN ALLTAG · BW09 · V0.25.0 · 04.11.2026
+
+Täglicher Belohnungskalender mit freiwilliger Aktivierung, 6 XP/5 Münzen
+pro Tagesgeschenk, zusätzlicher einmaliger Tagesbonus für fünf bestätigte
+Putzaufgaben, Meilensteine für 3/7/14/30 abgeholte Geschenktage.
+
+Kein Rücksetzen bei Pausentagen. Keine rückwirkenden Geschenke.
+Wallet-Buchungen + Journal sind atomar; Bestehendes wird nicht überschrieben.
+
+Achtung: zuerst Backup erstellen und nach der Aktualisierung App-Version
+0.25.0 kontrollieren. Der echte Android-PWA-Praxistest bleibt offen.
+
+Nächster geplanter Baustein: BW10 – Diamantgarantie.

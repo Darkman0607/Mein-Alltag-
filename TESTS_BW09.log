@@ -1,0 +1,73 @@
+
+=== test-bw01-data.mjs ===
+PASS BW01: IndexedDB v1→v2 (14 physische Stores), alte Daten erhalten, vier Kategorien/100 geplante Karten, sieben Seltenheiten, stabile IDs, Dublettenschutz, Wallet/Exemplare/ungeöffnete Booster, vollständiges AES-GCM-Backup und Restore, v1-Backup-Restore ohne Löschen der Belohnungswelt, unvollständige Sicherungen abgewiesen.
+STATUS 0
+
+=== test-bw02-album.mjs ===
+PASS BW02: 100 nummerierte Slots, 4 Kategorien, Filter, echtes Besitzmodell, Dubletten, Favoriten, Validierung, Katalog-Bearbeitung, keine fingierten Karten, Backup inklusive Album und Migration.
+STATUS 0
+
+=== test-bw03-economy.mjs ===
+PASS BW03: explicit opt-in, user-editable rules, verified completion reward, wallet+immutable journal atomically, duplicate prevention, no retroactive/partial payout, disabled privacy sources, rollback on wallet error, backup+restore, offline shell.
+STATUS 0
+
+=== test-bw04-shop.mjs ===
+PASS BW04: sieben Booster-Typen, Karten-Pool-Voraussetzungen, echte und summierte Chancen, Eventmarkierung, Favoriten, Preisverwaltung, 1–10er Mehrfachkauf, atomare Wallet/Pack/Journal-Buchung, feste Pool-Snapshots, kein Doppelabzug, Fehler-Rollback, Vollbackup/Restore, keine künstlichen Gratiscoins, kein Öffnen vor BW05.
+STATUS 0
+
+=== test-bw05-opening.mjs ===
+PASS BW05: 5 real copies, sealed-pack deletion + journal in one transaction, replay protection, missing cards and tampered pool preserve packs, independent weighted draws statistically validated, AES backup/restore, 0 extra coins, catalogue progress.
+STATUS 0
+
+=== test-bw07-cards.mjs ===
+PASS BW07: 100 starter cards, locked-copy protection, last copy + rare confirmation, atomically journaled sell/salvage/craft, exact balances, replay idempotency, Diamond exclusion, editable rates, failure rollback, safe backup+restore.
+STATUS 0
+
+=== test-bw08-missions.mjs ===
+PASS BW08: opt-in, 12 stable missions, daily/weekly/monthly/local period rollover, source filtering, no retroactive rewards, real ownership, atomic claims, replay safety, overflow rollback and full backup/restore.
+STATUS 0
+
+=== test-bw09-calendar.mjs ===
+PASS BW09: opt-in, 24h gift idempotency, verified task bonus, durable milestones without streak penalties, no retroactive or bogus claims, overflow rollback, full encrypted-backup dataset restore.
+STATUS 0
+
+=== test-bw11-premium.mjs ===
+PASS BW11: strict settings normalization, no startup write, stable IndexedDB prefs, unchanged reward data, reversible settings, backup+restore, no autoplay.
+STATUS 0
+
+=== test-bw09-ui.py ===
+PASS BW09 UI 320px: opt-in, 42 day cells, daily gift once, bonus gating, month navigation, no overflow
+PASS BW09 UI 390px: opt-in, 42 day cells, daily gift once, bonus gating, month navigation, no overflow
+PASS BW09 UI 412px: opt-in, 42 day cells, daily gift once, bonus gating, month navigation, no overflow
+STATUS 0
+
+=== test-bw08-ui.py ===
+PASS BW08 Chromium isolated 320px: opt-in, proper button states, claim once, filters, existing economy, no overflow
+PASS BW08 Chromium isolated 390px: opt-in, proper button states, claim once, filters, existing economy, no overflow
+PASS BW08 Chromium isolated 412px: opt-in, proper button states, claim once, filters, existing economy, no overflow
+STATUS 0
+
+=== test-bw11-ui.py ===
+PASS BW11 isolated album 320px: 100 slots, full/reduced state, optional sound, diamond label, owned state, no overflow
+PASS BW11 isolated album 390px: 100 slots, full/reduced state, optional sound, diamond label, owned state, no overflow
+PASS BW11 isolated album 412px: 100 slots, full/reduced state, optional sound, diamond label, owned state, no overflow
+PASS BW11 OS reduced-motion automatically disables premium animation
+STATUS 0
+
+=== test-bw11-booster-ui.py ===
+PASS BW11 booster 320px: rarity styling, one-card reveal, five-card instant reveal, no overflow
+PASS BW11 booster 390px: rarity styling, one-card reveal, five-card instant reveal, no overflow
+PASS BW11 booster 412px: rarity styling, one-card reveal, five-card instant reveal, no overflow
+STATUS 0
+
+=== test-bw04-ui.py initial archived run ===
+FAILED: stale premium fixture; no app-code change
+=== test-bw04-ui.py with corrected fixture ===
+PASS BW04 isolated Chromium 320 px: shop, filters, favorites, multiple purchase, price adjustment, sealed inventory, no overflow
+PASS BW04 isolated Chromium 390 px: shop, filters, favorites, multiple purchase, price adjustment, sealed inventory, no overflow
+PASS BW04 isolated Chromium 412 px: shop, filters, favorites, multiple purchase, price adjustment, sealed inventory, no overflow
+
+STATUS 0
+
+=== test-bw05-ui.py ===
+NOT COMPLETED in wide historical-suite run; current BW11 booster UI test passed.

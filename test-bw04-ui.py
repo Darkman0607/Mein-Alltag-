@@ -5,6 +5,9 @@ ROOT=Path(__file__).resolve().parent
 source='\n'.join(line for line in (ROOT/'assets/reward-shop-ui.js').read_text().splitlines() if not line.startswith('import ')).replace('export ','')
 bootstrap=r'''
 const REWARD_CATEGORIES=[{id:'anime-frauen',label:'Anime-Frauen'},{id:'anime-tiere',label:'Anime-Tiere'},{id:'maschinen',label:'Traktoren & Maschinen'},{id:'monster',label:'Monster'}];
+function safeStarterAsset(){return null;}
+function renderPremiumSettings(){return '';}
+function playPremiumReveal(){return false;}
 const REWARD_RARITIES=['gewoehnlich','ungewoehnlich','selten','episch','legendaer','mythisch','diamant'];
 const BOOSTER_PRESETS=[
  {id:'booster:mixed',name:'Entdecker-Mix',kind:'mixed'},
@@ -20,7 +23,6 @@ let mock={wallet:{coins:134,xp:100,shards:0},inventory:[],purchases:[],openings:
  pool:i===0?Array.from({length:5},(_,k)=>({id:'card:'+k,name:'Testkarte '+k,rarity:'selten',categoryId:'monster'})):[],
  odds:Object.fromEntries(REWARD_RARITIES.map(r=>[r,r==='selten'&&i===0?100:0]))
  }))};
-function safeStarterAsset(card){return card?.imageAsset||null;}
 async function loadBoosterShop(){return structuredClone(mock);}
 async function openOwnedBooster(id){throw Error('Nicht im alten UI-Test öffnen');}
 async function purchaseBooster(id,quantity,requestId){
