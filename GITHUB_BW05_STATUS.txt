@@ -1,0 +1,13 @@
+MEIN ALLTAG · BW05 V0.24.5 · GITHUB-VEROEFFENTLICHUNG
+04.11.2026
+
+Repository: https://github.com/Darkman0607/Mein-Alltag-
+Branch: main
+Code-Commit (17 geprüfte Dateien): c7d4a743bcd051965c597a49df14e61c372be3ec
+Word-Dokumentations-Commit: a92fe31a758c2065bf958a04ab023a77c0b1ee24
+
+Geprüft: Git-Blob-SHA der Quell-/Testdateien und DOCX-Dateien vor dem Commit;
+Stand wird abschließend nach Upload erneut aus GitHub-Tree abgeglichen.
+Offen: GitHub Pages HTTPS-Liveaufruf und Android-PWA-Installation/Offline-Funktion
+auf einem echten Gerät. Die Testumgebung blockiert Test-Navigationen auf
+lokale bzw. simulierte HTTPS-Adressen.
