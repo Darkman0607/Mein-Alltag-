@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.24.0",
-  "build": "BW00 Design 1 – freistehende 3D-Symbole im Hauptmenü und neue Sammlerzentrale; keine spielbaren Karten",
+  "version": "0.24.1",
+  "build": "BW01 – neue getrennte Belohnungswelt-Stores mit rückwärtskompatibler Backup-Migration",
   "release_date": "2026-11-04"
 }
