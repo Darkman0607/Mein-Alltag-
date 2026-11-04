@@ -1,0 +1,5 @@
+Mein Alltag V0.25.0 · BW09
+Veröffentlicht auf branch main:
+https://github.com/Darkman0607/Mein-Alltag-/commit/74456102b2a098e2180fdfe89201e7023f44f291
+Nachkontrolle: version.json 0.25.0, app.js APP_VERSION 0.25.0, Cache 0.25.0 und beide Masterchecklisten.
+Android-/GitHub-Pages-Livetest und Restore auf physischem Zweitgerät bleiben offen.
