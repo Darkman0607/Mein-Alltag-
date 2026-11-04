@@ -1,3 +1,11 @@
+# Mein Alltag – Aktueller Stand BW11 / V0.24.8 (04.11.2026)
+
+**Premium-Kartenupdate:** Sieben Seltenheitsrahmen, Holo-/Diamantglanz, Kartenflip bei Boosteröffnung, Einstellungen für volle/reduzierte/ausgeschaltete Animationen sowie optionaler Ton (standardmäßig aus). Bestehende Kartendaten, Münzen und Booster bleiben unverändert. Word-Checklisten: `bauhaus.docx` und `Belohnungswelt_Mastercheckliste.docx`. Details: `README_BW11.md`, Tests: `TESTS_BW11.md`.
+
+**Neue verbindliche Reihenfolge:** BW11 (fertig) → BW08 Missionen → BW09 Belohnungskalender → BW10 Diamantgarantie → übrige Updates später. Echter Android-PWA-Test und GitHub-Pages-Update-Abnahme noch offen.
+
+---
+
 # Mein Alltag – BW06 / V0.24.6 (04.11.2026)
 
 - **Belohnungswelt – 100 originale stilisierte Vektor-Kartenmotive:** vier Kategorien à 25 Karten, individuelle Namen, Beschreibungen, sieben Seltenheiten und getrennte Grafikdateien.
