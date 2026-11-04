@@ -1,7 +1,10 @@
 /** Mein Alltag V0: strictly isolated IndexedDB stores for independent modules. */
 export const DB_NAME = 'mein-alltag-v0';
-export const DB_VERSION = 1;
-export const MODULE_STORES = Object.freeze(['lagerhaus','frauengesundheit','familienplaner','putzmanager','hausservice']);
+export const DB_VERSION = 2;
+export const MODULE_STORES = Object.freeze(['lagerhaus','frauengesundheit','familienplaner','putzmanager','hausservice','belohnungswelt']);
+// BW01: Physically isolated reward entities; never rename existing object stores.
+export const REWARD_STORES = Object.freeze(['bw-series','bw-catalog','bw-booster-types','bw-instances','bw-wallet','bw-unopened','bw-journal']);
+export const ALL_DATA_STORES = Object.freeze([...MODULE_STORES,...REWARD_STORES,'meta']);
 const META_STORE = 'meta';
 let dbPromise;
 
@@ -11,7 +14,7 @@ export function openDatabase() {
     const request = indexedDB.open(DB_NAME,DB_VERSION);
     request.onupgradeneeded = () => {
       const db=request.result;
-      for(const store of [...MODULE_STORES,META_STORE]) if(!db.objectStoreNames.contains(store)) db.createObjectStore(store);
+      for(const store of ALL_DATA_STORES) if(!db.objectStoreNames.contains(store)) db.createObjectStore(store);
     };
     request.onsuccess = () => {
       const db=request.result;
