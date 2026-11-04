@@ -1,0 +1,50 @@
+
+=== test-bw01-data.mjs ===
+PASS BW01: IndexedDB v1→v2 (14 physische Stores), alte Daten erhalten, vier Kategorien/100 geplante Karten, sieben Seltenheiten, stabile IDs, Dublettenschutz, Wallet/Exemplare/ungeöffnete Booster, vollständiges AES-GCM-Backup und Restore, v1-Backup-Restore ohne Löschen der Belohnungswelt, unvollständige Sicherungen abgewiesen.
+
+=== test-bw02-album.mjs ===
+PASS BW02: 100 nummerierte Slots, 4 Kategorien, Filter, echtes Besitzmodell, Dubletten, Favoriten, Validierung, Katalog-Bearbeitung, keine fingierten Karten, Backup inklusive Album und Migration.
+
+=== test-bw03-economy.mjs ===
+PASS BW03: explicit opt-in, user-editable rules, verified completion reward, wallet+immutable journal atomically, duplicate prevention, no retroactive/partial payout, disabled privacy sources, rollback on wallet error, backup+restore, offline shell.
+
+=== test-bw04-shop.mjs ===
+PASS BW04: sieben Booster-Typen, Karten-Pool-Voraussetzungen, echte und summierte Chancen, Eventmarkierung, Favoriten, Preisverwaltung, 1–10er Mehrfachkauf, atomare Wallet/Pack/Journal-Buchung, feste Pool-Snapshots, kein Doppelabzug, Fehler-Rollback, Vollbackup/Restore, keine künstlichen Gratiscoins, kein Öffnen vor BW05.
+
+=== test-bw05-opening.mjs ===
+PASS BW05: 5 real copies, sealed-pack deletion + journal in one transaction, replay protection, missing cards and tampered pool preserve packs, independent weighted draws statistically validated, AES backup/restore, 0 extra coins, catalogue progress.
+
+=== test-bw07-cards.mjs ===
+PASS BW07: 100 starter cards, locked-copy protection, last copy + rare confirmation, atomically journaled sell/salvage/craft, exact balances, replay idempotency, Diamond exclusion, editable rates, failure rollback, safe backup+restore.
+
+=== test-bw11-premium.mjs ===
+PASS BW11: strict settings normalization, no startup write, stable IndexedDB prefs, unchanged reward data, reversible settings, backup+restore, no autoplay.
+
+=== test-bw08-missions.mjs ===
+PASS BW08: opt-in, 12 stable missions, daily/weekly/monthly/local period rollover, source filtering, no retroactive rewards, real ownership, atomic claims, replay safety, overflow rollback and full backup/restore.
+
+=== test-bw05-ui.py ===
+PASS BW05 isolated Chromium 320px – 5 revealed cards, inventory deduction, history after remount, no overflow
+PASS BW05 isolated Chromium 390px – 5 revealed cards, inventory deduction, history after remount, no overflow
+PASS BW05 isolated Chromium 412px – 5 revealed cards, inventory deduction, history after remount, no overflow
+
+=== test-bw07-ui.py ===
+PASS BW07 UI mobile Chromium 320px: grouped copies, locking, sale, craft, search, favorites, no horizontal overflow
+PASS BW07 UI mobile Chromium 390px: grouped copies, locking, sale, craft, search, favorites, no horizontal overflow
+PASS BW07 UI mobile Chromium 412px: grouped copies, locking, sale, craft, search, favorites, no horizontal overflow
+
+=== test-bw11-ui.py ===
+PASS BW11 isolated album 320px: 100 slots, full/reduced state, optional sound, diamond label, owned state, no overflow
+PASS BW11 isolated album 390px: 100 slots, full/reduced state, optional sound, diamond label, owned state, no overflow
+PASS BW11 isolated album 412px: 100 slots, full/reduced state, optional sound, diamond label, owned state, no overflow
+PASS BW11 OS reduced-motion automatically disables premium animation
+
+=== test-bw11-booster-ui.py ===
+PASS BW11 booster 320px: rarity styling, one-card reveal, five-card instant reveal, no overflow
+PASS BW11 booster 390px: rarity styling, one-card reveal, five-card instant reveal, no overflow
+PASS BW11 booster 412px: rarity styling, one-card reveal, five-card instant reveal, no overflow
+
+=== test-bw08-ui.py ===
+PASS BW08 Chromium isolated 320px: opt-in, proper button states, claim once, filters, existing economy, no overflow
+PASS BW08 Chromium isolated 390px: opt-in, proper button states, claim once, filters, existing economy, no overflow
+PASS BW08 Chromium isolated 412px: opt-in, proper button states, claim once, filters, existing economy, no overflow

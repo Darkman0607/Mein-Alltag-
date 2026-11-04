@@ -93,8 +93,10 @@ const snapshot=await captureSnapshot();assert.equal(validateSnapshot(snapshot).c
 await setRewardConsent('putzmanager',false);await restoreSnapshot(snapshot);
 assert.equal((await loadRewardEconomy()).settings.sources.putzmanager.enabled,true);
 assert.equal((await loadRewardEconomy()).journal.length,2);
-for(const f of ['assets/app.js','sw.js','index.html']){
- const src=readFileSync(f,'utf8');assert(src.includes('reward-economy'),`offline/import missing: ${f}`);
+assert(readFileSync('assets/app.js','utf8').includes('reward-missions-ui'), 'mission page no longer imported');
+for(const f of ['sw.js','index.html']){
+ const src=readFileSync(f,'utf8');assert(src.includes('reward-economy'),`offline/stylesheet missing: ${f}`);
 }
-assert.equal(JSON.parse(readFileSync('version.json')).version,'0.24.8');
+assert(readFileSync('assets/reward-missions-ui.js','utf8').includes('reward-economy-ui'), 'existing BW03 controls must remain available');
+assert.equal(JSON.parse(readFileSync('version.json')).version,'0.24.9');
 console.log('PASS BW03: explicit opt-in, user-editable rules, verified completion reward, wallet+immutable journal atomically, duplicate prevention, no retroactive/partial payout, disabled privacy sources, rollback on wallet error, backup+restore, offline shell.');

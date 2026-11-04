@@ -106,6 +106,6 @@ assert.equal((await loadBoosterShop()).types.find(t=>t.kind==='mixed').pool.leng
 assert(stores.get('bw-unopened').values().next().value.poolSnapshot.length===5);
 // Regression: no free starting coins, opening remains in separate BW05 module.
 assert.equal(typeof (await import('./assets/reward-opening.js')).openOwnedBooster,'function');
-assert.equal(JSON.parse(readFileSync('version.json','utf8')).version,'0.24.8');
+assert.equal(JSON.parse(readFileSync('version.json','utf8')).version,'0.24.9');
 for(const source of ['assets/app.js','sw.js','index.html'])assert(readFileSync(source,'utf8').includes('reward-shop'));
 console.log('PASS BW04: sieben Booster-Typen, Karten-Pool-Voraussetzungen, echte und summierte Chancen, Eventmarkierung, Favoriten, Preisverwaltung, 1–10er Mehrfachkauf, atomare Wallet/Pack/Journal-Buchung, feste Pool-Snapshots, kein Doppelabzug, Fehler-Rollback, Vollbackup/Restore, keine künstlichen Gratiscoins, kein Öffnen vor BW05.');

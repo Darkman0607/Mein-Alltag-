@@ -1,19 +1,16 @@
+# Mein Alltag – BW08 Missionen / V0.24.9 (04.11.2026)
+
+**Neu:** 12 echte Tages-, Wochen-, Monats- und dauerhafte Sammelmissionen. Nach ausdrücklicher Aktivierung zählen neue, bereits in der App bestätigte Reinigungen und Boosteröffnungen; vorhandene Sammelkarten zählen zu Sammlerzielen. Auszahlung ausschließlich per „Belohnung abholen“, jeweils einmal pro Zeitraum durch eine gemeinsame Wallet-/Journal-Transaktion. Gesundheitseinträge bleiben ausgeschlossen.
+
+**Reihenfolge:** BW11 ✓ → BW08 ✓ → **BW09 Belohnungskalender** → BW10 Diamantgarantie → später weitere Module. Details: `README_BW08.md`, Tests: `TESTS_BW08.md`, Checklisten: `bauhaus.docx` und `Belohnungswelt_Mastercheckliste.docx`. Echte Android-Abnahme noch offen.
+
+---
+
 # Mein Alltag – Aktueller Stand BW11 / V0.24.8 (04.11.2026)
 
 **Premium-Kartenupdate:** Sieben Seltenheitsrahmen, Holo-/Diamantglanz, Kartenflip bei Boosteröffnung, Einstellungen für volle/reduzierte/ausgeschaltete Animationen sowie optionaler Ton (standardmäßig aus). Bestehende Kartendaten, Münzen und Booster bleiben unverändert. Word-Checklisten: `bauhaus.docx` und `Belohnungswelt_Mastercheckliste.docx`. Details: `README_BW11.md`, Tests: `TESTS_BW11.md`.
 
 **Neue verbindliche Reihenfolge:** BW11 (fertig) → BW08 Missionen → BW09 Belohnungskalender → BW10 Diamantgarantie → übrige Updates später. Echter Android-PWA-Test und GitHub-Pages-Update-Abnahme noch offen.
-
----
-
-# Mein Alltag – BW06 / V0.24.6 (04.11.2026)
-
-- **Belohnungswelt – 100 originale stilisierte Vektor-Kartenmotive:** vier Kategorien à 25 Karten, individuelle Namen, Beschreibungen, sieben Seltenheiten und getrennte Grafikdateien.
-- **Einmaliger, bewusster Import:** In der Belohnungswelt unter „Album → Fehlende Kartenplätze füllen“. Vorhandene Karten und Bilder bleiben unangetastet; keine kostenlosen Münzen oder gesammelten Exemplare.
-- **Booster-Bilder:** Bei BW05-Öffnungen werden die neuen Motive angezeigt, sofern die Karte aus der Startserie stammt; eigene Kartenbilder behalten Vorrang.
-- **Offline:** alle 100 SVGs im Service-Worker-Cache. Neue ZIP mit aktualisierten Word-Checklisten.
-- **Tests:** 100 SVG-Quellen validiert, 15/18 Node-Tests bestanden (3 historische Tests sind auf alte Versionsnummern fest verdrahtet), Album-/Shop-/Booster-Chromium-Tests bei 320/390/412 px bestanden. Android-/HTTPS-Live-Abnahme offen.
-- Ausführliche Hinweise: [`README_BW06.md`](README_BW06.md).
 
 ---
 

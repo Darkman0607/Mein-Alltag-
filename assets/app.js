@@ -14,13 +14,13 @@ import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapsho
 import {readRewardOverview} from './reward-data.js';
 import {loadRewardAlbum} from './reward-album.js';
 import {renderRewardAlbum,mountRewardAlbum} from './reward-album-ui.js';
-import {renderRewardEconomy,mountRewardEconomy} from './reward-economy-ui.js';
+import {renderMissionCenter,mountMissionCenter} from './reward-missions-ui.js';
 import {renderRewardShop,mountRewardShop} from './reward-shop-ui.js';
 import {renderRewardCards,mountRewardCards} from './reward-cards-ui.js';
 import {renderPremiumSettings,mountPremiumSettings} from './reward-premium.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.24.8';
+export const APP_VERSION='0.24.9';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -92,10 +92,10 @@ function renderReward(route){
     tab==='album'?renderRewardAlbum():
     tab==='booster'?renderRewardShop('booster'):
     tab==='shop'?renderRewardShop('shop'):
-    tab==='missionen'?renderRewardEconomy():
+    tab==='missionen'?renderMissionCenter():
     tab==='wunschliste'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">♡</span><h2>Wunschliste</h2><p>Hier werden später gesuchte Karten und fehlende Lieblingskarten gesammelt.</p><p class="bw-muted">Noch keine Karten vorgemerkt.</p></div>`:
     tab==='herstellung'?renderRewardCards():
-    `<div class="bw-empty-panel"><h2>Weitere Funktionen</h2><p>BW11: Premium-Karteneffekte im Album und beim Aufdecken. Belohnungsmissionen, Kalender und Diamantgarantie folgen mit BW08, BW09 und BW10.</p>${renderPremiumSettings()}<p id="bwStorageStatus" role="status">Prüfe neuen Datenspeicher …</p><div class="bw-quicklinks"><button data-reward="wunschliste" type="button">♡ Wunschliste</button><button data-reward="herstellung" type="button">⚒ Herstellung</button><button data-navigate="more" type="button">⚙ App-Einstellungen</button></div></div>`;
+    `<div class="bw-empty-panel"><h2>Weitere Funktionen</h2><p>BW11 Premium-Karteneffekte und BW08 Missionen sind aktiv. Belohnungskalender und Diamantgarantie folgen mit BW09 und BW10.</p>${renderPremiumSettings()}<p id="bwStorageStatus" role="status">Prüfe neuen Datenspeicher …</p><div class="bw-quicklinks"><button data-reward="wunschliste" type="button">♡ Wunschliste</button><button data-reward="herstellung" type="button">⚒ Herstellung</button><button data-navigate="more" type="button">⚙ App-Einstellungen</button></div></div>`;
  return `<section class="bw-reward-scene" aria-label="Belohnungswelt"><div class="bw-reward-head"><button class="bw-reward-back" type="button" data-navigate="home" aria-label="Zurück zum Hauptmenü">‹</button><div class="bw-reward-head-center"><span class="bw-reward-logo"><img src="./assets/bw00/belohnungswelt.webp" alt="" draggable="false"/></span><h1>Belohnungswelt</h1><p>${esc(titles[tab])}</p></div><button class="bw-reward-info" type="button" data-reward="more" aria-label="Weitere Funktionen">ⓘ</button></div>
   <div class="bw-reward-wallet" aria-label="Dein Guthaben"><div class="bw-wallet-xp"><span>★</span><strong id="bwWalletXp">0 XP</strong></div><div class="bw-wallet-coins"><span>🪙</span><strong id="bwWalletCoins">0</strong></div><div class="bw-wallet-splitters"><span>💎</span><strong id="bwWalletShards">0</strong></div></div>
   <div class="bw-reward-body">${panel}</div>
@@ -210,7 +210,7 @@ function bindView(route){
  view.querySelector('[data-go-home]')?.addEventListener('click',()=>navigate('home'));
  view.querySelectorAll('[data-navigate]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.navigate)));
  view.querySelectorAll('[data-reward]').forEach(el=>el.addEventListener('click',()=>navigate('reward',el.dataset.reward)));
- if(route.page==='reward'){mountPremiumSettings(view);mountRewardStorage(route);if(route.section==='album')mountRewardAlbum();if(route.section==='missionen')mountRewardEconomy(()=>mountRewardStorage(route));if(['shop','booster'].includes(route.section))mountRewardShop();if(route.section==='herstellung')mountRewardCards(()=>mountRewardStorage(route));}
+ if(route.page==='reward'){mountPremiumSettings(view);mountRewardStorage(route);if(route.section==='album')mountRewardAlbum();if(route.section==='missionen')mountMissionCenter(()=>mountRewardStorage(route));if(['shop','booster'].includes(route.section))mountRewardShop();if(route.section==='herstellung')mountRewardCards(()=>mountRewardStorage(route));}
  if(route.page==='module'){
    if(route.id==='lagerhaus') mountLagerhaus();
    else if(route.id==='frauengesundheit') mountHealth();

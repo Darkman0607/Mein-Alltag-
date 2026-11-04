@@ -1,0 +1,14 @@
+Mein Alltag · BW08 Missionen · Version 0.24.9 · 04.11.2026
+
+12 tägliche, wöchentliche, monatliche und dauerhafte Sammelmissionen.
+Aktivierung und Auszahlung ausschließlich nach deinem Klick. Fortschritt stammt aus
+bestätigten Reinigungseinträgen, Boosteröffnungen und realem Kartenbesitz.
+Jede Vergabe wird atomar und gegen Doppelklicks geschützt in Wallet und Journal
+gebucht. Vor Aktivierung gibt es keine rückwirkenden Aktions-Boni.
+
+App: Belohnungswelt → Missionen → Missionen jetzt starten.
+BW03-Freigabe für Reinigungsbelohnungen separat prüfen (Einstellungen aufklappen).
+BW09 Belohnungskalender und BW10 Diamantgarantie folgen danach.
+
+Vor Installation: externes Backup erstellen. Android-PWA-Praxistest offen.
+Dokumentation: README_BW08.md und TESTS_BW08.md.
