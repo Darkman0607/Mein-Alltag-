@@ -89,7 +89,7 @@ const unexpected={...full,stores:{...full.stores,'unexpected-store':[]}};
 await assert.rejects(backup.restoreSnapshot(unexpected),/Unvollständige/);
 assert.equal((await rw.readRewardOverview()).wallet.coins,456,'bad snapshot may not touch live data');
 const app=readFileSync('assets/app.js','utf8'),sw=readFileSync('sw.js','utf8'),v=JSON.parse(readFileSync('version.json'));
-assert.match(app,/APP_VERSION='0\.24\.6'/);assert.equal(v.version,'0.24.6');assert.match(sw,/mein-alltag-v0-24-6/);
+assert.match(app,/APP_VERSION='0\.24\.7'/);assert.equal(v.version,'0.24.7');assert.match(sw,/mein-alltag-v0-24-7/);
 assert.match(sw,/assets\/reward-data.js/);assert.match(app,/bwStorageStatus/);
 assert.equal(dbmod.ALL_DATA_STORES.length,14);
 

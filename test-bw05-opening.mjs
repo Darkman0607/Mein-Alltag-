@@ -188,6 +188,6 @@ for(let i=0;i<40000;i++){
 const observed=rare/40000;
 assert(Math.abs(observed-0.6)<0.02,`Statistical rarity check failed: ${observed}`);
 const app=readFileSync('assets/app.js','utf8');
-assert.equal(JSON.parse(readFileSync('version.json','utf8')).version,'0.24.6');
-assert(app.includes('BW05: Booster'));
+assert.equal(JSON.parse(readFileSync('version.json','utf8')).version,'0.24.7');
+assert(app.includes("renderRewardShop('booster')"));
 console.log('PASS BW05: 5 real copies, sealed-pack deletion + journal in one transaction, replay protection, missing cards and tampered pool preserve packs, independent weighted draws statistically validated, AES backup/restore, 0 extra coins, catalogue progress.');

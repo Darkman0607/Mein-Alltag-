@@ -1,8 +1,8 @@
+import {safeStarterAsset} from './reward-series.js';
 /** BW05: Booster shop and accessible opening. Purchase + opening histories are immutable. */
 import {loadBoosterShop,purchaseBooster,setBoosterPrice,setShopFavorite,BOOSTER_PRESETS} from './reward-shop.js';
 import {REWARD_CATEGORIES,REWARD_RARITIES,newRewardId} from './reward-data.js';
 import {openOwnedBooster} from './reward-opening.js';
-import {safeStarterAsset} from './reward-series.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const percent=n=>(Math.round(n*100)/100).toLocaleString('de-AT',{maximumFractionDigits:2})+' %';
 const date=s=>{const d=new Date(s);return Number.isFinite(d.getTime())?d.toLocaleString('de-AT',{dateStyle:'short',timeStyle:'short'}):'–';};
@@ -43,7 +43,7 @@ function renderShopBody(data,filters){
   if(search&&!`${t.name} ${t.kind} ${categoryLabel(t.categoryId)}`.toLocaleLowerCase('de-AT').includes(search))return false;
   return true;
  });
- return `${shopSummary(data)}${shopFilters()}<div class="bw-shop-qty"><label>Booster pro Einkauf <select id="bwShopQuantity">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}" ${n===qty?'selected':''}>${n} ${n===1?'Booster':'Booster'}</option>`).join('')}</select></label><span>Inventarlimit: 200 ungeöffnete Booster</span></div><p class="bw-shop-warning">⚠️ Ein Booster ist nur mit mindestens fünf passenden, bereits von dir angelegten Karten kaufbar. Albumplätze allein zählen nicht. Unter Album → Startkollektion kannst du 100 originale Vektormotive bei Bedarf selbst einspielen.</p><div id="bwShopGrid" class="bw-shop-grid">${filtered.length?filtered.map(t=>boosterCard(t,data.wallet.coins,qty)).join(''):'<p class="bw-shop-empty">Keine Booster für diese Filter gefunden.</p>'}</div><p class="bw-shop-disclaimer">Die Ziehchancen beschreiben das gespeicherte Rechenmodell pro Kartenplatz. Beim Öffnen werden fünf Karten nach dem beim Kauf gespeicherten Pool gezogen. Kein Echtgeld und keine garantierte Seltenheit.</p><section class="bw-shop-history"><h3>Letzte Käufe</h3>${purchaseHistory(data.purchases)}</section>`;
+ return `${shopSummary(data)}${shopFilters()}<div class="bw-shop-qty"><label>Booster pro Einkauf <select id="bwShopQuantity">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}" ${n===qty?'selected':''}>${n} ${n===1?'Booster':'Booster'}</option>`).join('')}</select></label><span>Inventarlimit: 200 ungeöffnete Booster</span></div><p class="bw-shop-warning">⚠️ Ein Booster ist nur mit mindestens fünf passenden, bereits von dir angelegten Karten kaufbar. Albumplätze allein zählen nicht. Originalmotive werden nicht automatisch erzeugt.</p><div id="bwShopGrid" class="bw-shop-grid">${filtered.length?filtered.map(t=>boosterCard(t,data.wallet.coins,qty)).join(''):'<p class="bw-shop-empty">Keine Booster für diese Filter gefunden.</p>'}</div><p class="bw-shop-disclaimer">Die Ziehchancen beschreiben das gespeicherte Rechenmodell pro Kartenplatz. Beim Öffnen werden fünf Karten nach dem beim Kauf gespeicherten Pool gezogen. Kein Echtgeld und keine garantierte Seltenheit.</p><section class="bw-shop-history"><h3>Letzte Käufe</h3>${purchaseHistory(data.purchases)}</section>`;
 }
 function purchaseHistory(items){return items.length?`<div>${items.map(p=>`<div class="bw-shop-history-row"><span>${date(p.createdAt)}<small>${esc(BOOSTER_PRESETS.find(x=>x.id===p.boosterTypeId)?.name||p.boosterTypeId)} · ${p.quantity} ×</small></span><b>−${p.coinsSpent} 🪙</b></div>`).join('')}</div>`:'<p class="bw-shop-empty">Noch keine Booster gekauft.</p>';}
 function openingCard(item,index,data,revealed=false){

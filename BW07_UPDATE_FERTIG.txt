@@ -1,0 +1,10 @@
+Mein Alltag – V0.24.7 – BW07 (04.11.2026)
+
+Kartenverwaltung: einzelne Exemplare sperren/entsperren, virtueller Verkauf gegen
+Münzen, Splitter-Verwertung, Herstellung bis Mythisch, Diamant-Herstellung gesperrt.
+Alle Buchungen atomar und mit Dublettenschutz; letzte und besonders seltene
+Karten nur nach gesonderter Bestätigung abgebbar. Konfigurierbare interne Preise.
+
+Bitte zuerst App-Backup anlegen. Dann Belohnungswelt → Karten verwalten.
+Android-/GitHub-Pages-Livetests bleiben zur Abnahme offen.
+Dokumentation: README_BW07.md, TESTS_BW07.md, Word-Checklisten.
