@@ -15,12 +15,13 @@ const BOOSTER_PRESETS=[
  {id:'booster:premium',name:'Premium-Booster',kind:'premium'},
  {id:'booster:event',name:'Event-Booster',kind:'event'}
 ];
-let mock={wallet:{coins:134,xp:100,shards:0},inventory:[],purchases:[],types:BOOSTER_PRESETS.map((t,i)=>({
+let mock={wallet:{coins:134,xp:100,shards:0},inventory:[],purchases:[],openings:[],catalog:[],types:BOOSTER_PRESETS.map((t,i)=>({
  ...t,categoryId:null,description:'Testkarten im Katalog',priceCoins:i===0?12:25,eligible:i===0,reason:i===0?'':'Noch nicht genug Karten (0/5)',favorite:false,
  pool:i===0?Array.from({length:5},(_,k)=>({id:'card:'+k,name:'Testkarte '+k,rarity:'selten',categoryId:'monster'})):[],
  odds:Object.fromEntries(REWARD_RARITIES.map(r=>[r,r==='selten'&&i===0?100:0]))
  }))};
 async function loadBoosterShop(){return structuredClone(mock);}
+async function openOwnedBooster(id){throw Error('Nicht im alten UI-Test öffnen');}
 async function purchaseBooster(id,quantity,requestId){
  const t=mock.types.find(t=>t.id===id),cost=quantity*t.priceCoins;
  if(!t.eligible||cost>mock.wallet.coins)throw Error('No coins');

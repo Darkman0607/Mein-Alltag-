@@ -96,5 +96,5 @@ assert.equal((await loadRewardEconomy()).journal.length,2);
 for(const f of ['assets/app.js','sw.js','index.html']){
  const src=readFileSync(f,'utf8');assert(src.includes('reward-economy'),`offline/import missing: ${f}`);
 }
-assert.equal(JSON.parse(readFileSync('version.json')).version,'0.24.4');
+assert.equal(JSON.parse(readFileSync('version.json')).version,'0.24.5');
 console.log('PASS BW03: explicit opt-in, user-editable rules, verified completion reward, wallet+immutable journal atomically, duplicate prevention, no retroactive/partial payout, disabled privacy sources, rollback on wallet error, backup+restore, offline shell.');

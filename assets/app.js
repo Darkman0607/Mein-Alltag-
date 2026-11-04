@@ -18,7 +18,7 @@ import {renderRewardEconomy,mountRewardEconomy} from './reward-economy-ui.js';
 import {renderRewardShop,mountRewardShop} from './reward-shop-ui.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.24.4';
+export const APP_VERSION='0.24.5';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -86,14 +86,14 @@ function renderReward(route){
      <div class="bw-hero-label"><strong>Deine besondere Karte</strong><span>Designvorschau · noch keine Karte gesammelt</span></div>
     </div>
     <button class="bw-progress" type="button" data-reward="album" aria-label="Sammlungsalbum öffnen"><span class="bw-progress-icon" aria-hidden="true">▤</span><span class="bw-progress-copy"><strong>Sammelfortschritt</strong><span>0 / 100 Karten</span><span class="bw-progress-track"><span style="width:0%"></span></span></span><b>0%</b></button>
-    <p class="bw-note">BW04: Du kannst virtuelle Münzen für versiegelte Booster ausgeben, sobald fünf passende Albumkarten angelegt sind. Shop und Inventar sind jetzt aktiv; die Kartenöffnung folgt in BW05.</p>`:
+    <p class="bw-note">BW05: Booster aus dem Shop können jetzt geöffnet werden. Pro Pack erhältst du fünf zufällige Kartenexemplare. Öffnungen werden dauerhaft im Album und Journal gespeichert.</p>`:
     tab==='album'?renderRewardAlbum():
     tab==='booster'?renderRewardShop('booster'):
     tab==='shop'?renderRewardShop('shop'):
     tab==='missionen'?renderRewardEconomy():
     tab==='wunschliste'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">♡</span><h2>Wunschliste</h2><p>Hier werden später gesuchte Karten und fehlende Lieblingskarten gesammelt.</p><p class="bw-muted">Noch keine Karten vorgemerkt.</p></div>`:
     tab==='herstellung'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">⚒</span><h2>Kartenherstellung</h2><p>Karten bis Mythisch sollen aus Splittern herstellbar sein. Diamant-Karten bleiben exklusiv für Booster und Herausforderungen.</p><p class="bw-muted">Die Herstellung folgt in einem späteren Update.</p></div>`:
-    `<div class="bw-empty-panel"><h2>Weitere Funktionen</h2><p>BW04: Kartenalbum, XP-/Münzkonto, Booster-Shop, Favoriten, Preisverwaltung und versiegeltes Pack-Inventar sind aktiv. Kartenöffnungen, Handel und Belohnungskalender folgen später.</p><p id="bwStorageStatus" role="status">Prüfe neuen Datenspeicher …</p><div class="bw-quicklinks"><button data-reward="wunschliste" type="button">♡ Wunschliste</button><button data-reward="herstellung" type="button">⚒ Herstellung</button><button data-navigate="more" type="button">⚙ App-Einstellungen</button></div></div>`;
+    `<div class="bw-empty-panel"><h2>Weitere Funktionen</h2><p>BW05: Kartenalbum, XP/Münzen, Booster-Shop und sichere Fünf-Karten-Öffnung sind aktiv. Handel, Herstellung und Belohnungskalender folgen später.</p><p id="bwStorageStatus" role="status">Prüfe neuen Datenspeicher …</p><div class="bw-quicklinks"><button data-reward="wunschliste" type="button">♡ Wunschliste</button><button data-reward="herstellung" type="button">⚒ Herstellung</button><button data-navigate="more" type="button">⚙ App-Einstellungen</button></div></div>`;
  return `<section class="bw-reward-scene" aria-label="Belohnungswelt"><div class="bw-reward-head"><button class="bw-reward-back" type="button" data-navigate="home" aria-label="Zurück zum Hauptmenü">‹</button><div class="bw-reward-head-center"><span class="bw-reward-logo"><img src="./assets/bw00/belohnungswelt.webp" alt="" draggable="false"/></span><h1>Belohnungswelt</h1><p>${esc(titles[tab])}</p></div><button class="bw-reward-info" type="button" data-reward="more" aria-label="Weitere Funktionen">ⓘ</button></div>
   <div class="bw-reward-wallet" aria-label="Dein Guthaben"><div class="bw-wallet-xp"><span>★</span><strong id="bwWalletXp">0 XP</strong></div><div class="bw-wallet-coins"><span>🪙</span><strong id="bwWalletCoins">0</strong></div><div class="bw-wallet-splitters"><span>💎</span><strong id="bwWalletShards">0</strong></div></div>
   <div class="bw-reward-body">${panel}</div>

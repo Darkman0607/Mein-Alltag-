@@ -1,5 +1,5 @@
 /** Mein Alltag BW04 – sealed virtual boosters with transactional purchases.
- * No real money, NO opening/drawing. BW05 must consume the immutable purchase
+ * No real money. BW05 consumes the immutable purchase
  * snapshot (poolSnapshot and weights) rather than changing shop definitions.
  */
 import {openDatabase,mutateModuleValues} from './database.js';
@@ -45,7 +45,7 @@ export function boosterPool(type,catalog){
  return rows.sort((a,b)=>a.id.localeCompare(b.id));
 }
 /** Independent draws with replacement, five slots. The listed percentages are
- * theoretical per-slot odds only; no booster draw occurs in BW04. */
+ * theoretical per-slot odds for the BW05 independent draws. */
 export function calculateShopOdds(type,catalog){
  const pool=boosterPool(type,catalog),total=pool.reduce((sum,card)=>sum+card.weight,0);
  const odds=Object.fromEntries(REWARD_RARITIES.map(rarity=>[rarity,total>0?100*pool.filter(c=>c.rarity===rarity).reduce((sum,c)=>sum+c.weight,0)/total:0]));
@@ -100,7 +100,8 @@ export async function loadBoosterShop(){
     });
     const inventory=(requests.unopened.result||[]).map(p=>{validateRewardEntity('bw-unopened',p);return p;}).sort((a,b)=>String(b.purchasedAt).localeCompare(String(a.purchasedAt)));
     const purchases=(requests.journal.result||[]).filter(x=>x?.type==='booster-purchase').sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))).slice(0,100);
-    resolve({wallet:{xp:wallet.xp,coins:wallet.coins,shards:wallet.shards},types,inventory,purchases});
+    const openings=(requests.journal.result||[]).filter(x=>x?.type==='booster-open'&&Array.isArray(x.cards)&&x.cards.length===5).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))).slice(0,50);
+    resolve({wallet:{xp:wallet.xp,coins:wallet.coins,shards:wallet.shards},types,inventory,purchases,openings,catalog:requests.catalog.result||[]});
    }catch(e){reject(e);}
   };
   tx.onerror=()=>{};tx.onabort=()=>reject(tx.error||Error('Booster-Shop konnte nicht geladen werden.'));

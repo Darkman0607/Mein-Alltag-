@@ -1,0 +1,12 @@
+Mein Alltag · V0.24.5 · BW05 Booster öffnen
+04.11.2026
+
+Neu:
+- Fünf echte, unabhängig gewichtete Karten je gekauftem Booster.
+- Atomare Buchung: Pack entfernen, fünf Exemplare anlegen, Journal speichern.
+- Sichere Wiederholerkennung nach App-Neustart, keine doppelten Karten.
+- Mobile Kartenaufdeckung, Sammlung und gespeicherter Öffnungsverlauf.
+- Getestet: BW05 plus bisherige Module, Backup und mobile Chromium-UI.
+- Word-Checklisten aktualisiert. GitHub-Status: GITHUB_BW05_STATUS.txt.
+
+Offen: 100 Originalkartenmotive, Android-PWA-Livetest und HTTPS-GitHub-Pages-Abnahme.
