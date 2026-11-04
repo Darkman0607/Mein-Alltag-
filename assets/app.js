@@ -21,7 +21,7 @@ import {renderRewardCards,mountRewardCards} from './reward-cards-ui.js';
 import {renderPremiumSettings,mountPremiumSettings} from './reward-premium.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.25.0';
+export const APP_VERSION='0.25.1';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -37,7 +37,7 @@ function hashRoute(){
   if(part[0]==='lagerhaus' && part[1]==='items') return {page:'lagerartikel',roomId:part[2]?decodeURIComponent(part[2]):''};
   if(part[0]==='lagerhaus' && part[1]==='room' && part[2]) return {page:'lagerraum',roomId:decodeURIComponent(part[2]),shelfId:part[3]==='shelf'&&part[4]?decodeURIComponent(part[4]):'',focusId:part[3]==='focus'&&part[4]?decodeURIComponent(part[4]):'',compartmentId:part[5]==='fach'&&part[6]?decodeURIComponent(part[6]):''};
   if(part[0]==='module' && byId[part[1]]) return {page:'module',id:part[1]};
-  if(part[0]==='reward')return {page:'reward',section:['album','booster','shop','missionen','more','wunschliste','herstellung'].includes(part[1])?part[1]:'start'};
+  if(part[0]==='reward')return {page:'reward',section:['album','booster','shop','missionen','belohnungskalender','more','wunschliste','herstellung'].includes(part[1])?part[1]:'start'};
   if(['home','calendar','search','more','overview','messages'].includes(part[0])) return {page:part[0]};
   return {page:'home'};
 }

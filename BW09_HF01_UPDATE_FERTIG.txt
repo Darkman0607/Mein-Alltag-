@@ -1,0 +1,8 @@
+MEIN ALLTAG · BW09-HF01 · V0.25.1 · 04.11.2026
+
+FIX: Der Button „Zum Belohnungskalender“ führte wegen eines fehlenden Eintrags in der zentralen Routen-Allowlist nicht in den Kalender.
+Jetzt erreichbar über die Belohnungswelt-Startseite, über „Mehr“ und über den direkten Link.
+
+Datenerhalt: Keine Datenbankänderung, kein Löschen oder Erzeugen von Karten, Münzen, XP oder Geschenken.
+Neue Tests: integrierter Route/Klick-Test bei 320/390/412 px, Kalender-/Speicher-Regressionen.
+Echter Android-PWA-Test bleibt offen. Backup erstellen, Version 0.25.1 prüfen, Kalender öffnen.

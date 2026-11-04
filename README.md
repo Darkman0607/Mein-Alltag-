@@ -1,3 +1,9 @@
+# Mein Alltag – BW09-HF01 · Version 0.25.1 (04.11.2026)
+
+Fehlerbehebung: Der sichtbare Button „Zum Belohnungskalender“ wird jetzt vom zentralen Hash-Router akzeptiert. Auch der Link im Bereich „Mehr“ führt zum Kalender. Keine Datenbankmigration, keine Änderung an Kartensammlungen, Münzen, Missionen oder Tagesgeschenken. Offline-Cache auf 0.25.1 aktualisiert. Siehe `README_BW09_HF01.md` und `TESTS_BW09_HF01.md`. Als Nächstes weiterhin BW10 Diamantgarantie.
+
+---
+
 # Mein Alltag – BW09 Belohnungskalender / V0.25.0 (04.11.2026)
 
 **Neu:** Tagesgeschenk, verifizierter Putzaufgabenbonus und kumulative Meilensteine 3/7/14/30 ohne Fehlzeiten-Strafe. Alle Auszahlungen ausdrücklich per Klick und atomar gespeichert.

@@ -1,0 +1,13 @@
+BW09-HF01 V0.25.1 · 04.11.2026
+PASS python test-bw09-navigation.py (reale Appmodule, Router/Klickpfad 320/390/412 px)
+PASS python test-bw09-ui.py (isolierter Kalender, Aktivierung, Tagesgeschenk, Aufgabenbonus, 320/390/412 px)
+PASS node test-bw09-calendar.mjs (idempotente Kalenderbuchung, Sicherung/Rücksicherung)
+PASS node test-bw08-missions.mjs
+PASS node test-bw11-premium.mjs
+PASS node test-bw01-data.mjs
+PASS node test-bw02-album.mjs
+PASS node test-bw03-economy.mjs
+PASS node test-bw04-shop.mjs
+PASS node test-bw05-opening.mjs
+PASS Syntax assets/app.js und sw.js
+Offen: Android-PWA-Test; Live-HTTPS-GitHub-Pages mit echtem Gerät, Service-Worker-Update im Livebetrieb.
