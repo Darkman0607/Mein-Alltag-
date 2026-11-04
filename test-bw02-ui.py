@@ -47,9 +47,12 @@ with sync_playwright() as playwright:
   page.locator('#bwCardName').fill('Originaltestkarte')
   page.locator('#bwCardRarity').select_option('selten')
   page.locator('#bwCardDescription').fill('Nur Test; nicht gesammelt.')
+  page.locator('#bwAttr_element').fill('Wasser')
+  page.locator('#bwAttr_faehigkeit').fill('Eiskristall')
   page.locator('#bwCardSave').click()
   page.wait_for_function("document.querySelector('#bwModalTitle')?.textContent==='Originaltestkarte'")
   assert 'Noch nicht gesammelt' in page.locator('#bwModalBody').inner_text()
+  assert 'Eiskristall' in page.locator('#bwModalBody').inner_text()
   assert len(page.evaluate('getState().catalog'))==1
   assert len(page.evaluate('getState().instances'))==0
   if width==390:
