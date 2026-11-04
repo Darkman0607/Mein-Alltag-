@@ -2,6 +2,7 @@
 import {ALBUM_SLOTS,CATEGORY_APPEARANCE,CATEGORY_FIELDS,loadRewardAlbum,filterAlbum,setAlbumFavorite,saveAlbumCard,prepareAlbumImage} from './reward-album.js';
 import {REWARD_CATEGORIES,REWARD_RARITIES} from './reward-data.js';
 import {safeStarterAsset,installStarterSeries,previewStarterImport} from './reward-series.js';
+import {renderPremiumSettings,playPremiumReveal} from './reward-premium.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const rarityNames={gewoehnlich:'Gewöhnlich',ungewoehnlich:'Ungewöhnlich',selten:'Selten',episch:'Episch',legendaer:'Legendär',mythisch:'Mythisch',diamant:'Diamant'};
@@ -10,6 +11,7 @@ const percent=(n,total)=>total?Math.round(n*100/total):0;
 
 export function renderRewardAlbum(){return `<div class="bw-album" id="bwAlbum">
  <div class="bw-album-intro"><span class="bw-album-kicker">SAMMLUNG · 4 THEMEN</span><h2>Dein Kartenalbum</h2><p>100 nummerierte Plätze. Kartenmotive können von dir ergänzt werden; <strong>ein ausgefüllter Kartenplatz ist noch keine gesammelte Karte</strong>.</p></div>
+ ${renderPremiumSettings()}
  <div class="bw-starter-import" id="bwStarterImport"><button type="button" id="bwStarterImportButton">🎨 Fehlende Kartenplätze füllen</button><p id="bwStarterImportStatus" role="status" aria-live="polite">Startserie: 100 unabhängige Vektormotive; bereits angelegte Karten bleiben unverändert.</p></div>
  <div class="bw-album-stats" id="bwAlbumStats" role="status" aria-live="polite">Lade Sammelfortschritt …</div>
  <div class="bw-album-categories" id="bwAlbumCategories" role="group" aria-label="Kartenkategorie"></div>
@@ -28,7 +30,7 @@ function art(slot,large=false){
  const rarity=REWARD_RARITIES.includes(slot.card?.rarity)?slot.card.rarity:'unbekannt';
  return `<div class="bw-card-art bw-theme-${appearance.theme} bw-rarity-${rarity} ${slot.owned?'bw-is-owned':'bw-is-missing'} ${large?'bw-art-large':''}">
   ${hasSafeImage||starter?`<img src="${hasSafeImage?image:starter}" alt="${esc(slot.card.name)}" loading="lazy"/>`:`<span class="bw-card-emblem" aria-hidden="true">${appearance.icon}</span><span class="bw-card-unavailable">${slot.card?'Motiv fehlt':'Kartenplatz'}</span>`}
-  <span class="bw-card-art-number">#${pad(slot.number)}</span>
+  <span class="bw-card-art-number">#${pad(slot.number)}</span><span class="bw11-rarity-chip">${esc(rarityNames[rarity]||'Karte')}</span>
  </div>`;
 }
 
@@ -111,7 +113,7 @@ export function mountRewardAlbum(){
  const open=id=>{
   const slot=findSlot(id);if(!slot)return;
   lastFocus=document.activeElement;activeSlot=id;
-  modalBody.innerHTML=detail(slot);modal.hidden=false;document.body.classList.add('bw-card-dialog-open');wireDetail(id);closeBtn.focus();
+  modalBody.innerHTML=detail(slot);modal.hidden=false;document.body.classList.add('bw-card-dialog-open');wireDetail(id);playPremiumReveal(slot.card?.rarity);closeBtn.focus();
  };
  root.addEventListener('click',async e=>{
   const cat=e.target.closest('[data-bw-cat]');if(cat){category=cat.dataset.bwCat;paint();return;}

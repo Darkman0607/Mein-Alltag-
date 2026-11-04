@@ -3,6 +3,7 @@ import {safeStarterAsset} from './reward-series.js';
 import {loadBoosterShop,purchaseBooster,setBoosterPrice,setShopFavorite,BOOSTER_PRESETS} from './reward-shop.js';
 import {REWARD_CATEGORIES,REWARD_RARITIES,newRewardId} from './reward-data.js';
 import {openOwnedBooster} from './reward-opening.js';
+import {renderPremiumSettings,playPremiumReveal} from './reward-premium.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const percent=n=>(Math.round(n*100)/100).toLocaleString('de-AT',{maximumFractionDigits:2})+' %';
 const date=s=>{const d=new Date(s);return Number.isFinite(d.getTime())?d.toLocaleString('de-AT',{dateStyle:'short',timeStyle:'short'}):'–';};
@@ -11,7 +12,7 @@ const labelForType=type=>type.kind==='mixed'?'Gemischt':type.kind==='theme'?'The
 const boosterIcon=type=>type.kind==='mixed'?'🎴':type.kind==='theme'?'🃏':type.kind==='premium'?'💎':'🎉';
 const rarityLabel=r=>({gewoehnlich:'Gewöhnlich',ungewoehnlich:'Ungewöhnlich',selten:'Selten',episch:'Episch',legendaer:'Legendär',mythisch:'Mythisch',diamant:'Diamant'})[r]||r;
 export function renderRewardShop(mode='shop'){
- if(mode==='booster')return `<section class="bw-shop" id="bwShop" data-mode="booster" aria-label="Inventar ungeöffneter Booster"><header class="bw-shop-title"><span>BW05 · DEIN INVENTAR</span><h2>Deine Booster öffnen</h2><p>Öffne einen gekauften Booster und erhalte fünf echte Kartenexemplare. Jede Öffnung wird dauerhaft dokumentiert.</p></header><div id="bwShopContent">Lade Booster …</div><p class="bw-shop-message" id="bwShopMessage" role="status" aria-live="polite"></p></section>`;
+ if(mode==='booster')return `<section class="bw-shop" id="bwShop" data-mode="booster" aria-label="Inventar ungeöffneter Booster"><header class="bw-shop-title"><span>BW05 · DEIN INVENTAR</span><h2>Deine Booster öffnen</h2><p>Öffne einen gekauften Booster und erhalte fünf echte Kartenexemplare. Jede Öffnung wird dauerhaft dokumentiert.</p></header>${renderPremiumSettings()}<div id="bwShopContent">Lade Booster …</div><p class="bw-shop-message" id="bwShopMessage" role="status" aria-live="polite"></p></section>`;
  return `<section class="bw-shop" id="bwShop" data-mode="shop" aria-label="Booster-Shop"><header class="bw-shop-title"><span>BW05 · BOOSTER-SHOP</span><h2>Dein Karten-Shop</h2><p>Virtuelle Münzen aus deinen freigegebenen Aufgaben. Kein Echtgeld. Jedes Pack enthält fünf unabhängige Kartenziehungen.</p></header><div id="bwShopContent">Lade Booster-Shop …</div><p class="bw-shop-message" id="bwShopMessage" role="status" aria-live="polite"></p></section>`;
 }
 function shopSummary(data){
@@ -47,11 +48,11 @@ function renderShopBody(data,filters){
 }
 function purchaseHistory(items){return items.length?`<div>${items.map(p=>`<div class="bw-shop-history-row"><span>${date(p.createdAt)}<small>${esc(BOOSTER_PRESETS.find(x=>x.id===p.boosterTypeId)?.name||p.boosterTypeId)} · ${p.quantity} ×</small></span><b>−${p.coinsSpent} 🪙</b></div>`).join('')}</div>`:'<p class="bw-shop-empty">Noch keine Booster gekauft.</p>';}
 function openingCard(item,index,data,revealed=false){
- const card=data.catalog.find(c=>c.id===item.cardId),safeImage=typeof card?.imageData==='string'&&/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(card.imageData)?card.imageData:safeStarterAsset(card);
- return `<button type="button" class="bw-open-card ${revealed?'is-revealed':''}" data-reveal-card="${index}" aria-label="Karte ${index+1} ${revealed?'anzeigen':'aufdecken'}" aria-pressed="${revealed}"><span class="bw-open-back" aria-hidden="true">✦<small>KARTE ${index+1}</small></span><span class="bw-open-front"><span class="bw-open-image">${safeImage?`<img src="${esc(safeImage)}" alt="" loading="lazy">`:'✧'}</span><strong>${esc(item.name)}</strong><small>#${String(item.number||0).padStart(3,'0')} · ${esc(rarityLabel(item.rarity))}</small>${item.duplicate?'<em>Bereits vorhanden / doppelt</em>':'<em>Neu in der Sammlung</em>'}</span></button>`;
+ const card=data.catalog.find(c=>c.id===item.cardId),safeRarity=REWARD_RARITIES.includes(item.rarity)?item.rarity:'gewoehnlich',safeImage=typeof card?.imageData==='string'&&/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(card.imageData)?card.imageData:safeStarterAsset(card);
+ return `<button type="button" class="bw-open-card bw11-rarity-${safeRarity} ${revealed?'is-revealed':''}" data-reveal-card="${index}" aria-label="Karte ${index+1} ${revealed?'anzeigen':'aufdecken'}" aria-pressed="${revealed}"><span class="bw-open-back" aria-hidden="true">✦<small>KARTE ${index+1}</small></span><span class="bw-open-front"><span class="bw-open-image">${safeImage?`<img src="${esc(safeImage)}" alt="" loading="lazy">`:'✧'}</span><strong>${esc(item.name)}</strong><small>#${String(item.number||0).padStart(3,'0')} · ${esc(rarityLabel(item.rarity))}</small>${item.duplicate?'<em>Bereits vorhanden / doppelt</em>':'<em>Neu in der Sammlung</em>'}</span></button>`;
 }
 function openingResults(result,data){
- return `<section class="bw-open-results" id="bwOpenResults" aria-label="Deine fünf gezogenen Karten" tabindex="-1"><div class="bw-open-results-heading"><span>✨ BW05 · ERGEBNIS</span><h3>Deine 5 neuen Karten!</h3><p>${result.replayed?'Bereits gespeicherte Öffnung':'Sicher gespeichert'} · ${date(result.openedAt)} · Jede Karte ist jetzt als Exemplar im Album vorhanden.</p></div><div class="bw-open-card-grid">${result.cards.map((x,i)=>openingCard(x,i,data)).join('')}</div><button type="button" class="bw-open-reveal-all" data-reveal-all="1">Alle 5 Karten aufdecken</button><button type="button" class="bw-open-to-album" data-go-album="1">Zum Kartenalbum</button></section>`;
+ return `<section class="bw-open-results" id="bwOpenResults" aria-label="Deine fünf gezogenen Karten" tabindex="-1"><div class="bw-open-results-heading"><span>✨ BW05 · ERGEBNIS</span><h3>Deine 5 neuen Karten!</h3><p>${result.replayed?'Bereits gespeicherte Öffnung':'Sicher gespeichert'} · ${date(result.openedAt)} · Jede Karte ist jetzt als Exemplar im Album vorhanden.</p></div><div class="bw-open-card-grid">${result.cards.map((x,i)=>openingCard(x,i,data)).join('')}</div><button type="button" class="bw-open-reveal-all" data-reveal-all="1">Alle 5 sofort aufdecken</button><button type="button" class="bw-open-to-album" data-go-album="1">Zum Kartenalbum</button></section>`;
 }
 function openingHistory(items){
  return `<section class="bw-shop-history"><h3>Öffnungsverlauf (${items.length})</h3>${items.length?items.map(item=>`<details class="bw-open-history"><summary>✦ ${date(item.createdAt)} · ${esc(BOOSTER_PRESETS.find(t=>t.id===item.boosterTypeId)?.name||'Booster')} · 5 Karten</summary><ol>${item.cards.map(card=>`<li>${esc(card.name)} · ${esc(rarityLabel(card.rarity))}${card.duplicate?' · Doppelt':''}</li>`).join('')}</ol></details>`).join(''):'<p class="bw-shop-empty">Noch kein Booster geöffnet.</p>'}</section>`;
@@ -78,8 +79,8 @@ export async function mountRewardShop(){
  area.addEventListener('click',async e=>{
   if(e.target.closest('[data-go-shop]')){location.hash='#/reward/shop';return;}
   if(e.target.closest('[data-go-album]')){location.hash='#/reward/album';return;}
-  if(e.target.closest('[data-reveal-all]')){area.querySelectorAll('[data-reveal-card]').forEach(card=>{card.classList.add('is-revealed');card.setAttribute('aria-pressed','true');});return;}
-  const reveal=e.target.closest('[data-reveal-card]');if(reveal){reveal.classList.add('is-revealed');reveal.setAttribute('aria-pressed','true');return;}
+  if(e.target.closest('[data-reveal-all]')){area.querySelector('#bwOpenResults')?.classList.add('bw11-instant');area.querySelectorAll('[data-reveal-card]').forEach(card=>{card.classList.add('is-revealed');card.setAttribute('aria-pressed','true');});return;}
+  const reveal=e.target.closest('[data-reveal-card]');if(reveal){if(!reveal.classList.contains('is-revealed')){reveal.classList.add('is-revealed');reveal.setAttribute('aria-pressed','true');playPremiumReveal(reveal.className.match(/bw11-rarity-([a-z]+)/)?.[1]);}return;}
   if(busy)return;
   const open=e.target.closest('[data-shop-open]');if(open){
    const packId=open.dataset.shopOpen,pack=data?.inventory?.find(x=>x.id===packId);if(!pack)return;

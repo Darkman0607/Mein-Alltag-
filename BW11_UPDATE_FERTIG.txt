@@ -1,0 +1,7 @@
+Mein Alltag – BW11 – Beta V0.24.8
+
+Premium-Kartenrahmen für sieben Seltenheiten, Holo-/Diamant-Effekte, kurzer Booster-Kartenflip, Sofortaufdecken, drei Leistungsmodi und optionaler Ton (standardmäßig aus). Einstellungen bleiben im verschlüsselten Backup erhalten. Kein neuer Karten-/Währungsbestand.
+
+Die neue, verbindliche Reihenfolge: BW11 (dieses Update) → BW08 Missionen → BW09 Belohnungskalender → BW10 Diamantgarantie. Danach restliche Updates.
+
+Android-Hardware-/Pages-Livetest noch offen. Vor Installation bitte vollständiges App-Backup sichern. Word-Masterchecklisten liegen bei.

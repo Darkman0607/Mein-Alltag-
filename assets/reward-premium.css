@@ -1,0 +1,67 @@
+/* BW11 – reusable rarity-based card treatments. Image pixels and reward data stay untouched. */
+.bw11-settings{--bw11-ink:#b8def6;margin:10px 0 16px;padding:13px;background:linear-gradient(130deg,#152949,#081b33);border:1px solid #4b80a4;border-radius:14px;color:#e8f5ff;min-width:0}
+.bw11-setting-header{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px}
+.bw11-setting-header span{border:1px solid #537fa3;border-radius:7px;font-size:10px;color:#9cd5f4;padding:3px 7px;letter-spacing:.05em}
+.bw11-settings-fields{display:grid;grid-template-columns:1fr;gap:9px;margin:10px 0}
+.bw11-settings-fields label{display:flex;align-items:center;justify-content:space-between;gap:9px;color:var(--bw11-ink);font-size:12px;font-weight:700}
+.bw11-settings-fields select{width:min(100%,160px);background:#061d36;color:white;border:1px solid #4a91b9;border-radius:9px;min-height:42px;padding:7px 9px;font:inherit;font-size:13px}
+.bw11-settings-fields .bw11-sound-label{justify-content:flex-start;min-height:36px;gap:12px}
+.bw11-sound-label input{accent-color:#6ec9fa;width:20px;height:20px;flex:none}
+.bw11-settings p{margin:6px 0 0;font-size:11px;line-height:1.5;color:#b7d3e7}
+.bw11-settings .bw11-setting-message{color:#a3f0c0;min-height:16px}
+.bw11-settings .bw11-setting-message.is-error{color:#ffc2ba}
+.bw-card-art{--bw11-accent:#748aa6;--bw11-glow:#d3e5ff;--bw11-lustre:.12;}
+.bw-card-art.bw-rarity-gewoehnlich{--bw11-accent:#8c9bad;--bw11-glow:#cbd3df;border-color:#8c9bad}
+.bw-card-art.bw-rarity-ungewoehnlich{--bw11-accent:#4fc69c;--bw11-glow:#b2ffe1;border-color:#4fc69c}
+.bw-card-art.bw-rarity-selten{--bw11-accent:#559bff;--bw11-glow:#a6d7ff;--bw11-lustre:.3;border-color:#559bff}
+.bw-card-art.bw-rarity-episch{--bw11-accent:#bb71f2;--bw11-glow:#efbbff;--bw11-lustre:.38;border-color:#bb71f2}
+.bw-card-art.bw-rarity-legendaer{--bw11-accent:#f6c453;--bw11-glow:#fff2a7;--bw11-lustre:.52;border-color:#f6c453}
+.bw-card-art.bw-rarity-mythisch{--bw11-accent:#ff75ae;--bw11-glow:#ffc5ec;--bw11-lustre:.60;border-color:#ff75ae}
+.bw-card-art.bw-rarity-diamant{--bw11-accent:#8befff;--bw11-glow:#f5faff;--bw11-lustre:.76;border-color:#8befff}
+.bw-card-art.bw-rarity-diamant{box-shadow:inset 0 0 16px #9ff4ff55,0 0 8px #7ce6ff44}
+.bw-card-art.bw-rarity-legendaer,.bw-card-art.bw-rarity-mythisch{box-shadow:inset 0 0 12px #ffe6ff24,0 0 9px #f2bbee33}
+.bw-card-art:after{content:"";position:absolute;z-index:2;inset:-65%;pointer-events:none;opacity:0;background:linear-gradient(115deg,transparent 32%,#ffffff00 42%,var(--bw11-glow) 49%,#ffffffaa 51%,transparent 59%),linear-gradient(15deg,#90ffcb11,#c5a5ff19,#fdf7b510);mix-blend-mode:screen;transform:translateX(-58%) rotate(15deg)}
+.bw-card-art.bw-rarity-diamant:after{background:linear-gradient(110deg,transparent 34%,#6ef4fc77 43%,#ff7cb766 48%,#fffaacaa 52%,#8ca6ff77 56%,transparent 65%)}
+.bw-art-large .bw11-rarity-chip{display:block;position:absolute;bottom:8px;left:8px;z-index:3;padding:5px 9px;border:1px solid var(--bw11-accent);border-radius:7px;background:#07192bd9;color:#f7fbff;font-size:11px;font-weight:850;letter-spacing:.04em;box-shadow:0 0 10px #0009}
+.bw11-rarity-chip{display:none}
+/* Only animate one large selected card or focused/hovered owned card, not 100 grid cards. */
+html[data-bw11-effects="full"] .bw-art-large.bw-is-owned.bw-rarity-episch:after,
+html[data-bw11-effects="full"] .bw-art-large.bw-is-owned.bw-rarity-legendaer:after,
+html[data-bw11-effects="full"] .bw-art-large.bw-is-owned.bw-rarity-mythisch:after,
+html[data-bw11-effects="full"] .bw-art-large.bw-is-owned.bw-rarity-diamant:after{opacity:.38;animation:bw11-glide 3.6s ease-in-out infinite alternate}
+html[data-bw11-effects="full"] .bw-card-tile.has-copy:focus-within .bw-card-art.bw-rarity-selten:after,
+html[data-bw11-effects="full"] .bw-card-tile.has-copy:hover .bw-card-art.bw-rarity-selten:after,
+html[data-bw11-effects="full"] .bw-card-tile.has-copy:hover .bw-card-art.bw-rarity-legendaer:after,
+html[data-bw11-effects="full"] .bw-card-tile.has-copy:hover .bw-card-art.bw-rarity-diamant:after{opacity:.35;animation:bw11-glide 2.6s ease-in-out 1}
+/* Static premium borders still visible in reduced mode. 'Off' removes aura and foil. */
+html[data-bw11-effects="off"] .bw-card-art{box-shadow:none!important}
+html[data-bw11-effects="off"] .bw-card-art:after{display:none}
+.bw-open-card{--bw11-rim:#688cb4;--bw11-halo:#a6d9fc}
+.bw-open-card.bw11-rarity-gewoehnlich{--bw11-rim:#8696ab;--bw11-halo:#bbc7d9}
+.bw-open-card.bw11-rarity-ungewoehnlich{--bw11-rim:#52bf8f;--bw11-halo:#9cebc5}
+.bw-open-card.bw11-rarity-selten{--bw11-rim:#599dff;--bw11-halo:#9ccaff}
+.bw-open-card.bw11-rarity-episch{--bw11-rim:#b179f0;--bw11-halo:#e3b9ff}
+.bw-open-card.bw11-rarity-legendaer{--bw11-rim:#efc25c;--bw11-halo:#fff0a0}
+.bw-open-card.bw11-rarity-mythisch{--bw11-rim:#f47fb4;--bw11-halo:#ffc5e1}
+.bw-open-card.bw11-rarity-diamant{--bw11-rim:#82e8ff;--bw11-halo:#f6fcff}
+.bw-open-card.is-revealed{border:2px solid var(--bw11-rim);box-shadow:inset 0 0 14px #ffffff0b,0 0 12px color-mix(in srgb,var(--bw11-halo) 25%,transparent)}
+.bw-open-card.is-revealed.bw11-rarity-diamant{background:linear-gradient(140deg,#132b5b,#462651,#0b3f55)}
+.bw-open-card.is-revealed:after{content:"";pointer-events:none;position:absolute;z-index:3;inset:-45%;opacity:0;background:linear-gradient(105deg,transparent 38%,#ffffff77 48%,var(--bw11-halo) 50%,transparent 60%);mix-blend-mode:screen;transform:translateX(-80%) rotate(12deg)}
+html[data-bw11-effects="full"] .bw-open-card.is-revealed.bw11-rarity-episch:after,
+html[data-bw11-effects="full"] .bw-open-card.is-revealed.bw11-rarity-legendaer:after,
+html[data-bw11-effects="full"] .bw-open-card.is-revealed.bw11-rarity-mythisch:after,
+html[data-bw11-effects="full"] .bw-open-card.is-revealed.bw11-rarity-diamant:after{opacity:.6;animation:bw11-reveal .95s ease-out 1 both}
+html[data-bw11-effects="full"] .bw-open-card.is-revealed.bw11-rarity-diamant{animation:bw11-pulse .7s ease-out 1}
+html[data-bw11-effects="off"] .bw-open-card.is-revealed{box-shadow:none}
+html[data-bw11-effects="off"] .bw-open-card.is-revealed:after{display:none}
+.bw11-instant .bw-open-card,.bw11-instant .bw-open-card:after{animation:none!important;transition:none!important}
+@keyframes bw11-glide{0%{transform:translateX(-68%) rotate(15deg)}100%{transform:translateX(60%) rotate(15deg)}}
+@keyframes bw11-reveal{0%{transform:translateX(-70%) rotate(12deg)}100%{transform:translateX(72%) rotate(12deg)}}
+@keyframes bw11-pulse{0%{filter:brightness(1.5)}100%{filter:brightness(1)}}
+@media(prefers-reduced-motion:reduce){.bw-card-art:after,.bw-open-card.is-revealed:after,.bw-open-card.is-revealed{animation:none!important;transition:none!important}}
+@media(max-width:350px){.bw11-settings{padding:10px}.bw11-settings-fields label{font-size:11px}}
+/* Single 3D flip on tap; the five-card immediate reveal always disables it. */
+html[data-bw11-effects="full"] .bw-open-card.is-revealed{animation:bw11-card-flip .48s cubic-bezier(.22,.72,.38,1) both;backface-visibility:hidden;transform-style:preserve-3d}
+html[data-bw11-effects="full"] .bw-open-card.is-revealed.bw11-rarity-diamant{animation:bw11-card-flip .48s cubic-bezier(.22,.72,.38,1) both,bw11-pulse .75s ease-out 1}
+@keyframes bw11-card-flip{0%{transform:perspective(780px) rotateY(-86deg) scale(.96)}100%{transform:perspective(780px) rotateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){html[data-bw11-effects="full"] .bw-open-card.is-revealed{animation:none!important}}

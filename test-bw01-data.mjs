@@ -89,7 +89,7 @@ const unexpected={...full,stores:{...full.stores,'unexpected-store':[]}};
 await assert.rejects(backup.restoreSnapshot(unexpected),/Unvollständige/);
 assert.equal((await rw.readRewardOverview()).wallet.coins,456,'bad snapshot may not touch live data');
 const app=readFileSync('assets/app.js','utf8'),sw=readFileSync('sw.js','utf8'),v=JSON.parse(readFileSync('version.json'));
-assert.match(app,/APP_VERSION='0\.24\.7'/);assert.equal(v.version,'0.24.7');assert.match(sw,/mein-alltag-v0-24-7/);
+assert.match(app,/APP_VERSION='0\.24\.8'/);assert.equal(v.version,'0.24.8');assert.match(sw,/mein-alltag-v0-24-8/);
 assert.match(sw,/assets\/reward-data.js/);assert.match(app,/bwStorageStatus/);
 assert.equal(dbmod.ALL_DATA_STORES.length,14);
 console.log('PASS BW01: IndexedDB v1→v2 (14 physische Stores), alte Daten erhalten, vier Kategorien/100 geplante Karten, sieben Seltenheiten, stabile IDs, Dublettenschutz, Wallet/Exemplare/ungeöffnete Booster, vollständiges AES-GCM-Backup und Restore, v1-Backup-Restore ohne Löschen der Belohnungswelt, unvollständige Sicherungen abgewiesen.');
