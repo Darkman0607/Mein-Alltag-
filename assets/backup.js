@@ -1,9 +1,10 @@
 /* Mein Alltag F01 – vollständige manuelle, passwortverschlüsselte Datensicherung.
    File format: JSON envelope + AES-256-GCM ciphertext; KDF PBKDF2-SHA256 310000 rounds.
    No request to a cloud API is made. Raw values remain local in IndexedDB. */
-import {openDatabase,DB_NAME,MODULE_STORES} from './database.js';
+import {openDatabase,DB_NAME,MODULE_STORES,ALL_DATA_STORES} from './database.js';
 export const BACKUP_FORMAT='mein-alltag-encrypted-backup-v1';
-const STORES=[...MODULE_STORES,'meta'];
+const STORES=ALL_DATA_STORES;
+const LEGACY_STORES=['lagerhaus','frauengesundheit','familienplaner','putzmanager','hausservice','meta'];
 const ITERATIONS=310000;
 const bytesToBase64=bytes=>{let result='';for(let i=0;i<bytes.length;i+=8192)result+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(result);};
 const base64ToBytes=value=>{if(typeof value!=='string'||value.length>400000000||!/^[A-Za-z0-9+/]*={0,2}$/.test(value)||value.length%4!==0)throw Error('Beschädigte Backup-Daten.');const bin=atob(value),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes;};
@@ -56,15 +57,20 @@ export async function captureSnapshot(){
 }
 export function validateSnapshot(data){
  if(!data||data.format!=='mein-alltag-snapshot-v1'||data.db!==DB_NAME||!data.stores||typeof data.stores!=='object')throw Error('Datei gehört nicht zur unterstützten Mein-Alltag-Datenbank.');
- if(Object.keys(data.stores).sort().join('|')!==[...STORES].sort().join('|'))throw Error('Unvollständige Sicherung: Ein oder mehrere Module fehlen.');
+ const names=Object.keys(data.stores).sort().join('|');
+ const isCurrent=names===[...STORES].sort().join('|');
+ const isLegacy=names===[...LEGACY_STORES].sort().join('|');
+ if(!isCurrent&&!isLegacy)throw Error('Unvollständige oder unbekannte Sicherung: Speichermodule stimmen nicht überein.');
+ // Old v1 backups remain restorable. New reward stores are preserved rather than deleted.
+ const sourceStores=isLegacy?LEGACY_STORES:STORES;
  const decoded={};let count=0;
- for(const store of STORES){const entries=data.stores[store];if(!Array.isArray(entries)||entries.length>100000)throw Error('Ungültige Modul-Daten.');const seen=new Set();decoded[store]=entries.map(row=>{
+ for(const store of sourceStores){const entries=data.stores[store];if(!Array.isArray(entries)||entries.length>100000)throw Error('Ungültige Modul-Daten.');const seen=new Set();decoded[store]=entries.map(row=>{
    if(!Array.isArray(row)||row.length!==2)throw Error('Ungültiger Datenbankeintrag.');
    const key=decode(row[0]);if(!(['string','number'].includes(typeof key))||String(key).length>1000)throw Error('Ungültiger Datenbankschlüssel.');
    const marker=typeof key+':'+key;if(seen.has(marker))throw Error('Doppelter Datensatz.');seen.add(marker);count++;
    return [key,decode(row[1])];
  });}
- return {decoded,count};
+ return {decoded,count,legacy:isLegacy,sourceStores};
 }
 async function keyFromPassword(password,salt){
  if(typeof password!=='string'||password.length<12||password.length>512)throw Error('Backup-Passwort muss mindestens 12 Zeichen lang sein.');
@@ -92,12 +98,12 @@ export async function decryptBackup(envelope,password){
  validateSnapshot(snapshot);return snapshot;
 }
 export async function restoreSnapshot(snapshot){
- const {decoded,count}=validateSnapshot(snapshot),db=await openDatabase();
+ const {decoded,count,sourceStores}=validateSnapshot(snapshot),db=await openDatabase();
  // Single cross-store readwrite transaction: any write error rolls back ALL stores.
  await new Promise((resolve,reject)=>{
-   const tx=db.transaction(STORES,'readwrite');
+   const tx=db.transaction(sourceStores,'readwrite');
    tx.oncomplete=()=>resolve();tx.onerror=()=>{};tx.onabort=()=>reject(tx.error||Error('Import abgebrochen. Bisherige Daten bleiben erhalten.'));
-   try{for(const store of STORES){const os=tx.objectStore(store);os.clear();for(const [key,value] of decoded[store])os.put(value,key);}}catch(err){tx.abort();reject(err);}
+   try{for(const store of sourceStores){const os=tx.objectStore(store);os.clear();for(const [key,value] of decoded[store])os.put(value,key);}}catch(err){tx.abort();reject(err);}
  });
  return count;
 }
