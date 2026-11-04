@@ -5,6 +5,7 @@
  */
 import {getModuleValue,mutateModuleValues} from '../assets/database.js';
 import {atomicModuleChange} from '../assets/cross-module.js';
+import {REWARD_RULES_KEY,REWARD_WALLET_KEY,cleaningRewardId,planCleaningReward} from '../assets/reward-economy.js';
 import {ITEM_KEY,locationChoices} from './lagerhaus-items.js';
 import {MOVEMENT_KEY,bookStock,stockTotal,stockPositions} from './lagerhaus-stock.js';
 import {consumptionQuantity,pairEligible} from './lagerhaus-consumption.js';
@@ -143,9 +144,15 @@ export async function removeMaterial(roomId,lineId){
 export async function cancelCleaning(roomId){
  await mutateSession(roomId,(state,s)=>{if(!s)throw Error('Keine Reinigung aktiv.');delete state.active[roomId];});
 }
-const keys=[['putzmanager',CLEAN_KEY],['lagerhaus',ITEM_KEY],['lagerhaus',MOVEMENT_KEY],['lagerhaus','rooms.v1'],['lagerhaus','areas.v1']];
+const keysBase=[['putzmanager',CLEAN_KEY],['lagerhaus',ITEM_KEY],['lagerhaus',MOVEMENT_KEY],['lagerhaus','rooms.v1'],['lagerhaus','areas.v1'],['belohnungswelt',REWARD_RULES_KEY],['bw-wallet',REWARD_WALLET_KEY]];
 export async function finishCleaning(roomId){
- return atomicModuleChange(keys,values=>{
+ // Session ID read first, but all business checks and writes are repeated in ONE transaction.
+ // A concurrent finish changes the active session and the transaction aborts harmlessly.
+ const before=await loadCleaningState();
+ const session=before.active[roomId];
+ if(!session)throw Error('Reinigung ist bereits abgeschlossen oder wurde abgebrochen.');
+ const journalId=cleaningRewardId(session.id);
+ return atomicModuleChange([...keysBase,['bw-journal',journalId]],values=>{
   const state=normalize(values.putzmanager[CLEAN_KEY]),s=state.active[roomId];
   if(!s)throw Error('Reinigung ist bereits abgeschlossen oder wurde abgebrochen.');
   const items=Array.isArray(values.lagerhaus[ITEM_KEY])?values.lagerhaus[ITEM_KEY]:[];
@@ -172,7 +179,9 @@ export async function finishCleaning(roomId){
    confirmed.push({itemId:line.itemId,itemName:original.name,quantity:qty,unit:original.unit,fromId:line.fromId,containerId:line.containerId||null,eventId:event.id});
   }
   const finished={id:s.id,roomId:s.roomId,roomName:s.roomName,startedAt:s.startedAt,endedAt:doneAt,durationMs:sessionElapsed(s),doneCount:s.doneTaskIds.length,totalCount:taskCount(s.groups),materials:confirmed};
+  const reward=planCleaningReward(finished,{settings:values.belohnungswelt[REWARD_RULES_KEY],wallet:values['bw-wallet'][REWARD_WALLET_KEY],journal:values['bw-journal'][journalId]});
+  finished.reward=reward.result;
   delete state.active[roomId];state.history=[finished,...state.history].slice(0,LIMIT);
-  return {writes:[['putzmanager',CLEAN_KEY,state],['lagerhaus',ITEM_KEY,nextItems],['lagerhaus',MOVEMENT_KEY,[...stockEvents,...newEvents].slice(-3000)]],result:finished};
+  return {writes:[['putzmanager',CLEAN_KEY,state],['lagerhaus',ITEM_KEY,nextItems],['lagerhaus',MOVEMENT_KEY,[...stockEvents,...newEvents].slice(-3000)],...reward.writes],result:finished};
  });
 }
