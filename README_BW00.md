@@ -26,4 +26,8 @@ Stand: 04.11.2026
 - Wegen Browserrichtlinien konnte kein vollständiger HTTP-basierten PWA-Test durchgeführt werden.
 
 ## Veröffentlichung
-- Lokales ZIP ist geprüft. GitHub-Push gesondert verifizieren; niemals erfolgreichen Upload behaupten, ohne Commit zu prüfen.
+- GitHub-Repository: https://github.com/Darkman0607/Mein-Alltag-
+- Branch: main; BW00-V0.24.0-Quellcode, Kartendesign und Word-Checkliste hochgeladen und geprüft.
+- Bestätigter Basis-Commit für den vollständigen Upload: `dd9472fb2584dc60a64764c84e7338ce9d89d339`.
+- GitHub Pages auf dem echten Gerät und Service-Worker-Cache-Update sind noch NICHT verifiziert.
+- Das finale Release enthält den aktualisierten Word-Status; ZIP- und Hauptversion: V0.24.0.
