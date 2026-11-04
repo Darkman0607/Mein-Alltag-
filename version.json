@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.23.9",
-  "build": "Startseite nach Bildvorlage: sechs farbige Kacheln, kuschelige Belohnungswelt als Vorschau; fünf bestehende Module unverändert",
-  "release_date": "2026-11-03"
+  "version": "0.24.0",
+  "build": "BW00 Design 1 – freistehende 3D-Symbole im Hauptmenü und neue Sammlerzentrale; keine spielbaren Karten",
+  "release_date": "2026-11-04"
 }

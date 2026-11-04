@@ -13,7 +13,7 @@ import {renderHealth,mountHealth,confirmHealthExit} from '../modules/frauengesun
 import {createEncryptedBackup,triggerBackupDownload,decryptBackup,restoreSnapshot,validateSnapshot} from './backup.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 
-export const APP_VERSION='0.23.9';
+export const APP_VERSION='0.24.0';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -29,26 +29,73 @@ function hashRoute(){
   if(part[0]==='lagerhaus' && part[1]==='items') return {page:'lagerartikel',roomId:part[2]?decodeURIComponent(part[2]):''};
   if(part[0]==='lagerhaus' && part[1]==='room' && part[2]) return {page:'lagerraum',roomId:decodeURIComponent(part[2]),shelfId:part[3]==='shelf'&&part[4]?decodeURIComponent(part[4]):'',focusId:part[3]==='focus'&&part[4]?decodeURIComponent(part[4]):'',compartmentId:part[5]==='fach'&&part[6]?decodeURIComponent(part[6]):''};
   if(part[0]==='module' && byId[part[1]]) return {page:'module',id:part[1]};
-  if(['home','calendar','search','more','reward'].includes(part[0])) return {page:part[0]};
+  if(part[0]==='reward')return {page:'reward',section:['album','booster','shop','missionen','more','wunschliste','herstellung'].includes(part[1])?part[1]:'start'};
+  if(['home','calendar','search','more','overview','messages'].includes(part[0])) return {page:part[0]};
   return {page:'home'};
 }
 export function navigate(page,id){
-  const newHash=page==='module' && byId[id] ? `#/module/${id}`:`#/${page}`;
+  const newHash=page==='module' && byId[id] ? `#/module/${id}`:page==='reward'&&id?`#/reward/${id}`:`#/${page}`;
   if(location.hash===newHash){render();return;}
   location.hash=newHash;
 }
 function section(title,subtitle=''){return `<div class="section-heading"><span class="eyebrow">Mein Alltag · Beta V${APP_VERSION}</span><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>`;}
+function bwIcon(name){
+ const paths={
+  home:'<path d="m3 10 9-7 9 7v10h-7v-7h-4v7H3z"/>',
+  overview:'<path d="M4 21v-9h4v9M10 21V5h4v16M16 21v-13h4v13"/>',
+  messages:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 10h18c0-2-3-3-3-10M10 21h4"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4m0-14.2-1.4 1.4M6.3 17.7l-1.4 1.4"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/>',
+  search:'<circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/>',
+  album:'<path d="M12 6q-4-3-9-2v15q5-1 9 2m0-15q4-3 9-2v15q-5-1-9 2M12 6v15"/>',
+  booster:'<rect x="7" y="4" width="14" height="17" rx="2" transform="rotate(7 14 13)"/><path d="M9 1v2m-4 5 1 1M14 9l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/>',
+  shop:'<path d="M3 9h18l-2-5H5L3 9ZM5 9v12h14V9M9 21v-8h6v8"/>',
+  missionen:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
+ };
+ return `<svg class="bw-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.more}</svg>`;
+}
 function renderHome(){
-  const reward={id:'belohnungswelt',name:'Belohnungswelt',subtitle:'Sammeln, Ausbauen & Belohnen'};
-  const tiles=[...MODULES,reward];
-  return `<section class="home-scene" aria-label="Startseite Mein Alltag">
-    <img class="home-brand-art" src="./assets/home-art/header.webp" alt="Mein Alltag – strukturiert, einfach, dein" draggable="false" />
-    <p class="home-intro">Sechs Bereiche. Ein Ort für deinen Alltag.</p>
-    <div class="module-grid">${tiles.map(m=>`<button type="button" class="module-tile" data-open="${m.id}" data-id="${m.id}" aria-label="${esc(m.name)} öffnen"><img src="./assets/home-art/${m.id}.webp" alt="" draggable="false"/><span class="tile-copy">${esc(m.name)} – ${esc(m.subtitle)}</span></button>`).join('')}</div>
-    <div class="home-footer"><button class="install-link" id="installAction" type="button">App installieren – Anleitung</button><p id="installHelp" class="install-help" aria-live="polite"></p><span class="home-version">MEIN ALLTAG · BETA V${APP_VERSION}</span></div>
+  const reward={id:'belohnungswelt',name:'Belohnungswelt',subtitle:'Karten sammeln & Belohnungen'};
+  const entries=[...MODULES,reward];
+  return `<section class="bw-home" aria-label="Mein Alltag – Hauptmenü">
+    <div class="bw-home-head"><div class="bw-mountain-mist"></div><div class="bw-roof" aria-hidden="true">⌂</div>
+      <h1>Mein Alltag</h1><p>Deine Alltagszentrale</p>
+      <button type="button" class="bw-header-action bw-head-left" data-navigate="more" aria-label="Einstellungen öffnen">${bwIcon('settings')}</button>
+      <button type="button" class="bw-header-action bw-head-right" data-navigate="messages" aria-label="Mitteilungen öffnen">${bwIcon('messages')}</button>
+    </div>
+    <div class="bw-home-modules">${entries.map(m=>`<button type="button" class="bw-module" data-open="${m.id}" aria-label="${esc(m.name)} öffnen"><img src="./assets/bw00/${m.id}.webp" alt="" draggable="false"><span>${m.id==='hausservice'?'M.R<br>Hausservice':esc(m.name)}</span></button>`).join('')}</div>
+    <div class="bw-home-end"><span>MEIN ALLTAG · BETA V${APP_VERSION}</span><button class="bw-install" id="installAction" type="button">App installieren – Anleitung</button><p id="installHelp" aria-live="polite" class="install-help"></p></div>
   </section>`;
 }
-function renderReward(){return `<div class="reward-preview"><span class="reward-badge">✦ Neues Modul – in Planung</span><img src="./assets/home-art/belohnungswelt.webp" alt="Kuschelige Stadt als Vorschau für die Belohnungswelt"/><h1>Belohnungswelt</h1><p>Hier entsteht später deine eigene kleine Stadt. Durch erledigte Aufgaben sammelst du XP, Münzen und Baumaterial für neue Gebäude.</p><p><strong>Noch nicht spielbar.</strong> Dieses Update richtet zunächst den neuen Startbildschirm und den Zugang ein.</p><button type="button" class="primary-button" data-go-home>Zur Hauptseite</button></div>`;}
+const BW_TAB_ICONS={album:'▣',booster:'✦',shop:'▤',missionen:'◎',more:'•••'};
+function rewardBottomNav(current){
+ const items=[['album','Album'],['booster','Booster'],['shop','Shop'],['missionen','Missionen'],['more','Mehr']];
+ return items.map(([id,name])=>`<button type="button" class="nav-item bw-reward-nav ${current===id?'active':''}" data-reward="${id}" aria-label="${name}" ${current===id?'aria-current="page"':''}><span class="bw-nav-icon" aria-hidden="true">${bwIcon(id)}</span><span>${name}</span></button>`).join('');
+}
+function renderReward(route){
+ const tab=route.section||'start';
+ const titles={start:'Deine Karten- & Belohnungszentrale',album:'Dein Kartenalbum',booster:'Deine Booster',shop:'Booster-Shop',missionen:'Missionen & Erfolge',more:'Weitere Funktionen',wunschliste:'Deine Wunschliste',herstellung:'Kartenherstellung'};
+ const panel=tab==='start'?`<div class="bw-reward-hero">
+     <div class="bw-reward-hero-light"></div><img src="./assets/bw00/hero_dragon.webp" alt="Designbeispiel: Karte mit blauem Fantasy-Drachen" draggable="false"/>
+     <div class="bw-hero-label"><strong>Deine besondere Karte</strong><span>Designvorschau · noch keine Karte gesammelt</span></div>
+    </div>
+    <button class="bw-progress" type="button" data-reward="album" aria-label="Sammlungsalbum öffnen"><span class="bw-progress-icon" aria-hidden="true">▤</span><span class="bw-progress-copy"><strong>Sammelfortschritt</strong><span>0 / 100 Karten</span><span class="bw-progress-track"><span style="width:0%"></span></span></span><b>0%</b></button>
+    <p class="bw-note">BW00 richtet das Design ein. Karten, Münzen und Booster folgen in eigenen Funktionsupdates.</p>`:
+    tab==='album'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">▤</span><h2>Dein Sammelalbum</h2><p>Die vier geplanten Serien starten mit insgesamt 100 Karten: Anime-Frauen, Anime-Tiere, Traktoren & Maschinen und Monster.</p><div class="bw-series-list">${['Anime-Frauen','Anime-Tiere','Traktoren & Maschinen','Monster'].map(n=>`<div><span>${esc(n)}</span><b>0 / 25</b></div>`).join('')}</div><p class="bw-muted">Noch keine Sammelkarten vorhanden. Das Album wird im nächsten Entwicklungsabschnitt aktiviert.</p></div>`:
+    tab==='booster'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">✦</span><h2>Booster-Inventar</h2><p>Ein Booster wird später fünf Karten enthalten. Gekaufte, noch ungeöffnete Booster werden hier verwaltet.</p><div class="bw-placeholder-counter">0 ungeöffnete Booster</div><p class="bw-muted">Boosteröffnungen sind in BW00 noch nicht verfügbar.</p></div>`:
+    tab==='shop'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">▥</span><h2>Booster-Shop</h2><p>Geplant sind gemischte Booster, Themen-Booster, Event- und Premium-Booster mit transparenten Ziehchancen.</p><p class="bw-muted">Der Shop ist noch nicht freigeschaltet. Es werden keine Münzen abgebucht.</p></div>`:
+    tab==='missionen'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">◎</span><h2>Missionen & Erfolge</h2><p>Tägliche, wöchentliche und monatliche Aufgaben verbinden später deine App-Bereiche mit Münzen und Sammelkarten.</p><p class="bw-muted">Noch keine aktiven Missionen.</p></div>`:
+    tab==='wunschliste'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">♡</span><h2>Wunschliste</h2><p>Hier werden später gesuchte Karten und fehlende Lieblingskarten gesammelt.</p><p class="bw-muted">Noch keine Karten vorgemerkt.</p></div>`:
+    tab==='herstellung'?`<div class="bw-empty-panel"><span class="bw-panel-symbol">⚒</span><h2>Kartenherstellung</h2><p>Karten bis Mythisch sollen aus Splittern herstellbar sein. Diamant-Karten bleiben exklusiv für Booster und Herausforderungen.</p><p class="bw-muted">Die Herstellung folgt in einem späteren Update.</p></div>`:
+    `<div class="bw-empty-panel"><h2>Weitere Funktionen</h2><p>Geplant sind Wunschliste, Kartenherstellung, Belohnungskalender, Statistik und Einstellungen.</p><div class="bw-quicklinks"><button data-reward="wunschliste" type="button">♡ Wunschliste</button><button data-reward="herstellung" type="button">⚒ Herstellung</button><button data-navigate="more" type="button">⚙ App-Einstellungen</button></div></div>`;
+ return `<section class="bw-reward-scene" aria-label="Belohnungswelt"><div class="bw-reward-head"><button class="bw-reward-back" type="button" data-navigate="home" aria-label="Zurück zum Hauptmenü">‹</button><div class="bw-reward-head-center"><span class="bw-reward-logo"><img src="./assets/bw00/belohnungswelt.webp" alt="" draggable="false"/></span><h1>Belohnungswelt</h1><p>${esc(titles[tab])}</p></div><button class="bw-reward-info" type="button" data-reward="more" aria-label="Weitere Funktionen">ⓘ</button></div>
+  <div class="bw-reward-wallet" aria-label="Dein Guthaben"><div class="bw-wallet-xp"><span>★</span><strong>0 XP</strong></div><div class="bw-wallet-coins"><span>🪙</span><strong>0</strong></div><div class="bw-wallet-splitters"><span>💎</span><strong>0</strong></div></div>
+  <div class="bw-reward-body">${panel}</div>
+  </section>`;
+}
+function renderOverview(){return `${section('Übersicht','Alles Wichtige schnell erreichen.')}<div class="glass-card"><h2>Deine Übersicht</h2><p>Wähle eine Funktion, die du öffnen möchtest.</p><button type="button" class="row-link" data-navigate="calendar"><span>📅 Kalender</span><span>›</span></button><button type="button" class="row-link" data-navigate="search"><span>⌕ Suche</span><span>›</span></button><button type="button" class="row-link" data-navigate="reward"><span>🎴 Belohnungswelt</span><span>›</span></button></div>`;}
+function renderMessages(){return `${section('Mitteilungen','Deine Informationszentrale.')}<div class="glass-card"><h2>Keine neuen Mitteilungen</h2><p>Benachrichtigungen werden erst angezeigt, wenn die jeweiligen Module entsprechende Ereignisse unterstützen. Die angezeigte Null ist kein erfundener Datenbestand.</p><button type="button" class="secondary-button" data-navigate="home">Zur Startseite</button></div>`;}
 
 function renderModule(m){return `<div class="module-hero" data-id="${m.id}"><img src="${icon(m)}" alt=""/><div><h1>${esc(m.name)}</h1><p>${esc(m.subtitle)}</p></div></div><span class="status-pill">Grundgerüst eingerichtet</span><div class="glass-card"><h2>Dein Bereich</h2><p>${esc(m.description)}</p><label class="field-label" for="moduleNote">Meine Startnotiz (nur auf diesem Gerät)</label><textarea maxlength="2000" class="note-input" id="moduleNote" placeholder="Optional: Hier kannst du eine kurze Notiz speichern."></textarea><div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px"><button type="button" class="primary-button" id="saveNote">Notiz speichern</button><span class="inline-message" id="saveMessage" role="status"></span></div></div><div class="glass-card"><h2>Für spätere Updates vorgesehen</h2>${m.features.map(s=>`<p>✓ ${esc(s)}</p>`).join('')}<p class="module-privacy">Diese Funktionen sind noch nicht umgesetzt. V0 liefert Navigation und getrennten lokalen Datenspeicher.</p></div>`;}
 function monthMatrix(date){
@@ -132,6 +179,8 @@ async function saveNote(id){const field=document.getElementById('moduleNote');co
 function bindView(route){
  view.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click',()=>el.dataset.open==='belohnungswelt'?navigate('reward'):navigate('module',el.dataset.open)));
  view.querySelector('[data-go-home]')?.addEventListener('click',()=>navigate('home'));
+ view.querySelectorAll('[data-navigate]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.navigate)));
+ view.querySelectorAll('[data-reward]').forEach(el=>el.addEventListener('click',()=>navigate('reward',el.dataset.reward)));
  if(route.page==='module'){
    if(route.id==='lagerhaus') mountLagerhaus();
    else if(route.id==='frauengesundheit') mountHealth();
@@ -292,23 +341,39 @@ function bindBackup(){
  });
  connectedUI();
 }
+function defaultBottomNav(){return `
+  <button type="button" class="nav-item" data-route="home" aria-label="Start"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('home')}</span><span>Start</span></button>
+  <button type="button" class="nav-item" data-route="calendar" aria-label="Kalender"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('calendar')}</span><span>Kalender</span></button>
+  <button type="button" class="nav-item" data-route="search" aria-label="Suche"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('search')}</span><span>Suche</span></button>
+  <button type="button" class="nav-item" data-route="more" aria-label="Mehr"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('more')}</span><span>Mehr</span></button>`;}
+function homeBottomNav(){return `
+  <button type="button" class="nav-item" data-route="home" aria-current="page" aria-label="Start"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('home')}</span><span>Start</span></button>
+  <button type="button" class="nav-item" data-route="overview" aria-label="Übersicht"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('overview')}</span><span>Übersicht</span></button>
+  <button type="button" class="nav-item" data-route="messages" aria-label="Mitteilungen"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('messages')}</span><span>Mitteilungen</span></button>
+  <button type="button" class="nav-item" data-route="more" aria-label="Einstellungen"><span class="bw-nav-icon" aria-hidden="true">${bwIcon('settings')}</span><span>Einstellungen</span></button>`;}
 export function render(){
  const route=hashRoute();
- const labels={home:['Mein Alltag','STRUKTURIERT. EINFACH. DEIN.'],calendar:['Kalender','DEINE ÜBERSICHT'],search:['Suche','SCHNELL ZUM BEREICH'],more:['Mein Alltag','MEHR & EINSTELLUNGEN'],reward:['Belohnungswelt','DEINE KLEINE STADT']};
+ const labels={home:['Mein Alltag','STRUKTURIERT. EINFACH. DEIN.'],calendar:['Kalender','DEINE ÜBERSICHT'],search:['Suche','SCHNELL ZUM BEREICH'],more:['Mein Alltag','MEHR & EINSTELLUNGEN'],overview:['Übersicht','DEINE ALLTAGSZENTRALE'],messages:['Mitteilungen','NEUIGKEITEN'],reward:['Belohnungswelt','DEINE KARTENSAMMLUNG']};
  const [title,sub]=route.page==='lagerartikel'?['Lagerhaus','ARTIKELVERWALTUNG']:route.page==='lagerraum'?['Lagerhaus','3D-LAGERRAUM']:route.page==='lagernavigator'?['Lagerhaus','LAGER-NAVIGATOR']:route.page==='lagerservice'?['Lagerhaus','GERÄTE & SERVICE']:route.page==='module'?[byId[route.id].name,'DEIN EIGENER BEREICH']:labels[route.page];
  appTitle.textContent=title;appSubtitle.textContent=sub;
  backButton.hidden=route.page==='home';
- document.querySelectorAll('.nav-item').forEach(item=>{const active=item.dataset.route===route.page;item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});
- view.innerHTML=route.page==='home'?renderHome():route.page==='reward'?renderReward():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():route.id==='frauengesundheit'?renderHealth():route.id==='putzmanager'?renderPutzmanager():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='lagernavigator'?renderLagerNavigator():route.page==='lagerservice'?renderLagerService():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
+ view.innerHTML=route.page==='home'?renderHome():route.page==='reward'?renderReward(route):route.page==='overview'?renderOverview():route.page==='messages'?renderMessages():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():route.id==='frauengesundheit'?renderHealth():route.id==='putzmanager'?renderPutzmanager():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='lagernavigator'?renderLagerNavigator():route.page==='lagerservice'?renderLagerService():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
  document.body.classList.toggle('health-mode',route.page==='module'&&route.id==='frauengesundheit');
  document.body.classList.toggle('home-mode',route.page==='home');
+ document.body.classList.toggle('reward-mode',route.page==='reward');
+ const nav=document.querySelector('.bottom-nav');
+ if(route.page==='reward')nav.innerHTML=rewardBottomNav(route.section);
+ else if(route.page==='home')nav.innerHTML=homeBottomNav();
+ else nav.innerHTML=defaultBottomNav();
+ nav.querySelectorAll('[data-route]').forEach(el=>{const active=el.dataset.route===route.page;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');el.addEventListener('click',()=>navigate(el.dataset.route));});
+ nav.querySelectorAll('[data-reward]').forEach(el=>el.addEventListener('click',()=>navigate('reward',el.dataset.reward)));
  view.scrollTop=0;bindView(route);
  document.getElementById('installAction')?.addEventListener('click',requestInstall);
  refreshInstallUI();
 }
 backButton.addEventListener('click',()=>{if(history.length>1)history.back();else navigate('home');});
 document.getElementById('settingsButton').addEventListener('click',()=>navigate('more'));
-document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));
+
 let renderedHash=location.hash;
 window.addEventListener('hashchange',()=>{
  if(renderedHash.startsWith('#/module/frauengesundheit') && location.hash!==renderedHash && !confirmHealthExit()){
