@@ -2,12 +2,12 @@
  * No implicit cross-module reads or writes. All read/validation/write work occurs inside
  * one IndexedDB readwrite transaction; failed stock bookings cannot finish a cleaning.
  */
-import {openDatabase,MODULE_STORES} from './database.js';
+import {openDatabase,MODULE_STORES,REWARD_STORES} from './database.js';
 export async function atomicModuleChange(readKeys, change){
  if(!Array.isArray(readKeys)||!readKeys.length||typeof change!=='function')throw Error('Ungültige Transaktion.');
  const ids=new Set();
  for(const pair of readKeys){
-  if(!Array.isArray(pair)||pair.length!==2||!MODULE_STORES.includes(pair[0])||typeof pair[1]!=='string'||!pair[1])throw Error('Ungültiger Modulschlüssel.');
+  if(!Array.isArray(pair)||pair.length!==2||![...MODULE_STORES,...REWARD_STORES].includes(pair[0])||typeof pair[1]!=='string'||!pair[1])throw Error('Ungültiger Modulschlüssel.');
   const key=pair[0]+'\0'+pair[1];if(ids.has(key))throw Error('Doppelter Transaktionsschlüssel.');ids.add(key);
  }
  const db=await openDatabase();
