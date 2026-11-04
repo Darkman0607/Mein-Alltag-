@@ -114,13 +114,16 @@ await assert.rejects(albumApi.setAlbumFavorite('monster:26',true),/Ungültiger/)
 await assert.rejects(albumApi.saveAlbumCard({categoryId:'monster',number:26,name:'Zu viel',rarity:'selten'}),/Unbekannte/);
 await assert.rejects(albumApi.saveAlbumCard({categoryId:'monster',number:1,name:'',rarity:'selten'}),/Kartenname/);
 await assert.rejects(albumApi.saveAlbumCard({categoryId:'monster',number:1,name:'OK',rarity:'ungültig'}),/Seltenheit/);
-const created=await albumApi.saveAlbumCard({categoryId:'monster',number:2,name:'Blaue Kreatur',rarity:'episch',description:'Kartenmuster ohne Bild'});
+const created=await albumApi.saveAlbumCard({categoryId:'monster',number:2,name:'Blaue Kreatur',rarity:'episch',description:'Kartenmuster ohne Bild',details:{element:'Wasser',faehigkeit:'Wächter'}});
+assert.equal(created.details.element,'Wasser');
+await assert.rejects(albumApi.saveAlbumCard({categoryId:'monster',number:2,name:'Ungültig',rarity:'selten',details:{element:'x'.repeat(121)}}),/Detailfeld/);
 assert.equal(created.id,'catalog:monster:002');
 assert.equal((await albumApi.loadRewardAlbum()).configured,2);
 assert.equal((await albumApi.loadRewardAlbum()).uniqueOwned,1,'Gestaltung darf kein Exemplar erschaffen');
 assert.equal((await rw.readRewardEntity('bw-series','series:monster')).plannedCards,25);
 const altered=await albumApi.saveAlbumCard({categoryId:'monster',number:2,name:'Bearbeitet',rarity:'selten',description:'Keine Belohnung'});
 assert.equal(altered.id,created.id,'Stable ID');
+assert.equal(altered.details.element,'Wasser','Vorhandene Kategorie-Details bleiben bei Änderungen erhalten');
 assert.equal(data.get('bw-catalog').size,2,'Kein Duplikat bei Bearbeitung');
 assert.equal((await albumApi.loadRewardAlbum()).uniqueOwned,1);
 const fullWithAlbum=await backup.captureSnapshot();
