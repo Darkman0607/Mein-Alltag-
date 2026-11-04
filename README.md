@@ -1,3 +1,22 @@
+# Mein Alltag – BW06 / V0.24.6 (04.11.2026)
+
+- **Belohnungswelt – 100 originale stilisierte Vektor-Kartenmotive:** vier Kategorien à 25 Karten, individuelle Namen, Beschreibungen, sieben Seltenheiten und getrennte Grafikdateien.
+- **Einmaliger, bewusster Import:** In der Belohnungswelt unter „Album → Fehlende Kartenplätze füllen“. Vorhandene Karten und Bilder bleiben unangetastet; keine kostenlosen Münzen oder gesammelten Exemplare.
+- **Booster-Bilder:** Bei BW05-Öffnungen werden die neuen Motive angezeigt, sofern die Karte aus der Startserie stammt; eigene Kartenbilder behalten Vorrang.
+- **Offline:** alle 100 SVGs im Service-Worker-Cache. Neue ZIP mit aktualisierten Word-Checklisten.
+- **Tests:** 100 SVG-Quellen validiert, 15/18 Node-Tests bestanden (3 historische Tests sind auf alte Versionsnummern fest verdrahtet), Album-/Shop-/Booster-Chromium-Tests bei 320/390/412 px bestanden. Android-/HTTPS-Live-Abnahme offen.
+- Ausführliche Hinweise: [`README_BW06.md`](README_BW06.md).
+
+---
+
+# W02 / Version 0.23.0 – 02.11.2026
+
+Siehe README_W02.md für die aktualisierte Küchenansicht. Alle Nutzerfotos bleiben privat; die Vorlage ist nicht maßgetreu.
+
+# Mein Alltag – W01.3 / V0.22.3 (02.11.2026)
+
+Möbelpositionen, Größen und 90°-Drehung im 2D-Grundriss bearbeiten; 3D-Vorschau synchron. Weiterhin lokale Raumdaten, kein öffentlicher Upload privater Pläne. Details in `README_W013.md` und `UPDATE_W013.txt`.
+
 # Mein Alltag – W01.1 / V0.22.1 (29.10.2026)
 
 - **Putzmanager**: privater Import strukturierter 3D-Raumdateien (.json) in bestehende Räume; drehbare, offlinefähige SVG-3D-Ansicht mit Wänden, Fenstern, Türen und schematischen Möbeln.
@@ -369,3 +388,6 @@ Tests: `python test-d02-feedback.py` (Chromium, simulierte Google-API), `python 
   der lokalen IndexedDB; sie gehören niemals in das öffentliche Repository.
 - W02 verarbeitet zwei vom Nutzer bestätigte Raumvorlagen anhand seiner Fotos.
 - Siehe `UPDATE_W01.txt` und `Wohnungsplan_Checkliste.docx` im Offline-ZIP.
+
+
+W02-HF01 · V0.23.1: 3D-Kamera-Touchsteuerung, automatische Wandschnitt-Ansicht und vereinfachte Oberfläche. Siehe README_HF01.md.
