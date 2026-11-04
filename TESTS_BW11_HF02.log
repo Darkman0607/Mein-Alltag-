@@ -1,0 +1,9 @@
+BW11-HF02 V0.25.2 / 04.11.2026
+PASS 320px: free preview, pack burst, five-card reveal, replay, real opening, five copies, no overflow
+PASS 390px: free preview, pack burst, five-card reveal, replay, real opening, five copies, no overflow
+PASS 412px: free preview, pack burst, five-card reveal, replay, real opening, five copies, no overflow
+PASS mode reduced; PASS mode off; PASS OS reduced-motion
+PASS Node: BW01/BW02/BW03/BW04/BW05/BW07/BW08/BW09/BW11
+PASS UI: BW04 shop / BW05 booster / BW11 booster / BW09 navigation (320/390/412px)
+Pass visual files: 198 offline-cache entries exist. No missing relative assets.
+NOT TESTED: real physical Android, GitHub Pages HTTPS PWA refresh, physical restore.

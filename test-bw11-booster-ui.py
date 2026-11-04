@@ -20,6 +20,8 @@ async function loadBoosterShop(){return content();}
 async function openOwnedBooster(id){inv=[];return {replayed:false,openedAt:'2026-11-04T12:30:00Z',cards:catalog.map(c=>({cardId:c.id,name:c.name,number:c.number,rarity:c.rarity,duplicate:false}))};}
 async function purchaseBooster(){throw Error('not needed')};async function setBoosterPrice(){};async function setShopFavorite(){};
 const safeStarterAsset=card=>card.imageAsset;
+function showBoosterPackStage(){return null;}
+function packPreview(){return [];}
 window.confirm=()=>true;
 '''
 script=fixture+src('assets/reward-premium.js')+'\n'+src('assets/reward-shop-ui.js')+r'''

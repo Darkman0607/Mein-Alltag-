@@ -1,3 +1,9 @@
+# Aktueller Stand: BW11-HF02 – V0.25.2 (04.11.2026)
+
+**Booster-Öffnungsanimation repariert:** Es gibt jetzt eine Vollbild-Packbühne mit Pack-Einflug, Aufreiß-Effekt, Lichtblitz, Funken und fünf aufdeckbaren Karten. Unter **Belohnungswelt → Booster → ✨ Booster-Öffnung kostenlos testen** funktioniert die Vorschau ohne Kauf oder Änderung von Karten/Münzen. Die eigentliche Kartenbuchung bleibt einmalig und atomar. Alle Effekte sind über die bestehenden BW11-Einstellungen steuerbar. Word-Masterchecklisten: `bauhaus.docx`, `Belohnungswelt_Mastercheckliste.docx`. Mehr: `README_BW11_HF02.md` / `TESTS_BW11_HF02.md`. Android-/GitHub-Pages-Livetest offen.
+
+---
+
 # Mein Alltag – BW09-HF01 · Version 0.25.1 (04.11.2026)
 
 Fehlerbehebung: Der sichtbare Button „Zum Belohnungskalender“ wird jetzt vom zentralen Hash-Router akzeptiert. Auch der Link im Bereich „Mehr“ führt zum Kalender. Keine Datenbankmigration, keine Änderung an Kartensammlungen, Münzen, Missionen oder Tagesgeschenken. Offline-Cache auf 0.25.1 aktualisiert. Siehe `README_BW09_HF01.md` und `TESTS_BW09_HF01.md`. Als Nächstes weiterhin BW10 Diamantgarantie.

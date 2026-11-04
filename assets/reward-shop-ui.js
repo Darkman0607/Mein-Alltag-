@@ -4,6 +4,7 @@ import {loadBoosterShop,purchaseBooster,setBoosterPrice,setShopFavorite,BOOSTER_
 import {REWARD_CATEGORIES,REWARD_RARITIES,newRewardId} from './reward-data.js';
 import {openOwnedBooster} from './reward-opening.js';
 import {renderPremiumSettings,playPremiumReveal} from './reward-premium.js';
+import {showBoosterPackStage,packPreview} from './reward-pack-stage.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const percent=n=>(Math.round(n*100)/100).toLocaleString('de-AT',{maximumFractionDigits:2})+' %';
 const date=s=>{const d=new Date(s);return Number.isFinite(d.getTime())?d.toLocaleString('de-AT',{dateStyle:'short',timeStyle:'short'}):'–';};
@@ -59,7 +60,7 @@ function openingHistory(items){
 }
 function renderInventoryBody(data,lastOpening=null){
  const groups=BOOSTER_PRESETS.map(preset=>({preset,packs:data.inventory.filter(p=>p.boosterTypeId===preset.id)})).filter(x=>x.packs.length);
- return `${shopSummary(data)}${lastOpening?openingResults(lastOpening,data):''}<div class="bw-shop-inventory-head"><h3>Dein versiegeltes Inventar</h3><p>Jeder Booster öffnet genau fünf unabhängige Kartenplätze. Bereits erhaltene Karten können erneut gezogen werden.</p></div>
+ return `${shopSummary(data)}<div class="bw-pack-preview"><button type="button" data-pack-preview="1">✨ Booster-Öffnung kostenlos testen</button><p>Nur Vorschau: kein Boosterverbrauch, keine Münzen und keine Karten werden vergeben.</p></div>${lastOpening?openingResults(lastOpening,data):''}<div class="bw-shop-inventory-head"><h3>Dein versiegeltes Inventar</h3><p>Jeder Booster öffnet genau fünf unabhängige Kartenplätze. Bereits erhaltene Karten können erneut gezogen werden.</p></div>
  ${groups.length?groups.map(({preset,packs})=>`<details class="bw-shop-inventory-group" open><summary><span aria-hidden="true">${boosterIcon(preset)}</span><strong>${esc(preset.name)}</strong><b>${packs.length} ×</b></summary><div class="bw-shop-packs">${packs.map(pack=>`<div class="bw-open-pack-row"><span>🎁 Pack #${esc(pack.id.slice(-8))}<small>Gekauft: ${date(pack.purchasedAt)} · ${pack.priceCoins} Münzen</small></span><button type="button" data-shop-open="${esc(pack.id)}" aria-label="Booster ${esc(pack.id.slice(-8))} öffnen">Jetzt öffnen ✨</button></div>`).join('')}</div></details>`).join(''):`<div class="bw-shop-empty bw-shop-inventory-empty">Keine ungeöffneten Booster vorhanden.<br><button type="button" data-go-shop="1">Zum Booster-Shop</button></div>`}
  ${openingHistory(data.openings)}<section class="bw-shop-history"><h3>Kaufverlauf</h3>${purchaseHistory(data.purchases)}</section><p class="bw-shop-disclaimer">Beim Öffnen verschwinden versiegelte Booster nur dann, wenn gleichzeitig fünf Kartenexemplare und die Journalbuchung erfolgreich gespeichert wurden. Kaufdatum, Pool und Chancen bleiben historisch dokumentiert. Auch die vollständige verschlüsselte Sicherung enthält die Ergebnisse.</p>`;
 }
@@ -79,6 +80,7 @@ export async function mountRewardShop(){
  area.addEventListener('click',async e=>{
   if(e.target.closest('[data-go-shop]')){location.hash='#/reward/shop';return;}
   if(e.target.closest('[data-go-album]')){location.hash='#/reward/album';return;}
+  if(e.target.closest('[data-pack-preview]')){showBoosterPackStage(root,{cards:packPreview(data?.catalog||[])},data?.catalog||[],{demo:true,packName:'Dein Test-Booster'});return;}
   if(e.target.closest('[data-reveal-all]')){area.querySelector('#bwOpenResults')?.classList.add('bw11-instant');area.querySelectorAll('[data-reveal-card]').forEach(card=>{card.classList.add('is-revealed');card.setAttribute('aria-pressed','true');});return;}
   const reveal=e.target.closest('[data-reveal-card]');if(reveal){if(!reveal.classList.contains('is-revealed')){reveal.classList.add('is-revealed');reveal.setAttribute('aria-pressed','true');playPremiumReveal(reveal.className.match(/bw11-rarity-([a-z]+)/)?.[1]);}return;}
   if(busy)return;
@@ -86,7 +88,7 @@ export async function mountRewardShop(){
    const packId=open.dataset.shopOpen,pack=data?.inventory?.find(x=>x.id===packId);if(!pack)return;
    if(!confirm('Dieses versiegelte Pack jetzt öffnen?\nDu erhältst genau fünf zufällige Karten aus dem beim Kauf gespeicherten Kartenpool. Doppelte Karten sind möglich.'))return;
    busy=true;open.disabled=true;feedback('Sichere Kartenziehung wird gespeichert …');
-   try{lastOpening=await openOwnedBooster(packId);await refresh();feedback('✓ Fünf Karten dauerhaft gespeichert. Das Ergebnis kannst du jetzt aufdecken.');area.querySelector('#bwOpenResults')?.focus();}
+   try{lastOpening=await openOwnedBooster(packId);await refresh();feedback('✓ Fünf Karten dauerhaft gespeichert. Die Booster-Animation wird angezeigt.');showBoosterPackStage(root,lastOpening,data?.catalog||[],{packName:BOOSTER_PRESETS.find(t=>t.id===pack.boosterTypeId)?.name||'Dein Booster'});}
    catch(err){feedback('Öffnen nicht möglich: '+err.message,true);await refresh().catch(()=>{});}
    finally{busy=false;}return;
   }

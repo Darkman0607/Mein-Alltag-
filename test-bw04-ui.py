@@ -8,6 +8,8 @@ const REWARD_CATEGORIES=[{id:'anime-frauen',label:'Anime-Frauen'},{id:'anime-tie
 function safeStarterAsset(){return null;}
 function renderPremiumSettings(){return '';}
 function playPremiumReveal(){return false;}
+function showBoosterPackStage(){return null;}
+function packPreview(){return [];}
 const REWARD_RARITIES=['gewoehnlich','ungewoehnlich','selten','episch','legendaer','mythisch','diamant'];
 const BOOSTER_PRESETS=[
  {id:'booster:mixed',name:'Entdecker-Mix',kind:'mixed'},

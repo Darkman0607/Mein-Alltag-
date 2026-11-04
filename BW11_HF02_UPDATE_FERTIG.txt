@@ -1,0 +1,16 @@
+Mein Alltag – Version 0.25.2 · BW11-HF02
+
+Behoben: Kein sichtbarer Effekt beim Öffnen eines Booster-Packs.
+Neu: Animierte Booster-Pack-Bühne (Einflug, Aufreißen, Lichtwelle, Funken,
+fünf verdeckte Karten und Einzelkarten-Flip), kostenloser Effekt-Testmodus.
+Die Kartenbuchung bleibt einmalig, atomar und unverändert.
+
+Erst Gesamtbackup erstellen, dann App in Chrome aktualisieren.
+Unter Belohnungswelt → Booster → „✨ Booster-Öffnung kostenlos testen“
+kann der Effekt ohne Kauf und ohne Änderung gespeicherter Daten ausprobiert werden.
+
+Node-Regressionen BW01–BW11 und isolierte mobile Chromium-Tests bestanden.
+Realer Android-PWA-Test, GitHub Pages-HTTPS-Abnahme und Backup-Restore
+auf einem zweiten Gerät bleiben offen.
+
+Beide Word-Masterchecklisten sind aktualisiert. Nächster Hauptschritt: BW10.

@@ -8,6 +8,8 @@ const REWARD_CATEGORIES=[{id:'monster',label:'Monster'}];
 function safeStarterAsset(){return null;}
 function renderPremiumSettings(){return '';}
 function playPremiumReveal(){return false;}
+function showBoosterPackStage(){return null;}
+function packPreview(){return [];}
 const REWARD_RARITIES=['gewoehnlich','ungewoehnlich','selten','episch','legendaer','mythisch','diamant'];
 const BOOSTER_PRESETS=[{id:'booster:mixed',name:'Entdecker-Mix',kind:'mixed'}];
 let mock={wallet:{xp:20,coins:35,shards:0},inventory:[{id:'pack:00000000-0000-4000-8000-000000000000:1',boosterTypeId:'booster:mixed',purchasedAt:'2026-11-04T12:00:00Z',priceCoins:20}],
