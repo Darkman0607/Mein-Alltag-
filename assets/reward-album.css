@@ -68,3 +68,5 @@
 .bw-card-tile .bw-card-art-number{left:6px;right:auto}
 
 .bw-card-detail-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #ffffff22;font-size:12px}.bw-card-detail-row b{color:#accfe8}.bw-card-detail-row span{text-align:right;overflow-wrap:anywhere}
+
+.bw-card-form .bw-card-event-toggle{display:flex;align-items:center;gap:10px;margin:8px 0;color:#c4e1f4;font-size:12px}.bw-card-event-toggle input{width:20px;height:20px;flex:none;accent-color:#48afdd}

@@ -1,0 +1,8 @@
+MEIN ALLTAG 0.24.4 – BW04
+
+FERTIG: Booster-Shop und ungeöffnetes Inventar; atomare Mehrfachkäufe mit virtuellen Münzen.
+ACHTUNG: Für jeden Booster müssen mindestens fünf passende Karten im Album angelegt sein.
+NOCH NICHT: Packöffnung und Ziehung von fünf Karten – folgt in BW05.
+Keine vorhandenen Karten-/Lagereinträge beim Update gelöscht.
+Word-Masterchecklisten bauhaus.docx und Belohnungswelt_Mastercheckliste.docx liegen bei.
+Die Originalkartenbilder sind nicht enthalten.

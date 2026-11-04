@@ -73,6 +73,7 @@ export function mountRewardAlbum(){
    <label for="bwCardRarity">Seltenheit *</label><select id="bwCardRarity" name="rarity">${REWARD_RARITIES.map(r=>`<option value="${r}" ${r===rarity?'selected':''}>${esc(rarityNames[r])}</option>`).join('')}</select>
    <label for="bwCardDescription">Beschreibung (optional)</label><textarea id="bwCardDescription" name="description" maxlength="600" rows="3" placeholder="Eigene Details zur Karte">${esc(note)}</textarea>
    ${CATEGORY_FIELDS[slot.categoryId].map(f=>`<label for="bwAttr_${f.key}">${esc(f.label)} (optional)</label><input id="bwAttr_${f.key}" name="bwAttr_${f.key}" maxlength="120" value="${esc(slot.card?.details?.[f.key]||'')}"/>`).join('')}
+   <label class="bw-card-event-toggle"><input id="bwEventCard" type="checkbox" name="eventCard" ${slot.card?.eventCard===true?'checked':''}/><span>Als Eventkarte markieren (für spätere Event-Booster)</span></label>
    <label for="bwCardImage">Eigenes Bild (PNG, JPG, WebP, maximal 8 MB)</label><input id="bwCardImage" name="picture" type="file" accept="image/png,image/jpeg,image/webp"/>
    <p class="bw-album-disclaimer">Bild wird auf deinem Gerät verkleinert und offline gespeichert. Ohne Auswahl bleibt ein bisher vorhandenes Motiv erhalten. Keine automatische Vergabe einer Karte.</p>
    <p class="bw-card-form-error" id="bwCardFormMessage" role="status" aria-live="polite"></p>
@@ -90,7 +91,7 @@ export function mountRewardAlbum(){
    if(file&&!pendingImage){msg.textContent='Bitte ein gültiges Bild auswählen oder die Bildverarbeitung abwarten.';return;}
    busy=true;const submit=form.querySelector('#bwCardSave');submit.disabled=true;msg.textContent='Speichere Karte …';
    try{
-    await saveAlbumCard({categoryId:slot.categoryId,number:slot.number,name:form.elements.name.value,rarity:form.elements.rarity.value,description:form.elements.description.value,imageData:pendingImage,details:Object.fromEntries(CATEGORY_FIELDS[slot.categoryId].map(f=>[f.key,form.elements['bwAttr_'+f.key].value]))});
+    await saveAlbumCard({categoryId:slot.categoryId,number:slot.number,name:form.elements.name.value,rarity:form.elements.rarity.value,description:form.elements.description.value,imageData:pendingImage,eventCard:form.elements.eventCard.checked,details:Object.fromEntries(CATEGORY_FIELDS[slot.categoryId].map(f=>[f.key,form.elements['bwAttr_'+f.key].value]))});
     pendingImage=null;await reload();const fresh=findSlot(slot.id);modalBody.innerHTML=detail(fresh);wireDetail(slot.id);
    }catch(err){msg.textContent='Speichern fehlgeschlagen: '+err.message;submit.disabled=false;}finally{busy=false;}
   });

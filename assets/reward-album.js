@@ -87,13 +87,14 @@ export async function setAlbumFavorite(slotId,wanted){
 }
 
 /** Save catalog metadata and a (user supplied) image. No owned instance is created. */
-export async function saveAlbumCard({categoryId,number,name,rarity,description='',imageData=null,details={}}){
+export async function saveAlbumCard({categoryId,number,name,rarity,description='',imageData=null,details={},eventCard=null}){
  const slot=getSlot(categoryId,Number(number));
  if(!slot)throw Error('Unbekannte Album-Kategorie oder Kartennummer.');
  if(typeof name!=='string'||!name.trim()||name.trim().length>90)throw Error('Kartenname muss 1–90 Zeichen enthalten.');
  if(!raritySet.has(rarity))throw Error('Ungültige Seltenheit.');
  if(typeof description!=='string'||description.length>600)throw Error('Die Beschreibung darf höchstens 600 Zeichen enthalten.');
  if(!details||typeof details!=='object'||Array.isArray(details))throw Error('Ungültige Kartendetails.');
+ if(eventCard!==null&&typeof eventCard!=='boolean')throw Error('Eventkarte muss Ja oder Nein sein.');
  const cleanDetails={};for(const field of CATEGORY_FIELDS[categoryId]){const value=details[field.key];if(value===undefined)continue;
   if(typeof value!=='string'||value.length>120)throw Error('Detailfeld ist zu lang oder ungültig.');cleanDetails[field.key]=value.trim();}
  if(imageData!==null&&(typeof imageData!=='string'||imageData.length>1150000||!/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(imageData)))throw Error('Kartenbild ist nicht unterstützt oder zu groß.');
@@ -113,7 +114,7 @@ export async function saveAlbumCard({categoryId,number,name,rarity,description='
     const prior=matches[0];
     const card={...(prior||{}),id:prior?.id||`catalog:${categoryId}:${String(slot.number).padStart(3,'0')}`,schemaVersion:REWARD_SCHEMA_VERSION,
      seriesId:prior?.seriesId||seriesId,categoryId,number:slot.number,name:name.trim(),rarity,description:description.trim(),
-     templateId:prior?.templateId??null,details:{...(prior?.details||{}),...cleanDetails},imageData:imageData===null?(prior?.imageData||null):imageData,updatedAt:new Date().toISOString()};
+     templateId:prior?.templateId??null,details:{...(prior?.details||{}),...cleanDetails},eventCard:eventCard===null?(prior?.eventCard===true):eventCard,imageData:imageData===null?(prior?.imageData||null):imageData,updatedAt:new Date().toISOString()};
     validateRewardEntity('bw-catalog',card);
     const s={id:seriesId,schemaVersion:REWARD_SCHEMA_VERSION,name:category.label,categoryId,plannedCards:category.planned};
     validateRewardEntity('bw-series',s);
