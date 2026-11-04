@@ -1,0 +1,26 @@
+/* BW03 private rewards screen – mobile-first, scoped to Belohnungswelt. */
+.bw-economy{max-width:560px;margin:0 auto;padding:4px 3px 30px;color:#f0f7ff;overflow-wrap:anywhere}
+.bw-economy header{margin:5px 3px 15px}.bw-economy-kicker{font-size:11px;font-weight:800;letter-spacing:.13em;color:#76c9ff}
+.bw-economy h2{font-size:clamp(21px,5.6vw,28px);line-height:1.22;margin:8px 0}.bw-economy p{color:#b8cee5;font-size:13px;line-height:1.55;margin:7px 0 12px}
+.bw-economy-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.bw-economy-totals>div{display:flex;flex-direction:column;align-items:center;gap:5px;background:linear-gradient(140deg,#1c3a65,#10223c);padding:13px 3px;border:1px solid #386395;border-radius:15px;min-width:0}
+.bw-economy-totals strong{font-size:clamp(16px,5vw,25px);font-variant-numeric:tabular-nums}.bw-economy-totals span{font-size:11px;color:#cbddf3}
+.bw-economy-card{padding:16px 12px;margin:12px 0;background:linear-gradient(160deg,#122944,#0a1a32);border:1px solid #2b4f77;border-radius:18px;box-shadow:0 10px 30px #0002}
+.bw-economy-card h3{font-size:17px;color:#f3f8ff;margin:0 0 9px}
+.bw-eco-consent{display:flex;align-items:center;gap:12px;border:1px solid #387cb3;background:#0d3052;padding:13px 9px;border-radius:13px;cursor:pointer}
+.bw-eco-consent input,.bw-eco-check input{width:21px;height:21px;accent-color:#40b7ff;flex-shrink:0}
+.bw-eco-consent span{display:flex;flex-direction:column;gap:4px;font-size:13px}.bw-eco-consent small{font-size:11px;font-weight:400;color:#c0d7ed;line-height:1.4}
+.bw-eco-disabled{padding:10px 8px;border-bottom:1px solid #274664;display:flex;align-items:flex-start;flex-direction:column;gap:3px;color:#93b1ce;font-size:12px}
+.bw-eco-disabled small{font-size:11px;color:#8ca7c1}
+.bw-economy p.bw-eco-footnote{font-size:11px;color:#a8bfd5;line-height:1.55;margin:12px 2px 4px}
+.bw-eco-rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 8px}
+.bw-rule-field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#d0e2f5;min-width:0}
+.bw-rule-field input{width:100%;min-width:0;box-sizing:border-box;padding:12px;border-radius:10px;background:#081a2e;color:#fff;border:1px solid #45668c;font-size:16px;min-height:44px}
+.bw-eco-check{grid-column:1/-1;display:flex;gap:9px;align-items:center;color:#dcecff;font-size:12px;line-height:1.4;margin:2px 0}
+.bw-eco-save{grid-column:1/-1;min-height:48px;border:0;border-radius:12px;font-size:14px;font-weight:800;background:#2d95d8;color:#fff;cursor:pointer}
+.bw-eco-save:disabled{opacity:.6}
+.bw-eco-journal{max-height:370px;overflow:auto}.bw-eco-entry{display:flex;justify-content:space-between;gap:9px;align-items:center;padding:11px 0;border-bottom:1px solid #2c4c6c;color:#eaf4ff;font-size:13px}
+.bw-eco-entry span{display:flex;flex-direction:column;gap:3px}.bw-eco-entry small{font-size:11px;color:#9dbdd8}.bw-eco-entry b{min-width:84px;text-align:right;color:#ffd782;font-size:12px;line-height:1.6}
+.bw-eco-empty{padding:21px 10px;border:1px dashed #3b6488;border-radius:12px;text-align:center;color:#9fbbd6;font-size:13px}
+.bw-eco-feedback{min-height:22px;font-size:12px;color:#a5f9c4!important;padding:3px 5px}.bw-eco-feedback.error{color:#ffb2b2!important}
+@media(max-width:340px){.bw-economy-card{padding:12px 9px}.bw-eco-rules{grid-template-columns:1fr}.bw-economy-totals{gap:5px}}
