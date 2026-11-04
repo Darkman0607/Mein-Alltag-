@@ -80,7 +80,7 @@ export async function mountCleaningUi({root,room,notify}){
    let message='Gespeichert ✓';
    if(action==='start'){await startCleaning(room);message='Reinigung und Stoppuhr gestartet.';}
    else if(action==='pause'||action==='resume'){await setTimer(room.id,action);message=action==='pause'?'Stoppuhr pausiert.':'Stoppuhr läuft wieder.';}
-   else if(action==='finish'){const out=await finishCleaning(room.id);message=`✓ Reinigung abgeschlossen (${duration(out.durationMs)}). ${out.materials.length} Lagerposition(en) abgebucht.`;}
+   else if(action==='finish'){const out=await finishCleaning(room.id);message=`✓ Reinigung abgeschlossen (${duration(out.durationMs)}). ${out.materials.length} Lagerposition(en) abgebucht.${out.reward?.awarded?` 🪙 +${out.reward.coins} Münzen, ★ +${out.reward.xp} XP.`:''}`;}
    else if(action==='discard'){await cancelCleaning(room.id);message='Reinigung verworfen; Lager unverändert.';}
    else if(action==='remove-material'){await removeMaterial(room.id,button.dataset.lineId);message='Material aus der Vormerkliste entfernt.';}
    else if(action==='save-preset'){await saveMaterialPreset(room.id);message='Materialauswahl gespeichert und beim nächsten Reinigungsstart automatisch vorgemerkt.';}
