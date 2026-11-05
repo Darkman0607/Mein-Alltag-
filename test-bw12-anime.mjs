@@ -13,7 +13,7 @@ for(const def of women){
  assert.equal(source,def.imageAsset,'Keep original BW06 content paths stable in the DB');
  const active=safeStarterAsset(def);
  assert(active && existsSync(active.slice(2)),`Missing card ${def.number}`);
- if(def.number<=20){
+ if(def.number<=25){
   assert.match(active,/\.webp$/);
   const data=readFileSync(active.slice(2));
   assert.equal(data.toString('latin1',0,4),'RIFF');assert.equal(data.toString('latin1',8,12),'WEBP');
@@ -23,15 +23,15 @@ for(const def of women){
  assert(!ids.has(`${def.categoryId}:${def.number}`));ids.add(`${def.categoryId}:${def.number}`);
  assert.equal(safeStarterAsset({...def,imageAsset:'https://evil.example/card.webp'}),null,'Never use arbitrary non-local sources');
 }
-assert.equal(hashes.size,20,'Every picture must be unique');
+assert.equal(hashes.size,25,'Every picture must be unique');
 const other=STARTER_CARDS.find(c=>c.categoryId==='anime-tiere');assert.equal(safeStarterAsset(other),other.imageAsset);
 const shell=readFileSync('sw.js','utf8'),album=readFileSync('assets/reward-album-ui.js','utf8'),opening=readFileSync('assets/reward-pack-stage.js','utf8'),shop=readFileSync('assets/reward-shop-ui.js','utf8');
 for(const u of urls)assert(shell.includes(`'${u}'`),`Offline pre-cache missed ${u}`);
-assert.equal(new Set(urls).size,20);
+assert.equal(new Set(urls).size,25);
 assert.match(album,/hasSafeImage\?image:starter/,'Personalized images must have priority');
 assert.match(opening,/safeStarterAsset\(card\)/);
 assert.match(shop,/safeStarterAsset\(card\)/);
-assert.match(shell,/mein-alltag-v0-25-4/);
-assert.equal(JSON.parse(readFileSync('version.json')).version,'0.25.4');
-assert.match(readFileSync('assets/app.js','utf8'),/APP_VERSION='0\.25\.4'/);
-console.log('PASS BW12: 20 different WebP artworks, 100 existing card slots, non-destructive image mapping, custom-image priority, booster and album integration, offline cache + version.');
+assert.match(shell,/mein-alltag-v0-25-5/);
+assert.equal(JSON.parse(readFileSync('version.json')).version,'0.25.5');
+assert.match(readFileSync('assets/app.js','utf8'),/APP_VERSION='0\.25\.5'/);
+console.log('PASS BW12: 25 different WebP artworks, 100 existing card slots, non-destructive image mapping, custom-image priority, booster and album integration, offline cache + version.');

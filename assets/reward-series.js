@@ -8,14 +8,14 @@ const canonicalId=(category,number)=>`catalog:${category}:${String(number).padSt
 const key=(category,number)=>`${category}:${number}`;
 export const STARTER_CARDS=BW06_STARTER_CARDS;
 export function starterAssetPath(category,number){return ids.has(category)&&Number.isInteger(number)&&number>=1&&number<=25?`./assets/card-art/${category}/${String(number).padStart(3,'0')}.svg`:null;}
-/** BW12: 20 premium original anime portraits. Existing stable catalogue IDs, names,
+/** BW12/BW14: all 25 premium original anime portraits. Existing stable catalogue IDs, names,
  * user-supplied pictures and card ownership are never modified. This resolves an
  * external, bundled image only for the unchanged, verified BW06 factory-art path.
  */
 export function safeStarterAsset(card){
  const expected=starterAssetPath(card?.categoryId,card?.number);
  if(!expected||card.imageAsset!==expected||!/^\.\/assets\/card-art\/(anime-frauen|anime-tiere|maschinen|monster)\/(?:00[1-9]|0[12][0-9])\.svg$/.test(expected))return null;
- if(card.categoryId==='anime-frauen'&&card.number<=20)return `./assets/card-art/anime-frauen/${String(card.number).padStart(3,'0')}.webp`;
+ if(card.categoryId==='anime-frauen'&&card.number<=25)return `./assets/card-art/anime-frauen/${String(card.number).padStart(3,'0')}.webp`;
  return expected;
 }
 

@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parent
 old=(ROOT/'test-bw11-ui.py').read_text()
 fixture=old.split("fixture=r'''",1)[1].split("'''",1)[0]
 fixture=fixture.replace('function safeStarterAsset(c){return c.imageAsset;}',
- 'function safeStarterAsset(c){return c.categoryId===\'anime-frauen\'&&c.number<=20?`./assets/card-art/anime-frauen/${String(c.number).padStart(3,\'0\')}.webp`:c.imageAsset;}')
+ 'function safeStarterAsset(c){return c.categoryId===\'anime-frauen\'&&c.number<=25?`./assets/card-art/anime-frauen/${String(c.number).padStart(3,\'0\')}.webp`:c.imageAsset;}')
 known=json.loads(subprocess.check_output(['node','--input-type=module','-e',"import {BW06_STARTER_CARDS} from './assets/reward-series-data.js';console.log(JSON.stringify(Object.fromEntries(BW06_STARTER_CARDS.filter(c=>c.categoryId==='anime-frauen').map(c=>[c.number,{name:c.name,rarity:c.rarity}]))))"],cwd=ROOT,text=True))
 fixture=fixture.replace('const catalog=[];', 'const __bw13names='+json.dumps(known,ensure_ascii=False)+';\nconst catalog=[];')
 fixture=fixture.replace('name:`${c.label} ${n}`,', "name:c.id==='anime-frauen'?__bw13names[n].name:`${c.label} ${n}`,")

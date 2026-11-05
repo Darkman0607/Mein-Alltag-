@@ -31,7 +31,7 @@ assert.equal((await loadRewardAlbum()).uniqueOwned,0,'catalog entries must not g
 assert.equal((await loadRewardEconomy()).wallet.coins,0,'no free wallet');
 assert.equal((await installStarterSeries()).added,0,'import must be idempotent');
 const defs=(await loadRewardCardManager()).catalog;
-for(const card of defs){assert.equal(safeStarterAsset(card),card.imageAsset);assert(existsSync(card.imageAsset.slice(2)),'asset missing '+card.imageAsset);}
+for(const card of defs){const expected=card.categoryId==='anime-frauen'&&card.number<=25?`./assets/card-art/anime-frauen/${String(card.number).padStart(3,'0')}.webp`:card.imageAsset;assert.equal(safeStarterAsset(card),expected);assert(existsSync(expected.slice(2)),'asset missing '+expected);}
 assert.deepEqual(Object.fromEntries(REWARD_RARITIES.map(r=>[r,defs.filter(c=>c.rarity===r).length])),{gewoehnlich:36,ungewoehnlich:24,selten:16,episch:12,legendaer:4,mythisch:4,diamant:4});
 assert.equal(previewStarterImport(defs).toAdd,0);
 // Seed one naturally obtained card plus a duplicate (simulation of a booster result).
