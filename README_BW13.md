@@ -17,3 +17,8 @@ Keinerlei Migration oder Änderung der IndexedDB. Kartenstammdaten, eigene Bilde
 `node test-bw12-anime.mjs` und `python test-bw13-ui.py` sowie bestehende BW02–BW09/BW11 Tests.
 Test-Screenshots sind im Ordner `DOKUMENTATION/` enthalten.
 Realer Android-/Offline-Test muss am Gerät erfolgen.
+
+## Veröffentlichung
+- GitHub main Commit: `51ddd12302cf75c8555918a23c2c96b9463bbbe5`
+- GitHub Pages Actions-Run: `42050180710` (erfolgreich)
+- Android-Handy-Abnahme weiterhin offen.

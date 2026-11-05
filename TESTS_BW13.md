@@ -6,4 +6,4 @@
 - [x] Node-Regressionsprüfungen: BW02, BW03, BW04, BW05, BW07, BW08, BW09, BW11, BW12 bestanden.
 - [x] Version / Service Worker 0.25.4.
 - [ ] Android PWA: Neustart, tatsächliches Bild-Update, Offline-Ansicht mit vorhandenen Daten.
-- [ ] GitHub Pages: Veröffentlichung separat prüfen.
+- [x] GitHub Pages: Version 0.25.4 veröffentlicht, Commit 51ddd12302cf75c8555918a23c2c96b9463bbbe5, Actions-Run 42050180710 erfolgreich.

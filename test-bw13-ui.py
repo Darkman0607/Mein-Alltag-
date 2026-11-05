@@ -1,13 +1,16 @@
 """BW13 isolated real Chromium rendering checks (network-independent)."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-import re
+import re,subprocess,json
 ROOT=Path(__file__).resolve().parent
 old=(ROOT/'test-bw11-ui.py').read_text()
 fixture=old.split("fixture=r'''",1)[1].split("'''",1)[0]
 fixture=fixture.replace('function safeStarterAsset(c){return c.imageAsset;}',
  'function safeStarterAsset(c){return c.categoryId===\'anime-frauen\'&&c.number<=20?`./assets/card-art/anime-frauen/${String(c.number).padStart(3,\'0\')}.webp`:c.imageAsset;}')
-fixture=fixture.replace("const card={id:","const card={id:")
+known=json.loads(subprocess.check_output(['node','--input-type=module','-e',"import {BW06_STARTER_CARDS} from './assets/reward-series-data.js';console.log(JSON.stringify(Object.fromEntries(BW06_STARTER_CARDS.filter(c=>c.categoryId==='anime-frauen').map(c=>[c.number,{name:c.name,rarity:c.rarity}]))))"],cwd=ROOT,text=True))
+fixture=fixture.replace('const catalog=[];', 'const __bw13names='+json.dumps(known,ensure_ascii=False)+';\nconst catalog=[];')
+fixture=fixture.replace('name:`${c.label} ${n}`,', "name:c.id==='anime-frauen'?__bw13names[n].name:`${c.label} ${n}`,")
+fixture=fixture.replace('number:n,rarity,description:', "number:n,rarity:c.id==='anime-frauen'?__bw13names[n].rarity:rarity,description:")
 code=fixture+'\n'+ '\n'.join(s for s in (ROOT/'assets/reward-premium.js').read_text().splitlines() if not s.startswith('import ')).replace('export ','')+ '\n'+ '\n'.join(s for s in (ROOT/'assets/reward-album-ui.js').read_text().splitlines() if not s.startswith('import ')).replace('export ','')+'''
 window.startBW13=()=>{document.getElementById('view').innerHTML=renderRewardAlbum();mountPremiumSettings(document.getElementById('view'));mountRewardAlbum();};
 '''

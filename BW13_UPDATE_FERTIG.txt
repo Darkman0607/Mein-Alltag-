@@ -1,1 +1,1 @@
-Mein Alltag 0.25.4 – BW13. 20 Kartenbilder und Albumdarstellung verbessert. Details siehe README_BW13.md.
+Mein Alltag V0.25.4 – BW13: 20 Kartenporträts repariert, saubere Zwei-Spalten-Ansicht, GitHub-Pages-Deployment erfolgreich. Word-Checklisten aktualisiert. Handytest offen.
