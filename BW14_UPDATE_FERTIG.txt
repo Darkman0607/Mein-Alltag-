@@ -1,0 +1,7 @@
+MEIN ALLTAG 0.25.5 – BW14
+05.11.2026
+
+Erledigt: letzte fünf Anime-Frauen-Motive #021–#025, nun 25/25 neue Standard-Porträts.
+Erledigt: Album, Booster, Shop, Offline-Cache, mobile Layouttests, Word-Checklisten.
+GitHub Code: d41a8825 (Pages erfolgreich, Run 42057688699).
+Offen: Realer Android-Offline- und PWA-Test mit Nutzerdaten.
