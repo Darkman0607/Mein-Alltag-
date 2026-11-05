@@ -1,0 +1,18 @@
+MEIN ALLTAG – V0.25.3 – BW12 – 05.11.2026
+
+FERTIG IN DER ZIP:
+- 20 neue unterschiedliche Anime-Frauen-Kartenmotive für die vorhandenen Plätze #001–#020
+- Sicherer automatischer Bildwechsel ohne Veränderung von Kartendaten, Münzen oder Besitz
+- Neue WebP-Bilder in Album, Booster und Offline-Cache
+- App-Version 0.25.3
+- Funktionstests und isolierte Chromium-Regressionen bestanden
+- Abgehakte Word-Checklisten: bauhaus.docx und Belohnungswelt_Mastercheckliste.docx
+- Motive im Ordner assets/card-art/anime-frauen/001.webp bis 020.webp
+- Bildübersicht: DOKUMENTATION/BW12_20_Anime_Karten_Vorschau.jpg
+
+WICHTIG: GITHUB MAIN NOCH NICHT AKTUALISIERT.
+Die verbundene GitHub-Repositoryversion wurde geprüft und zeigt noch 0.25.2.
+Ein vollständiger Push der binären Kartenbilder und App-Dateien war hier nicht ausführbar.
+Keinen Teilstand live veröffentlichen, solange nicht alle 20 WebP-Bilder hochgeladen sind.
+
+OFFEN: Android-Praxistest, GitHub-Upload, GitHub-Pages-/Offline-Liveabnahme.

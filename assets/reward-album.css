@@ -76,3 +76,6 @@
 .bw-starter-import button{min-height:44px;border:1px solid #78c6ef;background:#1367a1;color:white;border-radius:10px;padding:10px 14px;font-weight:800}
 .bw-starter-import button:disabled{opacity:.7}
 .bw-starter-import p{margin:8px 0 0;font-size:.82rem}
+
+/* BW12: anime art includes its own printed number; avoid a second number on top. */
+.bw-card-art.bw-bespoke-art .bw-card-art-number{display:none}

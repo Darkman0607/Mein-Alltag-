@@ -12,7 +12,7 @@ const percent=(n,total)=>total?Math.round(n*100/total):0;
 export function renderRewardAlbum(){return `<div class="bw-album" id="bwAlbum">
  <div class="bw-album-intro"><span class="bw-album-kicker">SAMMLUNG · 4 THEMEN</span><h2>Dein Kartenalbum</h2><p>100 nummerierte Plätze. Kartenmotive können von dir ergänzt werden; <strong>ein ausgefüllter Kartenplatz ist noch keine gesammelte Karte</strong>.</p></div>
  ${renderPremiumSettings()}
- <div class="bw-starter-import" id="bwStarterImport"><button type="button" id="bwStarterImportButton">🎨 Fehlende Kartenplätze füllen</button><p id="bwStarterImportStatus" role="status" aria-live="polite">Startserie: 100 unabhängige Vektormotive; bereits angelegte Karten bleiben unverändert.</p></div>
+ <div class="bw-starter-import" id="bwStarterImport"><button type="button" id="bwStarterImportButton">🎨 Fehlende Kartenplätze füllen</button><p id="bwStarterImportStatus" role="status" aria-live="polite">Startserie: 100 eigene Motive, davon 20 Premium-Anime-Karten; deine Bilder und Karten bleiben erhalten.</p></div>
  <div class="bw-album-stats" id="bwAlbumStats" role="status" aria-live="polite">Lade Sammelfortschritt …</div>
  <div class="bw-album-categories" id="bwAlbumCategories" role="group" aria-label="Kartenkategorie"></div>
  <div class="bw-album-controls"><label for="bwAlbumSearch">Karte suchen</label><input id="bwAlbumSearch" class="bw-album-search" type="search" maxlength="80" placeholder="Name oder Nummer, z. B. 003" autocomplete="off"/>
@@ -28,7 +28,7 @@ function art(slot,large=false){
  const starter=slot.card&&!image?safeStarterAsset(slot.card):null;
  const hasSafeImage=typeof image==='string'&&/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(image)&&image.length<=1150000;
  const rarity=REWARD_RARITIES.includes(slot.card?.rarity)?slot.card.rarity:'unbekannt';
- return `<div class="bw-card-art bw-theme-${appearance.theme} bw-rarity-${rarity} ${slot.owned?'bw-is-owned':'bw-is-missing'} ${large?'bw-art-large':''}">
+ return `<div class="bw-card-art bw-theme-${appearance.theme} bw-rarity-${rarity} ${slot.owned?'bw-is-owned':'bw-is-missing'} ${large?'bw-art-large':''} ${starter?.endsWith('.webp')?'bw-bespoke-art':''}">
   ${hasSafeImage||starter?`<img src="${hasSafeImage?image:starter}" alt="${esc(slot.card.name)}" loading="lazy"/>`:`<span class="bw-card-emblem" aria-hidden="true">${appearance.icon}</span><span class="bw-card-unavailable">${slot.card?'Motiv fehlt':'Kartenplatz'}</span>`}
   <span class="bw-card-art-number">#${pad(slot.number)}</span><span class="bw11-rarity-chip">${esc(rarityNames[rarity]||'Karte')}</span>
  </div>`;
