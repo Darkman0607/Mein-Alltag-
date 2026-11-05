@@ -24,4 +24,4 @@
 
 - Die 20 Illustrationen wurden für dieses Update KI-generiert. Der Bildsatz wurde aus einer generierten Kartenübersicht in einzelne, mobile WebP-Bilder aufbereitet. Großansichten haben daher eine geringere Quellauflösung als einzeln generierte Druckgrafiken.
 - Die 20 verschiedenen Motive sind **visuelle Ersatzmotive**, keine 20 neuen Datensätze. Wer zusätzliche Sammelplätze möchte, braucht ein eigenständiges Datenmodell-Update.
-- Automatisierte Browser-/Node-Tests sind keine echte Android- oder GitHub-Pages-Liveabnahme. **GitHub-Veröffentlichung in dieser Sitzung noch offen**, solange kein Commit plus Bildabgleich bestätigt wurde.
+- Automatisierte Browser-/Node-Tests sind keine echte Android-Praxisabnahme. **GitHub main V0.25.3 veröffentlicht und verifiziert**: Commit `a4c24aa7`, 141 geänderte Dateien, alle 20 WebP-Bilder und beide Word-Checklisten stimmen mit der ZIP überein. GitHub-Pages-Deployment zu diesem Commit erfolgreich (Actions-Run `42035480013`). Ein echter Android-PWA-Neustart und Offline-Test bleiben offen.

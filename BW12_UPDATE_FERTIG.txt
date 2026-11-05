@@ -10,9 +10,9 @@ FERTIG IN DER ZIP:
 - Motive im Ordner assets/card-art/anime-frauen/001.webp bis 020.webp
 - Bildübersicht: DOKUMENTATION/BW12_20_Anime_Karten_Vorschau.jpg
 
-WICHTIG: GITHUB MAIN NOCH NICHT AKTUALISIERT.
-Die verbundene GitHub-Repositoryversion wurde geprüft und zeigt noch 0.25.2.
-Ein vollständiger Push der binären Kartenbilder und App-Dateien war hier nicht ausführbar.
-Keinen Teilstand live veröffentlichen, solange nicht alle 20 WebP-Bilder hochgeladen sind.
+GITHUB MAIN IST AKTUALISIERT: V0.25.3.
+Commit: a4c24aa76f1e5e8942e8eb3b0d33dd8d9dbeef93
+141 Dateien hochgeladen und verglichen; 20/20 WebP-Bilder vorhanden, beide Word-Dateien abgeglichen.
+GitHub Pages: Deployment erfolgreich (Actions-Run 42035480013).
 
-OFFEN: Android-Praxistest, GitHub-Upload, GitHub-Pages-/Offline-Liveabnahme.
+OFFEN: Android-Praxistest, Offline-Test auf dem Zielhandy und Restore auf einem zweiten Geraet.

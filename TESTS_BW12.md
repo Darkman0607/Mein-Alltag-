@@ -16,6 +16,7 @@
 ## Nicht durch dieses Prüfprotokoll abgedeckt
 
 - [ ] Physischer Test auf Android (Installations-/Cache-Update und echte Bestandsdaten).
-- [ ] Verifizierter GitHub-Main-Commit einschließlich 20 Bildassets und Word-Dateien.
-- [ ] Öffentliche GitHub-Pages-Liveabnahme und Offline-Start nach GitHub-Push.
+- [x] GitHub-Main-Commit `a4c24aa7` verifiziert: 141 geänderte Dateien, 20 WebP-Bilder und beide Word-Dateien; relevanter ZIP-/Tree-Abgleich 225/225 Dateien identisch.
+- [x] GitHub-Pages-Deployment nach GitHub-Push erfolgreich: Actions-Run `42035480013`, Head-Commit `a4c24aa7`.
+- [ ] Echte GitHub-Pages-Nutzung auf dem Ziel-Android-Gerät, inklusive Offline-Start, noch offen.
 - [ ] Langzeittest auf Android bezüglich Ressourcen und Akkubelastung.
