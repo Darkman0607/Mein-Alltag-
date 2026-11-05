@@ -35,8 +35,9 @@ function art(slot,large=false){
 }
 
 function tile(slot){const appearance=CATEGORY_APPEARANCE[slot.categoryId];const title=slot.card?.name||`Karte #${pad(slot.number)}`;
- return `<div class="bw-card-tile ${slot.owned?'has-copy':''}" data-slot="${esc(slot.id)}">
-  <button type="button" class="bw-card-open" data-bw-open="${esc(slot.id)}" aria-label="${esc(title)}, ${esc(appearance.label)}, ${slot.owned?`${slot.owned} Exemplare`:'nicht gesammelt'} – Details öffnen">${art(slot)}<span class="bw-card-name">${esc(title)}</span><span class="bw-card-state">${slot.owned?`✓ ${slot.owned} × vorhanden`:slot.card?'Noch nicht gesammelt':'Nicht gestaltet'}</span></button>
+ const rarity=REWARD_RARITIES.includes(slot.card?.rarity)?slot.card.rarity:'unbekannt';
+ return `<div class="bw-card-tile bw-rarity-${rarity} ${slot.owned?'has-copy':''}" data-slot="${esc(slot.id)}">
+  <button type="button" class="bw-card-open" data-bw-open="${esc(slot.id)}" aria-label="${esc(title)}, ${esc(appearance.label)}, ${slot.owned?`${slot.owned} Exemplare`:'nicht gesammelt'} – Details öffnen">${art(slot)}<span class="bw-card-name">${esc(title)}</span><span class="bw-card-rarity-text">${esc(rarityNames[rarity]||'Noch offen')}</span><span class="bw-card-state">${slot.owned?`✓ ${slot.owned} × vorhanden`:slot.card?'Noch nicht gesammelt':'Nicht gestaltet'}</span></button>
   <button type="button" class="bw-card-favorite ${slot.favorite?'is-favorite':''}" data-bw-favorite="${esc(slot.id)}" aria-pressed="${slot.favorite}" aria-label="${esc(title)} ${slot.favorite?'aus Favoriten entfernen':'als Favorit merken'}" title="${slot.favorite?'Favorit entfernen':'Favorit merken'}">${slot.favorite?'★':'☆'}</button>
  </div>`;}
 

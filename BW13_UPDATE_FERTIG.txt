@@ -1,0 +1,1 @@
+Mein Alltag 0.25.4 – BW13. 20 Kartenbilder und Albumdarstellung verbessert. Details siehe README_BW13.md.
