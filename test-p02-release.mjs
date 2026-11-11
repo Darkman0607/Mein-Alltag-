@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const v=JSON.parse(fs.readFileSync('version.json','utf8'));
+assert.equal(v.version,'0.26.0');
+assert.match(fs.readFileSync('assets/app.js','utf8'),/export const APP_VERSION='0\.26\.0'/);
+const sw=fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE='mein-alltag-v0-26-0'/);
+const assets=sw.slice(sw.indexOf('const ASSETS=[')+14,sw.indexOf('];')).match(/'\.\/[^']+'/g)||[];
+const missing=assets.map(a=>a.slice(1,-1).replace(/^\.\//,'')).filter(f=>!fs.existsSync(f));
+assert.equal(missing.length,0,`Missing cache assets: ${missing.join(', ')}`);
+assert.equal(new Set(assets).size,assets.length,'duplicate precache assets');
+console.log(`PASS P02 release: ${v.version}; ${assets.length} unique, existing offline cache assets`);
