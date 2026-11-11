@@ -97,3 +97,28 @@
 .pm-clean-task-list{padding:0 12px 8px}
 .pm-clean-task{padding:10px 3px}
 @media(max-width:350px){.pm-clean-fold-controls button{font-size:11px}.pm-clean-group-summary{padding:9px 10px}}
+
+/* P02 V0.26.0 – quick room lists and one-tap warehouse materials */
+.pm-quick-list{margin:12px 0;border:1px solid #548b78;border-radius:14px;background:#12382f;padding:12px}
+.pm-quick-list summary{font-size:14px;font-weight:800;min-height:35px;cursor:pointer;line-height:1.6}
+.pm-quick-list summary small{color:#a8e6cf;font-size:11px}
+.pm-quick-list p{font-size:12px;color:#d1e4d9;line-height:1.55}
+.pm-quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 3px}
+.pm-quick-choice{display:flex;align-items:center;gap:8px;min-height:45px;border-radius:11px;padding:8px;background:#20483e;border:1px solid #467361;font-size:12px;font-weight:700;line-height:1.35}
+.pm-quick-choice input{width:19px;height:19px;accent-color:#8ef2b7;flex:none}
+.pm-quick-choice input:disabled{opacity:.55}
+.pm-clean-material{margin:14px 0 17px;padding:12px}
+.pm-material-top{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.pm-material-top h3{font-size:15px;line-height:1.35}
+.pm-material-top span{color:#9deac6;font-size:11px;white-space:nowrap;font-weight:700}
+.pm-material-fast{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:11px 0}
+.pm-material-shortcut{min-height:73px;width:100%;border:1px solid #79c8a0;border-radius:13px;background:#235344;color:#f1fff7;text-align:left;padding:11px 10px;display:flex;flex-direction:column;gap:5px;justify-content:center;overflow-wrap:anywhere;cursor:pointer}
+.pm-material-shortcut:focus-visible,.pm-quick-choice:focus-within{outline:3px solid #aff9d0;outline-offset:2px}
+.pm-material-shortcut strong{font-size:12px;line-height:1.35}
+.pm-material-shortcut small{font-size:11px;color:#b9f4dc;line-height:1.4}
+.pm-material-more{margin:12px 0 8px;background:#173c37;border:1px solid #4e8d77;border-radius:11px;padding:11px}
+.pm-material-more summary{min-height:29px;cursor:pointer;font-weight:750;font-size:12px;line-height:1.5}
+.pm-material-more form{padding-top:6px}
+.pm-material-basket{border-top:1px solid #477969;margin:12px 0 0;padding-top:8px}
+.pm-material-basket h4{margin:2px 0 6px}
+@media(max-width:350px){.pm-material-fast,.pm-quick-grid{grid-template-columns:1fr 1fr;gap:6px}.pm-quick-choice{padding:6px}.pm-material-shortcut{padding:8px;min-height:78px}}
