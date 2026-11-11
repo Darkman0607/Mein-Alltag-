@@ -1,0 +1,8 @@
+Mein Alltag V0.26.0 – P02 – 11.11.2026
+
+✓ Schnellstart Badezimmer / WC / Küche mit individuellen Aufgaben
+✓ Material-Schnellauswahl aus Lagerhaus
+✓ Bestandsschutz und erst beim Abschluss verbindliche Buchung
+✓ Word-Mastercheckliste inklusive früherer Updates aktualisiert
+✓ Tests und ZIP erstellt
+☐ Echte Android-/Offline-Prüfung ausstehend
