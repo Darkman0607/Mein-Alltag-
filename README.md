@@ -416,3 +416,10 @@ Tests: `python test-d02-feedback.py` (Chromium, simulierte Google-API), `python 
 
 
 W02-HF01 · V0.23.1: 3D-Kamera-Touchsteuerung, automatische Wandschnitt-Ansicht und vereinfachte Oberfläche. Siehe README_HF01.md.
+
+
+## P02 / Version 0.26.0 – Reinigung schneller starten (11.11.2026)
+- Neue auswählbare Schnelllisten für Badezimmer, WC und Küche, auch ohne 3D-Möbel.
+- Lager-Verbrauchsartikel mit einem Tipp vormerken; genaue Mengen weiterhin manuell.
+- Überbuchungsschutz beim Vormerken, Abbuchung weiterhin erst nach bestätigtem Abschluss.
+- Anleitung, Grenzen und Testergebnisse: `README_P02.md`, `TESTS_P02.md`, `bauhaus.docx`.
