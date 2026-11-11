@@ -6,3 +6,5 @@ Mein Alltag V0.26.0 – P02 – 11.11.2026
 ✓ Word-Mastercheckliste inklusive früherer Updates aktualisiert
 ✓ Tests und ZIP erstellt
 ☐ Echte Android-/Offline-Prüfung ausstehend
+✓ GitHub main veröffentlicht, Commit dfa835c0c90efb271f72d823e0f98ca1779694ce; Source-SHA geprüft
+☐ Live-GitHub-Pages-Cache auf dem Handy noch zu testen
