@@ -36,3 +36,9 @@ Stand: 11.11.2026 · Quelle: Mein Alltag V0.25.5 BW14. Keine Neuinstallation nö
 - `node test-p02-release.mjs`: Versionsgleichheit und Precache-Vollständigkeit.
 
 **Wichtiger Hinweis:** Private Wohnungs-/Lagerdaten bleiben lokal. Die im ZIP enthaltenen Test-Screenshots zeigen ausschließlich künstliche Daten.
+
+## GitHub main
+
+- P02-Code, Versionsdatei und Tests wurden auf `main` veröffentlicht. Aktueller Abschluss-Commit: `dfa835c0c90efb271f72d823e0f98ca1779694ce`.
+- Die 15 Git-Blob-SHA der Produktions-/Test-/Textdateien wurden mit der ausgelieferten lokalen Dateiversion verglichen (identisch).
+- GitHub Pages auf einem realen Android-Handy ist noch nicht bestätigt; die Word-Mastercheckliste liegt im ZIP.
