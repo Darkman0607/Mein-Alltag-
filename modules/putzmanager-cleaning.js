@@ -41,11 +41,41 @@ const STEPS={
  dunstabzug:['Außenseite abwischen','Fettfilter prüfen'],
  sonst:['Oberflächen abwischen','Sauberkeit kontrollieren']
 };
-export function roomTaskGroups(room){
+/** P02 – room-specific quick lists. User choices are private, per-room and optional. */
+export const QUICK_KEY='cleaning.quick-types.v1';
+export const QUICK_OPTIONS=Object.freeze({
+ bad:[['waschbecken','Waschbecken'],['spiegel','Spiegel'],['dusche','Dusche'],['wanne','Badewanne'],['wc','WC'],['schrank','Schränke'],['muelleimer','Mistkübel']],
+ wc:[['wc','WC-Schüssel'],['waschbecken','Handwaschbecken'],['spiegel','Spiegel'],['muelleimer','Mistkübel']],
+ kueche:[['arbeitsplatte','Arbeitsplatte'],['spuele','Spüle'],['herd','Herd'],['kuehlschrank','Kühlschrank'],['geschirrspueler','Geschirrspüler'],['muelleimer','Mistkübel'],['tisch','Tisch'],['dunstabzug','Dunstabzug']]
+});
+const QUICK_DEFAULTS=Object.freeze({
+ bad:['waschbecken','spiegel','dusche','wc','muelleimer'],
+ wc:['wc','waschbecken','spiegel','muelleimer'],
+ kueche:['arbeitsplatte','spuele','herd','kuehlschrank','geschirrspueler','muelleimer','tisch']
+});
+export function defaultQuickTypes(type){return [...(QUICK_DEFAULTS[type]||[])];}
+export async function loadQuickTypes(){const v=await getModuleValue('putzmanager',QUICK_KEY);return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}
+export async function saveQuickTypes(roomId,roomType,types){
+ const allowed=new Set((QUICK_OPTIONS[roomType]||[]).map(x=>x[0]));
+ if(!allowed.size)throw Error('Für diesen Raum gibt es keine Schnellliste.');
+ const selected=[...new Set(types)].filter(x=>allowed.has(x));
+ await mutateModuleValues('putzmanager',[QUICK_KEY],values=>{
+  const raw=values[QUICK_KEY],stored=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
+  stored[roomId]=selected;return [[QUICK_KEY,stored]];
+ });
+}
+export function roomTaskGroups(room,quickTypes=defaultQuickTypes(room?.type)){
  const objects=room?.sketch3d?.objects||room?.objects||[];
  const groups=[{id:'area:floor',name:'Boden',type:'boden',steps:['Boden freiräumen','Boden saugen oder kehren','Boden feucht wischen']}];
  if(room?.sketch3d?.windows?.length)groups.push({id:'area:windows',name:'Fenster',type:'fenster',steps:['Fensterbank abwischen','Glas und Rahmen bei Bedarf reinigen']});
  if(room?.sketch3d?.doors?.length)groups.push({id:'area:doors',name:'Türen und Türgriffe',type:'tuer',steps:['Türgriffe reinigen','Türblatt bei Bedarf abwischen']});
+ // Respect real room objects: never create a second task group for the same fixture type.
+ const present=new Set(objects.map(o=>o.type));
+ const allowed=new Map(QUICK_OPTIONS[room?.type]||[]);
+ for(const type of new Set(quickTypes)){
+  if(!allowed.has(type)||present.has(type))continue;
+  groups.push({id:`quick:${type}`,name:allowed.get(type),type,steps:STEPS[type]||STEPS.sonst});
+ }
  objects.forEach((o,i)=>groups.push({id:'object:'+(o.id||`legacy-${i}`),name:o.name,type:o.type,steps:STEPS[o.type]||STEPS.sonst}));
  return groups.map(g=>({...g,steps:g.steps.map((title,i)=>({id:g.id+':'+i,title}))}));
 }
@@ -66,13 +96,15 @@ function mutateSession(roomId,apply){
  });
 }
 export async function startCleaning(room){
- const groups=roomTaskGroups(room),now=iso();
- await mutateModuleValues('putzmanager',[CLEAN_KEY,PRESET_KEY],values=>{
+ const now=iso();
+ await mutateModuleValues('putzmanager',[CLEAN_KEY,PRESET_KEY,QUICK_KEY],values=>{
   const state=normalize(values[CLEAN_KEY]),presets=values[PRESET_KEY]||{};
   if(state.active[room.id])throw Error('Für diesen Raum gibt es bereits eine offene Reinigung.');
   if(Object.values(state.active).some(s=>s.status==='running'))throw Error('In einem anderen Raum läuft bereits eine Stoppuhr. Bitte dort zuerst pausieren.');
   const material=Array.isArray(presets[room.id])?presets[room.id]:[];
-  state.active[room.id]={id:uid(),roomId:room.id,roomName:room.name,startedAt:now,runningSince:now,status:'running',elapsedMs:0,groups,doneTaskIds:[],materials:material.slice(0,MAX_LINES).map(line=>({...line,id:uid()}))};
+  const pref=values[QUICK_KEY]?.[room.id],selected=Array.isArray(pref)?pref:defaultQuickTypes(room.type);
+  const sessionGroups=roomTaskGroups(room,selected);
+  state.active[room.id]={id:uid(),roomId:room.id,roomName:room.name,startedAt:now,runningSince:now,status:'running',elapsedMs:0,groups:sessionGroups,doneTaskIds:[],materials:material.slice(0,MAX_LINES).map(line=>({...line,id:uid()}))};
   return [[CLEAN_KEY,state]];
  });
 }
@@ -125,6 +157,26 @@ export function materialSources(items,rooms,areas){
  }
  return result;
 }
+/** Common consumables offered in one tap, respecting amounts already reserved. */
+export function remainingMaterial(source,materials=[]){
+ const held=materials.filter(m=>m.itemId===source.itemId&&m.fromId===source.fromId&&(m.containerId||null)===(source.containerId||null)).reduce((v,m)=>v+Number(m.quantity||0),0);
+ return Math.max(0,Math.round((Number(source.available)-held)*1000)/1000);
+}
+export function quickMaterialChoices(sources,materials=[]){
+ const categories=[
+  {test:/handschuh|gloves|nitril|latex/i,qty:s=>s.pairs?{quantity:1,mode:'pairs',display:'1 Paar'}:{quantity:1,mode:'units',display:`1 ${s.unit}`}},
+  {test:/müllsack|muellsack|müllbeutel|mistk[üu]belbeutel|abfallsack/i,qty:s=>({quantity:1,mode:'units',display:`1 ${s.unit}`})},
+  {test:/putztuch|reinigungstuch|wischtuch|mikrofasertuch/i,qty:s=>({quantity:1,mode:'units',display:`1 ${s.unit}`})},
+  {test:/reiniger|putzmittel|spülmittel|desinfektion|spray/i,qty:s=>s.unit==='ml'?{quantity:50,mode:'units',display:'50 ml'}:s.unit==='l'?{quantity:0.05,mode:'units',display:'0,05 l'}:{quantity:1,mode:'units',display:`1 ${s.unit}`}}
+ ];
+ const results=[];
+ for(const category of categories){
+  const options=sources.map((source,index)=>({source,index,amount:category.qty(source)})).filter(x=>category.test.test(x.source.name)&&remainingMaterial(x.source,materials)>=x.amount.quantity*(x.amount.mode==='pairs'?2:1));
+  if(!options.length)continue;
+  const selected=options[0];results.push({sourceIndex:selected.index,quantity:selected.amount.quantity,mode:selected.amount.mode,display:selected.amount.display,name:selected.source.name,remaining:remainingMaterial(selected.source,materials),unit:selected.source.unit});
+ }
+ return results;
+}
 export async function addMaterial(roomId,source,quantity,mode='units'){
  if(!source||typeof source.itemId!=='string'||!Number.isFinite(Number(source.available)))throw Error('Bitte Material aus dem Lagerhaus auswählen.');
  const units=consumptionQuantity({unit:source.unit,type:'verbrauch',name:source.name,pairCounting:source.pairs?'yes':'no'},quantity,mode);
@@ -134,6 +186,7 @@ export async function addMaterial(roomId,source,quantity,mode='units'){
   if(!s)throw Error('Bitte zuerst Reinigung starten.');
   if(s.materials.length>=MAX_LINES)throw Error('Maximal 30 Materialpositionen je Reinigung.');
   const duplicate=s.materials.find(l=>l.itemId===line.itemId&&l.fromId===line.fromId&&l.containerId===line.containerId);
+  if(remainingMaterial(source,s.materials)+1e-8<line.quantity)throw Error('Diese Menge ist durch die Vormerkliste bereits ausgeschöpft. Bitte Menge reduzieren.');
   if(duplicate){duplicate.quantity=Math.round((duplicate.quantity+line.quantity)*1000)/1000;}
   else s.materials.push(line);
  });
