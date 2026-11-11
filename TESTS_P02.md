@@ -18,3 +18,7 @@
 ## Datenschutz
 
 Alle Testdaten sind erfunden. Das ZIP enthält keine privaten Fotos oder Live-Daten des Geräts. Bei Updates im selben Browserprofil bleiben bestehende IndexedDB-Daten unangetastet; vorher ein vollständiges Backup durchführen.
+
+## GitHub-Abgleich
+
+Remote-Blob-SHA für sechs Produktionsdateien, Versionsdatei und neun Test-/Dokudateien mit lokalem `git hash-object` verglichen: identisch. Der Live-Test über GitHub Pages im Android-PWA-Profil bleibt offen.
