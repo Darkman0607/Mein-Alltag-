@@ -1,24 +1,27 @@
-/** P01 – isolated room-cleaning panel, mounted above the 3D editor. */
+/** P03 – one-tap cleaning checklist without the 3D interface. */
 import {getModuleValue} from '../assets/database.js';
 import {ITEM_KEY} from './lagerhaus-items.js';
-import {roomTaskGroups,taskCount,QUICK_OPTIONS,defaultQuickTypes,loadQuickTypes,saveQuickTypes,quickMaterialChoices,remainingMaterial,loadCleaningState,loadMaterialPresets,saveMaterialPreset,clearMaterialPreset,sessionElapsed,duration,materialSources,startCleaning,setTimer,setTaskDone,addMaterial,removeMaterial,cancelCleaning,finishCleaning} from './putzmanager-cleaning.js';
+import {roomTaskGroups,taskCount,QUICK_OPTIONS,defaultQuickTypes,loadQuickTypes,saveQuickTypes,quickMaterialChoices,remainingMaterial,loadCleaningState,loadMaterialPresets,saveMaterialPreset,clearMaterialPreset,sessionElapsed,duration,materialSources,startCleaning,setTimer,setTaskDone,setGroupDone,addMaterial,removeMaterial,cancelCleaning,finishCleaning} from './putzmanager-cleaning.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=n=>String(Number(n)).replace('.',',');
 function tasksHtml(groups,done,enabled,expandedGroups){
  const completed=new Set(done||[]);
  return groups.map(group=>{
   const count=group.steps.filter(step=>completed.has(step.id)).length;
-  return `<details class="pm-clean-group" data-clean-group="${esc(group.id)}" ${expandedGroups.has(group.id)?'open':''}><summary class="pm-clean-group-summary"><span class="pm-clean-group-name">${esc(group.name)}</span><span class="pm-clean-group-count">${count}/${group.steps.length}</span><span class="pm-clean-group-chevron" aria-hidden="true"></span></summary><div class="pm-clean-task-list">${group.steps.map(step=>`<label class="pm-clean-task ${completed.has(step.id)?'pm-clean-done':''}"><input type="checkbox" data-clean-task="${esc(step.id)}" ${completed.has(step.id)?'checked':''} ${enabled?'':'disabled'}><span>${esc(step.title)}</span></label>`).join('')}</div></details>`;
+  const ready=count===group.steps.length;
+  const id=esc(group.id),name=esc(group.name);
+  const control='<label class="pm-clean-area"><input type="checkbox" data-clean-area="'+id+'" '+(ready?'checked':'')+' '+(enabled?'':'disabled')+'><span class="pm-clean-area-label">'+name+'</span><small>'+(ready?'✓ Fertig':count?count+' / '+group.steps.length+' Schritte':'Noch offen')+'</small></label>';
+  const steps=group.steps.map(step=>'<label class="pm-clean-task '+(completed.has(step.id)?'pm-clean-done':'')+'"><input type="checkbox" data-clean-task="'+esc(step.id)+'" '+(completed.has(step.id)?'checked':'')+' '+(enabled?'':'disabled')+'><span>'+esc(step.title)+'</span></label>').join('');
+  return '<div class="pm-clean-group '+(ready?'pm-area-done':'')+'">'+control+'<details data-clean-group="'+id+'" '+(expandedGroups.has(group.id)?'open':'')+'><summary class="pm-area-details">Einzelschritte '+count+'/'+group.steps.length+' anzeigen</summary><div class="pm-clean-task-list">'+steps+'</div></details></div>';
  }).join('');
 }
 
 const summarizeLine=line=>`${line.itemName}: ${n(line.quantity)} ${line.unit}`;
 function quickListHtml(room,selected){
  const options=QUICK_OPTIONS[room.type];if(!options)return '';
- const existing=new Set((room.sketch3d?.objects||room.objects||[]).map(o=>o.type));
  return `<details class="pm-quick-list" data-clean-quick-details><summary>⚡ Schnellliste anpassen <small>(${selected.length} Vorlagen ausgewählt)</small></summary>
- <p>Diese Aufgaben werden ohne 3D-Einrichtung angelegt. Vorhandene Möbel aus deinem Raumplan sind immer dabei. Deine Auswahl gilt für den nächsten Start.</p>
- <div class="pm-quick-grid">${options.map(([type,label])=>`<label class="pm-quick-choice"><input type="checkbox" data-clean-quick="${esc(type)}" ${selected.includes(type)||existing.has(type)?'checked':''} ${existing.has(type)?'disabled':''}><span>${esc(label)}${existing.has(type)?' · 3D':''}</span></label>`).join('')}</div></details>`;
+ <p>Wähle, welche Bereiche zu deiner Reinigung gehören. Deine Auswahl gilt für den nächsten Start. Bereits eingetragene zusätzliche Bereiche bleiben bestehen.</p>
+ <div class="pm-quick-grid">${options.map(([type,label])=>`<label class="pm-quick-choice"><input type="checkbox" data-clean-quick="${esc(type)}" ${selected.includes(type)?'checked':''}><span>${esc(label)}</span></label>`).join('')}</div></details>`;
 }
 function materialHtml(active,sources,preset){
  const fast=quickMaterialChoices(sources,active.materials);
@@ -32,9 +35,12 @@ function materialHtml(active,sources,preset){
 }
 function cleanPanel(room,active,history,sources,preset,expandedGroups,quickTypes){
  const groups=active?.groups||roomTaskGroups(room,quickTypes),total=taskCount(groups),done=active?.doneTaskIds?.length||0;
- const recent=history.filter(h=>h.roomId===room.id).slice(0,3);
+ const recent=history.filter(h=>h.roomId===room.id).slice(0,5);
+ const completedAreas=groups.filter(g=>g.steps.every(step=>active?.doneTaskIds?.includes(step.id))).length;
+ const progress=total?Math.round(100*done/total):0;
  return `<section class="pm-clean-panel" aria-label="Raum reinigen">
- <div class="pm-clean-header"><div><div class="pm-eyebrow">PUTZMANAGER · P02</div><h2>🧽 ${esc(room.name)} reinigen</h2><p>Schnellstart ohne Möbel-Einrichtung · Aufgaben und Material direkt griffbereit.</p></div><span class="pm-clean-progress">${done}/${total}</span></div>
+ <div class="pm-clean-header"><div><div class="pm-eyebrow">PUTZMANAGER · P03</div><h2>🧽 ${esc(room.name)} reinigen</h2><p>Ein Häkchen pro Bereich. Details und Material nur bei Bedarf.</p></div><span class="pm-clean-progress">${done}/${total}</span></div>
+ <div class="pm-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-label="Reinigungsfortschritt"><div class="pm-progress-fill" style="width:${progress}%"></div></div>
  <div class="pm-clean-timer" role="timer" aria-live="off" data-clean-clock>${duration(sessionElapsed(active))}</div>
  <p class="pm-clean-caption">${active?active.status==='running'?'Die Stoppuhr läuft. Fortschritt bleibt beim Schließen gespeichert.':'Stoppuhr pausiert – Zeit und Häkchen sind gespeichert.':'Zuerst Raum auswählen, dann mit „Reinigung starten“ die Stoppuhr aktivieren.'}</p>
  ${preset?.length?`<p class="pm-clean-caption">🔁 Gespeicherte Materialvorlage: ${preset.length} Position(en) · beim Start automatisch vorgemerkt.</p>`:''}
@@ -44,10 +50,9 @@ function cleanPanel(room,active,history,sources,preset,expandedGroups,quickTypes
  <button type="button" class="pm-clean-discard" data-clean-action="discard">Reinigung verwerfen</button>`:
  `<button type="button" class="primary-button pm-accent pm-full" data-clean-action="start">▶ ${esc(room.name)} jetzt reinigen</button>`}</div>
  ${!active?quickListHtml(room,quickTypes):''}
- ${active?materialHtml(active,sources,preset):''}
- <div class="pm-clean-summary"><strong>Aufgabenübersicht</strong><span>${done} von ${total} erledigt</span></div>
- <div class="pm-clean-fold-controls" role="group" aria-label="Aufgabengruppen ein- oder ausklappen"><button type="button" data-clean-toggle-all="collapse">▴ Alle einklappen</button><button type="button" data-clean-toggle-all="expand">▾ Alle aufklappen</button></div>
+ <div class="pm-clean-summary"><strong>✅ Putzliste</strong><span>${completedAreas} von ${groups.length} Bereichen fertig</span></div>
  <div class="pm-clean-groups">${tasksHtml(groups,active?.doneTaskIds,Boolean(active),expandedGroups)}</div>
+ ${active?materialHtml(active,sources,preset):''}
  ${recent.length?`<details class="pm-clean-history"><summary>Letzte Reinigungen (${recent.length})</summary>${recent.map(record=>`<p><strong>${esc(new Date(record.endedAt).toLocaleDateString('de-AT'))}</strong> · ${duration(record.durationMs)} · ${record.doneCount}/${record.totalCount} Aufgaben · ${record.materials.length} Materialpositionen</p>`).join('')}</details>`:''}
  </section>`;
 }
@@ -80,12 +85,6 @@ export async function mountCleaningUi({root,room,notify}){
  };
  await refresh();timer=setInterval(updateClock,1000);
  stage.addEventListener('click',async e=>{
-  const foldButton=e.target.closest('[data-clean-toggle-all]');
-  if(foldButton){
-   const expand=foldButton.dataset.cleanToggleAll==='expand';
-   stage.querySelectorAll('details[data-clean-group]').forEach(group=>{group.open=expand;});
-   return;
-  }
   const button=e.target.closest('[data-clean-action]');if(!button||locked)return;
   const action=button.dataset.cleanAction,session=state?.active[room.id];
   if(action==='finish'){
@@ -128,9 +127,10 @@ export async function mountCleaningUi({root,room,notify}){
    form.querySelector('[name="quantity"]').step=selected.unit==='stk'?'1':'0.001';
    return;
   }
-  const checkbox=e.target.closest('[data-clean-task]');if(!checkbox||locked)return;
+  const checkbox=e.target.closest('[data-clean-task], [data-clean-area]');if(!checkbox||locked)return;
   locked=true;
-  try{await setTaskDone(room.id,checkbox.dataset.cleanTask,checkbox.checked);await refresh();}
+  try{if(checkbox.dataset.cleanArea)await setGroupDone(room.id,checkbox.dataset.cleanArea,checkbox.checked);
+      else await setTaskDone(room.id,checkbox.dataset.cleanTask,checkbox.checked);await refresh();}
   catch(error){notify(error.message,true);await refresh();}finally{locked=false;}
  });
  stage.addEventListener('submit',async e=>{
