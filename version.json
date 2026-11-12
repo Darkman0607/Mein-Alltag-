@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.27.0",
-  "build": "P03 – Putzmanager ohne 3D, schnelle Raum-Checkliste und Materialabzug",
+  "version": "0.27.1",
+  "build": "P04 – Testdaten einzeln oder für alle Module zurücksetzen",
   "release_date": "2026-11-12"
 }
