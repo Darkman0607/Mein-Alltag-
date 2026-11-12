@@ -122,3 +122,40 @@
 .pm-material-basket{border-top:1px solid #477969;margin:12px 0 0;padding-top:8px}
 .pm-material-basket h4{margin:2px 0 6px}
 @media(max-width:350px){.pm-material-fast,.pm-quick-grid{grid-template-columns:1fr 1fr;gap:6px}.pm-quick-choice{padding:6px}.pm-material-shortcut{padding:8px;min-height:78px}}
+
+/* P03: schnelle, ruhige Oberfläche; große Zielbereiche statt 3D-Plan. */
+.pm-simple-room{min-height:86px;padding:12px 14px}
+.pm-simple-room .pm-room-icon{height:52px;flex-basis:53px;font-size:30px}
+.pm-simple-room .pm-room-copy strong{font-size:17px}
+.pm-room-go{border-radius:12px;background:#a1edc5;padding:10px 10px;color:#093323;font-size:12px;font-weight:850;white-space:nowrap}
+.pm-compact-detail{margin:4px 0 8px}
+.pm-compact-detail>span{width:58px;height:58px;font-size:30px}
+.pm-compact-detail h1{font-size:21px}
+.pm-extra-settings{margin-top:22px;border-radius:15px;border:1px solid #426d60;background:#102b29;overflow:hidden}
+.pm-extra-settings>summary{padding:17px 14px;font-size:14px;font-weight:800;cursor:pointer;min-height:53px;box-sizing:border-box}
+.pm-extra-inner{padding:14px;border-top:1px solid #466a61}
+.pm-extra-inner h2{font-size:15px;margin:18px 0 5px}
+.pm-extra-inner>p{font-size:12px;color:#bdd6cc;line-height:1.5}
+.pm-extra-inner form label{display:block;margin:11px 0 5px;font-size:12px}
+.pm-extra-inner form .search-input{background:#0a2422;color:#fff;min-height:45px;width:100%}
+.pm-clean-panel{margin:8px 0 18px;padding:13px}
+.pm-clean-panel .pm-clean-header p{margin-bottom:4px}
+.pm-clean-panel .pm-clean-timer{font-size:34px;padding:9px 4px;margin-top:10px}
+.pm-progress-track{height:11px;background:#203d3b;border:1px solid #416a5e;border-radius:40px;overflow:hidden;margin:13px 0 3px}
+.pm-progress-fill{height:100%;background:linear-gradient(90deg,#62cba1,#b9f7ce);border-radius:inherit;transition:width .2s ease}
+.pm-clean-groups{gap:9px}
+.pm-clean-group{padding:0;overflow:hidden;background:#152f2c}
+.pm-clean-area{display:flex;align-items:center;gap:12px;padding:13px 12px;min-height:61px;cursor:pointer;box-sizing:border-box}
+.pm-clean-area input{width:28px;height:28px;flex:none;accent-color:#77e2b3}
+.pm-clean-area-label{flex:1;font-size:15px;font-weight:750;line-height:1.32;overflow-wrap:anywhere}
+.pm-clean-area small{font-size:11px;color:#9acdb9;white-space:nowrap}
+.pm-area-done{background:#153d30;border-color:#4d9575}
+.pm-area-done .pm-clean-area-label{text-decoration:line-through;color:#9fd0b8}
+.pm-area-done .pm-clean-area small{color:#a1f0c5}
+.pm-area-details{padding:4px 13px 12px 53px;font-size:11px;color:#b1dccd;cursor:pointer;min-height:31px}
+.pm-clean-group details[open] .pm-area-details{padding-bottom:9px}
+.pm-clean-task-list{padding:0 12px 10px 48px}
+.pm-clean-task{min-height:44px;font-size:12px}
+.pm-clean-task input{width:19px;height:19px}
+.pm-clean-history summary{min-height:40px;line-height:40px}
+@media(max-width:365px){.pm-room-go{font-size:11px;padding:10px 8px}.pm-clean-area-label{font-size:14px}.pm-clean-area small{font-size:10px}.pm-clean-task-list{padding-left:24px}}
