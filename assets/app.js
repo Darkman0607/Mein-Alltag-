@@ -20,8 +20,9 @@ import {renderRewardShop,mountRewardShop} from './reward-shop-ui.js';
 import {renderRewardCards,mountRewardCards} from './reward-cards-ui.js';
 import {renderPremiumSettings,mountPremiumSettings} from './reward-premium.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
+import {renderResetPanel,mountResetPanel} from './reset-data.js';
 
-export const APP_VERSION='0.27.0';
+export const APP_VERSION='0.27.1';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -187,6 +188,7 @@ function renderCalendar(){const now=new Date();const fmt=new Intl.DateTimeFormat
 function renderSearch(){return `${section('Suche','Finde deine fünf Bereiche.')}<label class="field-label" for="searchInput">App-Bereiche durchsuchen</label><input class="search-input" id="searchInput" autocomplete="off" type="search" placeholder="z. B. Lager oder Familie"/><div class="search-results" id="searchResults"></div>`;}
 function searchResults(q){const x=q.trim().toLocaleLowerCase('de-AT');const items=MODULES.filter(m=>`${m.name} ${m.subtitle} ${m.description}`.toLocaleLowerCase('de-AT').includes(x));return items.length?items.map(m=>`<button type="button" class="row-link" data-open="${m.id}"><span>${esc(m.name)}<small style="display:block;color:#9aaab8;font-size:11px;margin-top:3px">${esc(m.subtitle)}</small></span><span>›</span></button>`).join(''):'<p class="empty-state">Kein passender Bereich gefunden.</p>';}
 function renderMore(){return `${section('Mehr & Einstellungen','Lokaler Speicher und sichere Backups.')}<div class="glass-card"><h2>App-Version</h2><p>Mein Alltag · Beta V${APP_VERSION}</p><p>Die fünf Alltagsmodule und die Belohnungswelt speichern Daten lokal. Google Drive überträgt Daten ausschließlich beim manuellen Sichern oder Wiederherstellen.</p></div><div class="glass-card"><h2>Lokaler Datenspeicher</h2><div id="storageStatus" role="status"><p>Prüfe Datenbank …</p></div></div>
+${renderResetPanel()}
 <div class="glass-card backup-card" id="backupManager"><h2>🔐 Verschlüsseltes Gesamtbackup</h2><p>Alle sechs Bereiche, Fotos und Belege werden vor dem Speichern mit <strong>AES-256-GCM</strong> verschlüsselt. Kein automatischer Cloud-Abgleich.</p><p><strong>Wichtig:</strong> Das Passwort wird nicht gespeichert. Ohne Passwort kann das Backup nicht wiederhergestellt werden. Die lokalen Daten auf diesem Gerät sind weiterhin nicht separat verschlüsselt.</p>
 <label class="field-label" for="backupPassword">Backup-Passwort (mindestens 12 Zeichen)</label><input class="search-input" id="backupPassword" type="password" autocomplete="new-password" minlength="12" placeholder="Eigenes sicheres Backup-Passwort"/>
 <label class="field-label" for="backupPasswordConfirm">Passwort für neue Sicherung wiederholen</label><input class="search-input" id="backupPasswordConfirm" type="password" autocomplete="new-password" minlength="12" placeholder="Passwort erneut eingeben"/>
@@ -234,7 +236,7 @@ function bindView(route){
    field.addEventListener('input',update);update();
  }
  if(route.page==='more'){
-   loadStorage();bindBackup();document.getElementById('checkUpdate').addEventListener('click',async()=>{
+   loadStorage();bindBackup();mountResetPanel();document.getElementById('checkUpdate').addEventListener('click',async()=>{
      const message=document.getElementById('moreMessage');
      if(!('serviceWorker' in navigator)){message.textContent='Updateprüfung wird hier nicht unterstützt.';return;}
      try{
