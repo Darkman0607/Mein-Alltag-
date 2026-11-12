@@ -142,6 +142,17 @@ export async function setTaskDone(roomId,taskId,done){
   const next=new Set(s.doneTaskIds||[]);if(done)next.add(taskId);else next.delete(taskId);s.doneTaskIds=[...next];
  });
 }
+/** P03 – Ein ganzes Reinigungsobjekt mit nur einem Häkchen erledigen. */
+export async function setGroupDone(roomId,groupId,done){
+ await mutateSession(roomId,(_,session)=>{
+  if(!session)throw Error('Bitte zuerst Reinigung starten.');
+  const group=session.groups.find(g=>g.id===groupId);
+  if(!group)throw Error('Reinigungsbereich nicht mehr vorhanden.');
+  const next=new Set(session.doneTaskIds||[]);
+  for(const step of group.steps){if(done)next.add(step.id);else next.delete(step.id);}
+  session.doneTaskIds=[...next];
+ });
+}
 export function materialSources(items,rooms,areas){
  const choices=locationChoices(rooms,areas),locName=id=>choices.find(c=>c.id===id)?.label||'Unbekannter Ort',useLabel=item=>item.useArea?' · für '+item.useArea:'';
  const result=[];
