@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.26.0",
-  "build": "P02 – Schnellstart für Badezimmer, WC und Küche plus Material-Schnellauswahl",
-  "release_date": "2026-11-11"
+  "version": "0.27.0",
+  "build": "P03 – Putzmanager ohne 3D, schnelle Raum-Checkliste und Materialabzug",
+  "release_date": "2026-11-12"
 }
