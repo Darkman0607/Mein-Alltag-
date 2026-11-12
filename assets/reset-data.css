@@ -1,0 +1,27 @@
+/* P04: Mobile first, isolated destructive-action panel */
+.test-reset{border-color:#795b55;background:linear-gradient(140deg,rgba(55,39,44,.75),rgba(15,19,25,.94))}
+.test-reset-heading{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.test-reset-heading>span{font-size:24px}
+.test-reset-heading h2{margin:0}
+.test-reset-warning{padding:11px 12px;border-radius:11px;background:#292421;border:1px solid #756447}
+.test-reset-controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.test-reset-controls button{flex:1 1 130px;min-width:0;font-size:12px;padding:9px;min-height:42px}
+.test-reset-options{border:0;padding:0;margin:13px 0 10px;min-width:0}
+.test-reset-options legend{color:#e6e9ef;font-weight:700;font-size:13px;margin-bottom:9px}
+.test-reset-option{display:flex;align-items:center;gap:8px;padding:11px 10px;margin:7px 0;border:1px solid #56606b;border-radius:13px;background:#131f29;color:#f0f6fa;cursor:pointer;min-height:52px}
+.test-reset-option:has(input:checked){border-color:#dcac64;background:#27303a}
+.test-reset-option input,.test-reset-ack input{width:19px;height:19px;accent-color:#ffca70;flex:none}
+.test-reset-icon{font-size:19px;min-width:23px;text-align:center}
+.test-reset-label{font-size:13px;font-weight:700;flex:1;min-width:0}
+.test-reset-option small{font-size:10px;color:#a7b5c3;text-align:right;flex:0 0 auto}
+.test-reset-tip{font-size:12px;color:#c9d4de;line-height:1.6}
+.test-reset-selection{font-size:12px;color:#e4c894;margin:12px 0}
+.test-reset-ack{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:#e8eaf0;margin:15px 0;cursor:pointer}
+.test-reset-danger{width:100%;border:1px solid #ff8a72;background:linear-gradient(120deg,#b53a35,#832b2d);color:#fff;border-radius:14px;font-weight:750;padding:13px 12px;min-height:50px}
+.test-reset-danger:disabled{opacity:.45;cursor:not-allowed}
+.test-reset-feedback{min-height:22px;font-size:12px;margin:11px 0;overflow-wrap:anywhere}
+.test-reset-feedback[data-kind=error]{color:#ffbbb0}
+.test-reset-feedback[data-kind=success]{color:#b0f0cf}
+.test-reset-feedback[data-kind=progress]{color:#fbe5b5}
+.test-reset .test-reset-footnote{font-size:11px;color:#a3b0be;margin:13px 0 0}
+@media(max-width:350px){.test-reset-option{gap:6px;padding:10px 7px}.test-reset-option small{font-size:9px}.test-reset-label{font-size:12px}}
