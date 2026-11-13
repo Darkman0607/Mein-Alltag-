@@ -1,4 +1,13 @@
-/** H04 – Einheitenumrechnung ohne Änderung der gespeicherten Lager-Grundeinheiten. */
+/** H04/LUX01 – Einheitenumrechnung ohne Änderung der gespeicherten Lager-Grundeinheiten. */
+const UNIT_NAMES=Object.freeze({stk:'Stück',pack:'Packungen',kg:'kg',g:'g',l:'Liter',ml:'ml',m:'Meter',set:'Sets'});
+export function quantityLabel(item,quantity){
+ const n=Number(quantity);
+ if(!Number.isFinite(n))return 'Ungültiger Bestand';
+ const number=String(n).replace('.',',');
+ const unit=UNIT_NAMES[item?.unit]||item?.unit||'Einheiten';
+ if(pairEligible(item))return `${pairsLabel(n)} (${number} Stück)`;
+ return `${number} ${unit}`;
+}
 export function pairEligible(item){
  return item?.unit==='stk'&&item?.type==='verbrauch'&&(item.pairCounting==='yes'||(item.pairCounting!=='no'&&/handschuh|gloves?|nitril|latex/i.test(item.name||'')));
 }

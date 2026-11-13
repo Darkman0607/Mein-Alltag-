@@ -1,6 +1,6 @@
 /** L05–L07 – article records, templates and stable location references. */
 import {normalizeProperties} from './lagerhaus-templates.js';
-import {stockPositions,stockTotal,stockSettings} from './lagerhaus-stock.js';
+import {stockPositions,stockTotal,stockSettings,milli,requireUnitQuantity} from './lagerhaus-stock.js';
 import {cleanTags} from './lagerhaus-categories.js';
 export const ITEM_KEY='items.v1';
 export const ITEM_SEQ_KEY='items.sequence.v1';
@@ -38,7 +38,10 @@ export function validateItem(values,rooms,areas){
  const amount=Number(values.quantity);
  if(values.quantity===''||values.quantity===null||!Number.isFinite(amount)||amount<0||amount>1_000_000)throw new Error('Menge muss zwischen 0 und 1.000.000 liegen.');
  if(Math.abs(amount-Math.round(amount*1000)/1000)>1e-7)throw new Error('Maximal drei Nachkommastellen erlaubt.');
+ requireUnitQuantity({unit},milli(amount,{allowZero:true}), 'Anfangsbestand');
  const {minimumStock,packSize}=stockSettings(values);
+ requireUnitQuantity({unit},milli(minimumStock,{allowZero:true}),'Mindestbestand');
+ requireUnitQuantity({unit},milli(packSize),'Packungsgröße');
  const locationId=clean(values.locationId,100);
  if(!resolveItemLocation(locationId,rooms,areas).valid)throw new Error('Ausgewählter Lagerort existiert nicht mehr.');
  return {name,category,type,condition,unit,quantity:Math.round(amount*1000)/1000,locationId,minimumStock,packSize,

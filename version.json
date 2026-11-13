@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.27.1",
-  "build": "P04 – Testdaten einzeln oder für alle Module zurücksetzen",
-  "release_date": "2026-11-12"
+  "version": "0.27.2",
+  "build": "LUX01 – Lagerhaus: Mengen, Paarzählung und Packungsgrößen",
+  "release_date": "2026-11-13"
 }

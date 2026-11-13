@@ -8,7 +8,7 @@ import {atomicModuleChange} from '../assets/cross-module.js';
 import {REWARD_RULES_KEY,REWARD_WALLET_KEY,cleaningRewardId,planCleaningReward} from '../assets/reward-economy.js';
 import {ITEM_KEY,locationChoices} from './lagerhaus-items.js';
 import {MOVEMENT_KEY,bookStock,stockTotal,stockPositions} from './lagerhaus-stock.js';
-import {consumptionQuantity,pairEligible} from './lagerhaus-consumption.js';
+import {consumptionQuantity,pairEligible,quantityLabel} from './lagerhaus-consumption.js';
 import {updateContainer,untrackedAt} from './lagerhaus-tracking.js';
 export const CLEAN_KEY='cleaning.sessions.v1';
 export const PRESET_KEY='cleaning.material-presets.v1';
@@ -160,10 +160,10 @@ export function materialSources(items,rooms,areas){
   if(item.type!=='verbrauch'||stockTotal(item)<=0)continue;
   for(const pos of stockPositions(item)){
    const free=untrackedAt(item,pos.locationId);
-   if(free>0)result.push({itemId:item.id,fromId:pos.locationId,containerId:null,name:item.name,unit:item.unit,available:free,pairs:pairEligible(item),label:`${item.name}${useLabel(item)} · ${locName(pos.locationId)} · frei ${free} ${item.unit}`});
+   if(free>0)result.push({itemId:item.id,fromId:pos.locationId,containerId:null,name:item.name,unit:item.unit,available:free,pairs:pairEligible(item),label:`${item.name}${useLabel(item)} · ${locName(pos.locationId)} · frei ${quantityLabel(item,free)}`});
   }
   for(const c of item.containers||[]){
-   if(c.remaining>0)result.push({itemId:item.id,fromId:c.locationId,containerId:c.id,name:item.name,unit:item.unit,available:c.remaining,pairs:pairEligible(item),label:`${item.name}${useLabel(item)} · ${c.label||c.code||'Flasche'} · ${locName(c.locationId)} · Rest ${c.remaining} ${item.unit}`});
+   if(c.remaining>0)result.push({itemId:item.id,fromId:c.locationId,containerId:c.id,name:item.name,unit:item.unit,available:c.remaining,pairs:pairEligible(item),label:`${item.name}${useLabel(item)} · ${c.label||c.code||'Flasche'} · ${locName(c.locationId)} · Rest ${quantityLabel(item,c.remaining)}`});
   }
  }
  return result;

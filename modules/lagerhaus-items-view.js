@@ -3,9 +3,9 @@ import {getModuleValue,mutateModuleValuesWithDeletes,mutateModuleValues} from '.
 import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoices,resolveItemLocation,upsertItem,deleteItem} from './lagerhaus-items.js';
 import {navigationHref} from './lagerhaus-navigator.js';
 import {templatesFor,propertiesFor,templateById,detailedProperties} from './lagerhaus-templates.js';
-import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock} from './lagerhaus-stock.js';
+import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock,interpretQuantity} from './lagerhaus-stock.js';
 import {addContainer,updateContainer,addDevice,updateDevice,containerState,CONTAINER_STATES,DEVICE_STATES,trackedSummary} from './lagerhaus-tracking.js';
-import {pairEligible,pairsLabel,consumptionQuantity} from './lagerhaus-consumption.js';
+import {pairEligible,pairsLabel,consumptionQuantity,quantityLabel} from './lagerhaus-consumption.js';
 import {CATEGORY_KEY,CATEGORY_COLORS,CATEGORY_STARTERS,cleanTags,categoryLabel,addCategory,editCategory,removeCategory,bulkAssign,toggleFavorite,migrateCategories,filterItems} from './lagerhaus-categories.js';
 import {serviceStatus,serviceReceiptKeys} from './lagerhaus-service.js';
 import {PHOTO_INDEX_KEY,PHOTO_CATEGORIES,PHOTO_STAGES,photoKey,coverPhoto,ownerPhotos,photoHistory,photoDate,suggestedComparison,comparisonPhotos,readPhotoIndex,readPhotoBlob,preparePhoto,savePhoto,changePhoto,removePhoto} from './lagerhaus-photos.js';
@@ -78,22 +78,22 @@ function trackingPanel(item){
 function stockPanel(item){
  const list=stockPositions(item);
  const stock=stockAlert(item);
- const sources=list.map(p=>option(p.locationId,`${resolveItemLocation(p.locationId,rooms,areas).label} · ${stockQuantity(p.quantity)} ${ITEM_UNITS[item.unit]||item.unit}`,list[0]?.locationId)).join('');
+ const sources=list.map(p=>option(p.locationId,`${resolveItemLocation(p.locationId,rooms,areas).label} · ${quantityLabel(item,p.quantity)}`,list[0]?.locationId)).join('');
  const destinations=locationChoices(rooms,areas).map(c=>option(c.id,c.label,'')).join('');
  return `<form class="lager-stock-form" id="lagerStockForm"><div class="lager-item-form-title"><h2>Bestandsbuchung · ${esc(item.name)}</h2><button type="button" id="lagerStockCancel" class="secondary-button">Schließen</button></div>
- <p class="lager-stock-total">Aktueller Gesamtbestand: <strong>${esc(stockQuantity(stock.total))} ${esc(ITEM_UNITS[item.unit]||item.unit)}</strong></p>
+ <p class="lager-stock-total">Aktueller Gesamtbestand: <strong>${esc(quantityLabel(item,stock.total))}</strong></p>
  <div class="lager-stock-modes">${Object.entries(STOCK_ACTIONS).map(([v,label])=>`<button type="button" data-stock-mode="${v}" class="secondary-button ${v===stockKind?'is-stock-active':''}">${label}</button>`).join('')}</div>
  ${stockKind!=='receive'?`<label>Von Lagerort<select name="fromId" required>${sources}</select></label>`:''}
  ${stockKind!=='issue'?`<label>${stockKind==='transfer'?'Nach Lagerort':'Einlagern bei'}<select name="toId">${destinations}</select></label>`:''}
- <label>Mengeneingabe<select name="unitMode"><option value="units">Einheiten (${esc(ITEM_UNITS[item.unit]||item.unit)})</option><option value="packs">Packungen à ${esc(stockQuantity(item.packSize??1))} ${esc(ITEM_UNITS[item.unit]||item.unit)}</option></select></label>
- <label>Menge<input name="quantity" type="number" inputmode="decimal" min="0.001" step="0.001" max="1000000" required placeholder="z. B. 2"></label>
+ <label>Mengeneingabe<select name="unitMode"><option value="units">Einheiten (${esc(ITEM_UNITS[item.unit]||item.unit)})</option>${pairEligible(item)?'<option value="pairs">Paare (1 Paar = 2 Stück)</option>':''}<option value="packs">Packungen à ${esc(stockQuantity(item.packSize??1))} ${esc(ITEM_UNITS[item.unit]||item.unit)}</option></select></label>
+ <label>Menge<input name="quantity" type="number" inputmode="decimal" min="0.001" step="0.001" max="1000000" required placeholder="z. B. 2"></label><p class="lager-stock-help">1 Packung wird mit der beim Artikel hinterlegten Packungsgröße multipliziert. Paare zählen als 2 Stück.</p>
  <button class="primary-button" type="submit">${esc(STOCK_ACTIONS[stockKind])} buchen</button>
  ${stockEvents.filter(e=>e.itemId===item.id).slice(-5).reverse().length?`<div class="lager-stock-history"><strong>Letzte Buchungen</strong>${stockEvents.filter(e=>e.itemId===item.id).slice(-5).reverse().map(e=>`<div><span>${esc(STOCK_ACTIONS[e.type]||e.type)} · ${esc(new Date(e.createdAt).toLocaleDateString('de-AT'))}</span><span>${esc(stockQuantity(e.quantity))} ${esc(ITEM_UNITS[item.unit]||item.unit)}</span></div>`).join('')}</div>`:''}
  <p class="lager-stock-help">Packungsbuchungen werden automatisch in Grundeinheiten umgerechnet. Buchungen ändern nur den Bestand, nicht die Artikelnummer oder den Lagerort anderer Positionen. Maximal drei Nachkommastellen.</p></form>`;
 }
 function positionsHtml(item){
  const positions=stockPositions(item);
- return positions.length?`<div class="lager-stock-positions">${positions.map(pos=>{const location=resolveItemLocation(pos.locationId,rooms,areas),href=navigationHref(pos.locationId,rooms,areas);return `<div class="lager-l14-position"><span>${esc(location.label)}${href?`<a class="lager-l14-jump" href="${esc(href)}" aria-label="${esc(item.name)} am Lagerort ${esc(location.label)} in der 3D-Ansicht anzeigen">📍 3D anzeigen</a>`:'<small class="lager-l14-no-place">Kein 3D-Ziel</small>'}</span><strong>${esc(stockQuantity(pos.quantity))} ${esc(item.unit)}</strong></div>`;}).join('')}</div>`:'<p class="lager-stock-empty">Kein Bestand auf Lager</p>';
+ return positions.length?`<div class="lager-stock-positions">${positions.map(pos=>{const location=resolveItemLocation(pos.locationId,rooms,areas),href=navigationHref(pos.locationId,rooms,areas);return `<div class="lager-l14-position"><span>${esc(location.label)}${href?`<a class="lager-l14-jump" href="${esc(href)}" aria-label="${esc(item.name)} am Lagerort ${esc(location.label)} in der 3D-Ansicht anzeigen">📍 3D anzeigen</a>`:'<small class="lager-l14-no-place">Kein 3D-Ziel</small>'}</span><strong>${esc(quantityLabel(item,pos.quantity))}</strong></div>`;}).join('')}</div>`:'<p class="lager-stock-empty">Kein Bestand auf Lager</p>';
 }
 function templateSelect(type){
  return `<option value="">Ohne Vorlage – selbst erfassen</option>${templatesFor(type).map(t=>option(t.id,t.title,'')).join('')}`;
@@ -115,13 +115,14 @@ function form(item,requestedLocation=''){
  <div class="lager-item-grid"><label>Artikeltyp<select name="type" id="lagerItemType">${choices(ITEM_TYPES,a.type)}</select></label><label>Vorlage (optional)<select id="lagerItemTemplate" aria-label="Artikelvorlage">${templateSelect(a.type)}</select></label></div>
  <p class="lager-item-quick-tip">Schnellerfassung: Name, Menge und Lagerort genügen. Weitere Angaben sind freiwillig.</p>
  <label>Artikelname *<input name="name" required maxlength="100" autocomplete="off" placeholder="z. B. Akkuschrauber" value="${esc(a.name)}"></label>
- <div class="lager-item-grid"><label>${item?'Gesamtmenge (nur über Buchung änderbar)':'Anfangsbestand *'}<input name="quantity" type="number" inputmode="decimal" min="0" max="1000000" step="0.001" required value="${esc(a.quantity)}" ${item?'readonly':''}></label><label>Einheit<select name="unit" ${item&&stockTotal(item)>0?'disabled':''}>${choices(ITEM_UNITS,a.unit)}</select></label></div>
+ <div class="lager-item-grid"><label>${item?'Gesamtmenge (nur über Buchung änderbar)':'Anfangsbestand *'}<input name="quantity" type="number" inputmode="decimal" min="0" max="1000000" step="${['stk','pack','set'].includes(a.unit)?1:0.001}" required value="${esc(a.quantity)}" ${item?'readonly':''}></label><label>Grundeinheit<select name="unit" ${item&&stockTotal(item)>0?'disabled':''}>${choices(ITEM_UNITS,a.unit)}</select></label></div>
+ ${!item?`<label>Anfangsbestand erfassen als<select name="initialUnitMode"><option value="units">Grundeinheiten</option><option value="pairs">Paare (Handschuhe / aktivierte Paarzählung)</option><option value="packs">Packungen (Inhalt je Packung angeben)</option></select></label><label>Grundeinheiten je Packung<input name="packSize" type="number" min="0.001" max="1000000" step="1" value="${esc(a.packSize??1)}"></label>`:''}
  <label>${item?'Lagerort (über Buchung ändern)':'Erster Lagerort'}<select name="locationId" ${item?'disabled':''}>${locationSelect(location.valid?a.locationId:'')}</select></label>
  ${!location.valid?'<p class="lager-item-alert">Der bisherige Lagerort existiert nicht mehr. Bitte neu zuordnen.</p>':''}
  <details class="lager-item-details" id="lagerItemDetails" ${item?'open':''}>
   <summary>Weitere Angaben und typabhängige Eigenschaften</summary>
   <div class="lager-item-details-body">
-   <div class="lager-item-grid"><label>Mindestbestand (Warnung bei Erreichen)<input name="minimumStock" type="number" min="0" max="1000000" step="0.001" inputmode="decimal" value="${esc(a.minimumStock??0)}"></label><label>Packungsgröße (pro Packung)<input name="packSize" type="number" min="0.001" max="1000000" step="0.001" inputmode="decimal" value="${esc(a.packSize??1)}"></label></div>
+   <div class="lager-item-grid"><label>Mindestbestand (Warnung bei Erreichen)<input name="minimumStock" type="number" min="0" max="1000000" step="0.001" inputmode="decimal" value="${esc(a.minimumStock??0)}"></label>${item?`<label>Packungsgröße (pro Packung)<input name="packSize" type="number" min="0.001" max="1000000" step="${['stk','pack','set'].includes(a.unit)?1:0.001}" inputmode="decimal" value="${esc(a.packSize??1)}"></label>`:''}</div>
    <label>Paarzählung für Stück-Artikel<select name="pairCounting">${choices({auto:'Automatisch bei Handschuhen',yes:'Aktiviert (1 Paar = 2 Stück)',no:'Deaktiviert'},a.pairCounting||'auto')}</select></label>
    <div class="lager-item-grid"><label>Marke (optional)<input name="brand" maxlength="80" value="${esc(a.brand)}" placeholder="z. B. Bosch"></label><label>Artikelnummer (optional)<input name="articleNumber" maxlength="80" value="${esc(a.articleNumber)}"></label></div>
    <label>Zustand<select name="condition">${choices(ITEM_CONDITIONS,a.condition)}</select></label>
@@ -158,7 +159,7 @@ function card(item){
  const cover=coverPhoto(photos,'item',item.id),count=ownerPhotos(photos,'item',item.id).length;
  return `<article class="lager-item-card">${cover?`<img class="lager-item-cover" src="${esc(cover.thumbnail)}" alt="Hauptfoto von ${esc(item.name)}" loading="lazy">`:''}<div class="lager-item-card-top"><span class="lager-identifier">${esc(item.code)}</span><span class="lager-item-type">${esc(ITEM_TYPES[item.type]||'Sonstiges')}</span></div>
  <div class="lager-l13-title"><h3>${esc(item.name)}</h3><button type="button" aria-label="${item.favorite?'Favorit entfernen':'Als Favorit markieren'}" title="Favorit umschalten" class="lager-favorite-toggle ${item.favorite?'is-favorite':''}" data-favorite-toggle="${esc(item.id)}">${item.favorite?'★':'☆'}</button></div><p class="lager-item-path">⌖ ${stockPositions(item).length>1?'Mehrere Lagerorte':esc(loc.label)}</p>${item.useArea?`<p class="lager-fast-use">🧽 Für ${esc(item.useArea)}</p>`:''}
- <div class="lager-item-facts"><span><strong>${esc(stockQuantity(stock.total))}</strong> ${esc(ITEM_UNITS[item.unit]||item.unit)}</span><span>Packung: ${esc(stockQuantity(item.packSize??1))}</span><span class="lager-l13-category-badge" style="--category-accent:${CATEGORY_COLORS[categories.find(c=>c.id===item.categoryId)?.color]||CATEGORY_COLORS.slate}">${esc(categories.find(c=>c.id===item.categoryId)?.icon||'📦')} ${esc(categories.find(c=>c.id===item.categoryId)?categoryLabel(categories.find(c=>c.id===item.categoryId),categories):item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
+ <div class="lager-item-facts"><span><strong>${esc(quantityLabel(item,stock.total))}</strong></span>${Number(item.packSize??1)>1?`<span>1 Packung = ${esc(quantityLabel(item,item.packSize))}</span>`:''}<span class="lager-l13-category-badge" style="--category-accent:${CATEGORY_COLORS[categories.find(c=>c.id===item.categoryId)?.color]||CATEGORY_COLORS.slate}">${esc(categories.find(c=>c.id===item.categoryId)?.icon||'📦')} ${esc(categories.find(c=>c.id===item.categoryId)?categoryLabel(categories.find(c=>c.id===item.categoryId),categories):item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
  ${stock.low?`<p class="lager-stock-warning">⚠ Mindestbestand erreicht (${esc(stockQuantity(stock.minimumStock))} ${esc(ITEM_UNITS[item.unit]||item.unit)})</p>`:''}
  ${positionsHtml(item)}
  ${(item.containers||[]).length||((item.devices||[]).length)?`<p class="lager-item-extra">${(item.containers||[]).length?`Gebinde: ${trackedSummary(item).full} voll · ${trackedSummary(item).open} angebrochen · ${trackedSummary(item).empty} leer`:''} ${(item.devices||[]).length?`Einzelgeräte: ${trackedSummary(item).devices}`:''}</p>`:''}
@@ -342,9 +343,16 @@ function draw(preselect=''){
  el.querySelector('#lagerItemAdd').addEventListener('click',()=>{stockItemId=null;trackingItemId=null;editId=null;formOpen=true;draw(preselect);el.querySelector('[name="name"]')?.focus();});
  el.querySelector('#lagerItemCancel')?.addEventListener('click',()=>{editId=null;formOpen=false;draw(preselect);});
  bindTemplates(el);
+ const newItemForm=el.querySelector('#lagerItemForm');
+ const updateItemUnit=()=>{if(!newItemForm)return;const unit=newItemForm.elements.namedItem('unit')?.value||'stk';const mode=newItemForm.elements.namedItem('initialUnitMode')?.value||'units';const qty=newItemForm.elements.namedItem('quantity');if(qty&&!qty.readOnly)qty.step=mode==='units'&&!['stk','pack','set'].includes(unit)?'0.001':'1';const packSize=newItemForm.elements.namedItem('packSize');if(packSize)packSize.step=['stk','pack','set'].includes(unit)?'1':'0.001';};
+ newItemForm?.elements.namedItem('unit')?.addEventListener('change',updateItemUnit);
+ newItemForm?.elements.namedItem('initialUnitMode')?.addEventListener('change',updateItemUnit);updateItemUnit();
  bindCategoryControls(el,preselect);
  el.querySelectorAll('[data-stock-mode]').forEach(b=>b.addEventListener('click',()=>{stockKind=b.dataset.stockMode;draw(preselect);}));
  el.querySelector('#lagerStockCancel')?.addEventListener('click',()=>{stockItemId=null;draw(preselect);});
+ const stockFrm=el.querySelector('#lagerStockForm');
+ const refreshStockUnit=()=>{if(!stockFrm)return;const s=stockFrm.elements.namedItem('unitMode').value,qty=stockFrm.elements.namedItem('quantity');qty.step=s==='units'&&!['stk','pack','set'].includes(stockSelected?.unit)?'0.001':'1';qty.min=qty.step==='1'?'1':'0.001';};
+ stockFrm?.elements.namedItem('unitMode')?.addEventListener('change',refreshStockUnit);refreshStockUnit();
  el.querySelector('#lagerStockForm')?.addEventListener('submit',async event=>{
   event.preventDefault();const frm=event.currentTarget;
   const submit=frm.querySelector('[type="submit"]');submit.disabled=true;
@@ -366,6 +374,10 @@ function draw(preselect=''){
   const f=new FormData(formEl);const value=Object.fromEntries(f.entries());
   if(editId){const existing=items.find(x=>x.id===editId);value.locationId=existing?.locationId||'';value.unit=value.unit||existing?.unit||'stk';}
   value.properties=Object.fromEntries(propertiesFor(value.type).map(prop=>[prop.key,f.get(`property.${prop.key}`)||'']));
+  if(!editId){
+   try{const draft={name:value.name,unit:value.unit,type:value.type,packSize:value.packSize,pairCounting:value.pairCounting};value.quantity=Number(value.quantity)===0?0:interpretQuantity(draft,value.quantity,value.initialUnitMode||'units').baseQuantity;}
+   catch(e){status('Mengenprüfung: '+e.message);return;}
+  }
   submit.disabled=true;
   try{await modify((records,sequence,currentRooms,currentAreas)=>upsertItem(records,value,{id:editId,rooms:currentRooms,areas:currentAreas,makeId:newid,sequence}));
    editId=null;formOpen=false;draw();status('Artikel erfolgreich gespeichert.');

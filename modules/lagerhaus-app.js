@@ -5,7 +5,8 @@ import {ITEM_KEY,ITEM_SEQ_KEY,upsertItem,assertNodeHasNoItems,assertLocationsRet
 import {MOVEMENT_KEY,stockTotal} from './lagerhaus-stock.js';
 import {fachCards,matchFach,fachBooking} from './lagerhaus-fach.js';
 import {shelfLines,roomUnassigned,shelfPackagesSvg,formatAmount} from './lagerhaus-shelf.js';
-import {pairEligible,pairsLabel} from './lagerhaus-consumption.js';
+import {pairEligible,pairsLabel,quantityLabel} from './lagerhaus-consumption.js';
+import {interpretQuantity} from './lagerhaus-stock.js';
 import {readPhotoIndex,coverPhoto} from './lagerhaus-photos.js';
 import {stockPositions,bookStock} from './lagerhaus-stock.js';
 import {locationChoices} from './lagerhaus-items.js';
@@ -240,7 +241,7 @@ function quickLocationOptions(){return locationChoices(rooms,areas).map(x=>`<opt
 function fastRecent(){
  const el=document.getElementById('lagerFastRecent');if(!el)return;
  const recent=[...itemRecords].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,5);
- el.innerHTML=recent.length?`<h2>Meine Artikel <span class="lager-fast-count">(${itemRecords.length})</span></h2><div class="lager-fast-recent-list">${recent.map(a=>`<div class="lager-fast-recent-item"><span><strong>${esc(a.name)}</strong><small>${a.useArea?'Für '+esc(a.useArea)+' · ':''}${esc(a.code||'Artikel')}</small></span><b>${esc(stockTotal(a))} ${esc(a.unit||'stk')}</b></div>`).join('')}</div><a href="#/lagerhaus/items" class="lager-fast-all">Alle ${itemRecords.length} Artikel ansehen →</a>`:'<p class="lager-hint">Noch keine Artikel erfasst. Starte mit einem Namen und einer Menge.</p>';
+ el.innerHTML=recent.length?`<h2>Meine Artikel <span class="lager-fast-count">(${itemRecords.length})</span></h2><div class="lager-fast-recent-list">${recent.map(a=>`<div class="lager-fast-recent-item"><span><strong>${esc(a.name)}</strong><small>${a.useArea?'Für '+esc(a.useArea)+' · ':''}${esc(a.code||'Artikel')}</small></span><b>${esc(quantityLabel(a,stockTotal(a)))}</b></div>`).join('')}</div><a href="#/lagerhaus/items" class="lager-fast-all">Alle ${itemRecords.length} Artikel ansehen →</a>`:'<p class="lager-hint">Noch keine Artikel erfasst. Starte mit einem Namen und einer Menge.</p>';
 }
 export function renderLagerhaus(){return `${header('Mein Lagerhaus','Artikel sofort eintragen – 3D-Räume und Regale sind freiwillig.')}
  <section class="lager-fast-card" aria-label="Einfacher Lagerzugang">
@@ -249,7 +250,10 @@ export function renderLagerhaus(){return `${header('Mein Lagerhaus','Artikel sof
   <form id="lagerQuickForm" class="lager-fast-form" hidden>
    <h2>Artikel schnell erfassen</h2>
    <label>Was möchtest du eintragen? *<input type="text" name="name" maxlength="100" autocomplete="off" required placeholder="z. B. Einweghandschuhe"></label>
-   <div class="lager-fast-fields"><label>Wie viel? *<input type="number" name="quantity" required min="0.001" max="1000000" step="0.001" inputmode="decimal" value="1"></label><label>Einheit<select name="unit"><option value="stk">Stück</option><option value="pack">Packungen</option><option value="ml">Milliliter</option><option value="l">Liter</option><option value="set">Set</option></select></label></div>
+   <div class="lager-fast-fields"><label>Wie viel? *<input type="number" name="quantity" required min="1" max="1000000" step="1" inputmode="decimal" value="1"></label><label>Grundeinheit<select name="unit"><option value="stk">Stück</option><option value="ml">Milliliter</option><option value="l">Liter</option><option value="g">Gramm</option><option value="kg">Kilogramm</option><option value="m">Meter</option><option value="pack">Packung als eigene Einheit</option><option value="set">Set</option></select></label></div>
+   <label>Menge erfassen als<select name="unitMode"><option value="units">Grundeinheiten</option><option value="pairs">Paare (1 Paar = 2 Stück)</option><option value="packs">Packungen (Inhalt angeben)</option></select></label>
+   <label id="lagerFastPackLabel" hidden>Stück / Grundeinheiten je Packung *<input type="number" name="packSize" min="0.001" max="1000000" step="1" inputmode="decimal" placeholder="z. B. 100"></label>
+   <p id="lagerFastUnitHint" class="lager-hint">Beispiel: 100 Handschuhe als 100 Stück oder als 50 Paar einlagern.</p>
    <label>Wofür brauchst du es? <span class="lager-fast-optional">(optional)</span><input name="useArea" maxlength="40" list="lagerFastUseAreas" placeholder="z. B. Küche"><datalist id="lagerFastUseAreas">${quickPurposeOptions()}</datalist></label>
    <details class="lager-fast-more"><summary>Mehr Optionen (freiwillig)</summary><label>Art des Artikels<select name="type"><option value="verbrauch">Verbrauchsartikel / Putzmaterial</option><option value="geraet">Gerät</option><option value="einzel">Gegenstand</option></select></label><label>Wo liegt der Artikel wirklich? <span class="lager-fast-optional">(optional)</span><select id="lagerQuickLocation" name="locationId"><option value="">Ohne festen Lagerort</option></select></label><p class="lager-hint">„Für Küche“ beschreibt die Verwendung. Der tatsächliche Lagerort ist davon unabhängig.</p></details>
    <button type="submit" class="primary-button lager-fast-save">✓ Artikel speichern</button><button type="button" id="lagerQuickCancel" class="secondary-button lager-fast-cancel">Schließen</button>
@@ -268,6 +272,17 @@ function bindQuickForm(){
  const toggle=show=>{form.hidden=!show;open.setAttribute('aria-expanded',String(show));open.textContent=show?'− Erfassung ausblenden':'＋ Artikel hinzufügen';if(show)form.elements.namedItem('name').focus();};
  open.addEventListener('click',()=>toggle(form.hidden));
  form.querySelector('#lagerQuickCancel').addEventListener('click',()=>toggle(false));
+ const refreshUnits=()=>{
+  const unit=form.elements.namedItem('unit').value,mode=form.elements.namedItem('unitMode').value;
+  const packField=form.querySelector('#lagerFastPackLabel'),packInput=form.elements.namedItem('packSize'),quantity=form.elements.namedItem('quantity');
+  packField.hidden=mode!=='packs';packInput.required=mode==='packs';
+  quantity.step=(mode!=='units'||['stk','pack','set'].includes(unit))?'1':'0.001';
+  quantity.min=quantity.step==='1'?'1':'0.001';
+  packInput.step=['stk','pack','set'].includes(unit)?'1':'0.001';
+  form.querySelector('#lagerFastUnitHint').textContent=mode==='packs'?'Beispiel: 2 Packungen à 100 Stück ergeben 200 Stück im Lager.':mode==='pairs'?'Paare sind nur bei Handschuhen oder aktivierter Paarzählung möglich.':'Mengen in Stück/Packung/Set ganzzahlig; bei Liter, ml, kg und Meter sind Kommazahlen erlaubt.';
+ };
+ for(const name of ['unit','unitMode'])form.elements.namedItem(name).addEventListener('change',refreshUnits);
+ refreshUnits();
  form.addEventListener('submit',async e=>{
   e.preventDefault();const submit=form.querySelector('[type=submit]');submit.disabled=true;
   const v=Object.fromEntries(new FormData(form).entries());const useArea=String(v.useArea||'').trim();
@@ -280,16 +295,25 @@ function bindQuickForm(){
     const existingAreas=Array.isArray(values[AREAS_KEY])?values[AREAS_KEY]:[];
     const id=String(v.locationId||'');
     const name=String(v.name||'').trim();
+    if(/handschuh|gloves?|nitril|latex/i.test(name)&&v.unit==='pack')throw new Error('Handschuhe bitte mit Grundeinheit „Stück“ und Eingabe „Packungen“ erfassen. Sonst fehlt die Stückzahl.');
+    const enteredPackSize=v.unitMode==='packs'?v.packSize:1;
+    const draft={name,type:v.type,unit:v.unit,packSize:enteredPackSize,pairCounting:'auto'};
+    const converted=interpretQuantity(draft,v.quantity,v.unitMode||'units');
     const found=current.find(a=>a.name.toLocaleLowerCase('de-AT')===name.toLocaleLowerCase('de-AT')&&a.unit===v.unit&&a.type===v.type&&String(a.useArea||'').toLocaleLowerCase('de-AT')===useArea.toLocaleLowerCase('de-AT'));
     if(found&&v.type==='verbrauch'){
      const locValid=new Set(locationChoices(existingRooms,existingAreas).map(x=>x.id));
-     const stocked=bookStock(found,{type:'receive',quantity:v.quantity,toId:id},locValid,{makeId:newId});
-     message=`${name}: ${v.quantity} ${v.unit} zum vorhandenen Bestand hinzugefügt.`;
+     let stockItem=found;
+     if(v.unitMode==='packs'&&Number(found.packSize??1)!==Number(enteredPackSize)){
+      if(Number(found.packSize??1)!==1)throw new Error(`Dieser Artikel hat bereits eine Packungsgröße von ${found.packSize}. Bitte Artikel bearbeiten oder die vorhandene Packungsgröße verwenden.`);
+      stockItem={...found,packSize:Number(enteredPackSize)};
+     }
+     const stocked=bookStock(stockItem,{type:'receive',quantity:converted.baseQuantity,toId:id,unitMode:'units'},locValid,{makeId:newId});
+     message=`${name}: ${quantityLabel(stockItem,converted.baseQuantity)} zum vorhandenen Bestand hinzugefügt.`;
      return [[ITEM_KEY,current.map(a=>a.id===found.id?stocked.item:a)],[MOVEMENT_KEY,[...(Array.isArray(values[MOVEMENT_KEY])?values[MOVEMENT_KEY]:[]),stocked.event].slice(-3000)]];
     }
-    const created=upsertItem(current,{name,type:v.type,quantity:v.quantity,unit:v.unit,locationId:id,condition:'gut',category:'Allgemein',tags:useArea?[useArea]:[],minimumStock:0,packSize:1,properties:{}},{rooms:existingRooms,areas:existingAreas,sequence:Number(values[ITEM_SEQ_KEY])||0,makeId:newId});
+    const created=upsertItem(current,{name,type:v.type,quantity:converted.baseQuantity,unit:v.unit,locationId:id,condition:'gut',category:'Allgemein',tags:useArea?[useArea]:[],minimumStock:0,packSize:enteredPackSize,properties:{}},{rooms:existingRooms,areas:existingAreas,sequence:Number(values[ITEM_SEQ_KEY])||0,makeId:newId});
     const next=created.items.map(a=>a.id===created.items.at(-1).id?{...a,useArea}:a);
-    message=`${name} wurde gespeichert${useArea?' · für '+useArea:''}.`;
+    message=`${name}: ${quantityLabel(draft,converted.baseQuantity)} gespeichert${useArea?' · für '+useArea:''}.`;
     return [[ITEM_KEY,next],[ITEM_SEQ_KEY,created.sequence]];
    });
    await loadState();fastRecent();

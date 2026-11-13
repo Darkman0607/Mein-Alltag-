@@ -1,4 +1,5 @@
-/** Lagerhaus L07: inventory positions in milliunits, atomic-safe pure booking rules. */
+/** Lagerhaus L07/LUX01: inventory positions in milliunits, atomic-safe pure booking rules. */
+import {pairEligible} from './lagerhaus-consumption.js';
 export const MOVEMENT_KEY='items.movements.v1';
 export const STOCK_ACTIONS=Object.freeze({receive:'Einlagerung',issue:'Entnahme',transfer:'Umlagerung'});
 const MAX=1_000_000;
@@ -9,6 +10,28 @@ export function milli(value,{allowZero=false,label='Menge'}={}){
  return Math.round(n*1000);
 }
 export const unmilli=n=>n/1000;
+/** Only physical divisible units may have fractions. Old records are not silently migrated. */
+export const DISCRETE_UNITS=Object.freeze(['stk','pack','set']);
+export function requireUnitQuantity(item,milliAmount,label='Menge'){
+ if(DISCRETE_UNITS.includes(item?.unit)&&milliAmount%1000!==0)throw new Error(`${label}: ${item.unit==='stk'?'Stück':item.unit==='pack'?'Packungen':'Sets'} nur als ganze Zahl erfassen.`);
+ return milliAmount;
+}
+/** Same unit interpretation for quick entry, stock bookings and the cleaning module. */
+export function interpretQuantity(item,quantity,mode='units'){
+ if(!['units','packs','pairs'].includes(mode))throw new Error('Unbekannte Mengeneingabe.');
+ const entered=milli(quantity);
+ if(mode==='packs'&&entered%1000!==0)throw new Error('Packungsanzahl muss ganzzahlig sein.');
+ if(mode==='pairs'){
+  if(!pairEligible(item))throw new Error('Paarzählung ist nur für Stück-Artikel mit aktivierter Paarzählung verfügbar.');
+  if(entered%1000!==0)throw new Error('Paaranzahl muss ganzzahlig sein.');
+ }
+ let units=entered;
+ if(mode==='packs'){const packUnits=milli(stockSettings(item).packSize);requireUnitQuantity(item,packUnits,'Packungsgröße');units=entered*packUnits/1000;}
+ if(mode==='pairs')units=entered*2;
+ if(!Number.isSafeInteger(units)||units>MAX*1000)throw new Error('Umrechnung überschreitet den zulässigen Maximalbestand.');
+ requireUnitQuantity(item,units,'Bestandsmenge');
+ return {units,entered,baseQuantity:unmilli(units)};
+}
 /** Legacy items from L05/L06 retain their locationId and quantity until edited/booked. */
 export function stockPositions(item){
  if(Array.isArray(item.stockLocations)){
@@ -42,11 +65,7 @@ export function stockAlert(item){
 export function bookStock(item,booking,validLocationIds,{now=new Date().toISOString(),makeId=()=>globalThis.crypto.randomUUID(),releaseRecordId=null}={}){
  const kind=String(booking.type||'');
  if(!Object.hasOwn(STOCK_ACTIONS,kind))throw new Error('Unbekannte Buchungsart.');
- const entered=milli(booking.quantity);
- const packUnits=milli(stockSettings(item).packSize);
- const units=booking.unitMode==='packs' ? entered*packUnits/1000 : entered;
- if(!Number.isSafeInteger(units)||units>MAX*1000)throw new Error('Packungsmenge ergibt mehr als drei Nachkommastellen oder überschreitet das Limit.');
- if(booking.unitMode&&booking.unitMode!=='units'&&booking.unitMode!=='packs')throw new Error('Ungültiger Mengenmodus.');
+ const {entered,units}=interpretQuantity(item,booking.quantity,booking.unitMode||'units');
  const fromId=String(booking.fromId??'');
  const toId=String(booking.toId??'');
  const valid=id=>validLocationIds instanceof Set?validLocationIds.has(id):Array.isArray(validLocationIds)?validLocationIds.includes(id):false;

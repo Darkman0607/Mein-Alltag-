@@ -1,7 +1,7 @@
 /** L08 – Individuelle Gebinde und Einzelgeräte als Teil des bestehenden Artikelbestands.
  * Keine separate Datenbank und keine zusätzliche Gesamtmenge durch Kennzeichnung.
  * Alle Operationen sind rein; persistiert wird mit mutateModuleValues aus L07. */
-import {milli,unmilli,stockPositions,stockTotal,bookStock} from './lagerhaus-stock.js';
+import {milli,unmilli,stockPositions,stockTotal,bookStock,requireUnitQuantity} from './lagerhaus-stock.js';
 const text=(v,max=120)=>String(v??'').trim().slice(0,max);
 const nowIso=()=>new Date().toISOString();
 const makeUUID=()=>globalThis.crypto.randomUUID();
@@ -54,7 +54,7 @@ function booking(item,type,quantity,fromId,toId,validIds,opts={}){
 export function addContainer(items,itemId,{capacity,remaining,locationId,source='new',label=''},validIds,{now=nowIso(),makeId=makeUUID,makeEventId=makeUUID}={}){
  const idx=findItem(items,itemId),item=items[idx];
  if(item.type!=='verbrauch')throw new Error('Gebindeverwaltung nur für Verbrauchsmaterial.');
- const amount=unmilli(milli(capacity));const rest=remaining===''||remaining===null||remaining===undefined?amount:unmilli(milli(remaining));if(rest>amount)throw new Error('Die Restmenge darf die Packungsgröße nicht überschreiten.');const place=String(locationId??'');validateLocation(validIds,place);
+ const amount=unmilli(milli(capacity));const rest=remaining===''||remaining===null||remaining===undefined?amount:unmilli(milli(remaining));if(rest>amount)throw new Error('Die Restmenge darf die Packungsgröße nicht überschreiten.');requireUnitQuantity(item,milli(amount),'Gebindegröße');requireUnitQuantity(item,milli(rest),'Gebinde-Restmenge');const place=String(locationId??'');validateLocation(validIds,place);
  if(!['new','existing'].includes(source))throw new Error('Ungültige Erfassungsart.');
  if(source==='existing'&&milli(untrackedAt(item,place))<milli(rest))throw new Error('Nicht genügend frei verfügbarer Bestand für dieses Gebinde.');
  const id=String(makeId());if(!id||duplicateId(items,id))throw new Error('Ungültige Gebinde-ID.');
@@ -73,7 +73,7 @@ export function updateContainer(items,itemId,containerId,action,args,validIds,{n
   if(containerState(old)!=='full')throw new Error('Gebinde ist bereits geöffnet oder leer.');
   updated={...old,openedAt:now,updatedAt:now};
  }else if(action==='consume'){
-  const amount=unmilli(milli(args.quantity));if(milli(amount)>milli(old.remaining,{allowZero:true}))throw new Error('Mehr als die verfügbare Restmenge.');
+  const amount=unmilli(milli(args.quantity));requireUnitQuantity(item,milli(amount),'Gebinde-Verbrauch');if(milli(amount)>milli(old.remaining,{allowZero:true}))throw new Error('Mehr als die verfügbare Restmenge.');
   const booked=booking(item,'issue',amount,old.locationId,'',validIds,{now,makeId:makeEventId,releaseRecordId:old.id});
   result=booked.item;event=booked.event;
   updated={...old,remaining:unmilli(milli(old.remaining,{allowZero:true})-milli(amount)),openedAt:old.openedAt||now,updatedAt:now};
