@@ -22,7 +22,7 @@ import {renderPremiumSettings,mountPremiumSettings} from './reward-premium.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 import {renderResetPanel,mountResetPanel} from './reset-data.js';
 
-export const APP_VERSION='0.27.1';
+export const APP_VERSION='0.27.3';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -422,17 +422,33 @@ if(!location.hash)history.replaceState(null,'','#/home');
 render();
 openDatabase().catch(err=>console.warn('IndexedDB nicht verfügbar:',err));
 
+// LUX02: Keep an installed Android PWA current without touching IndexedDB or user files.
 if('serviceWorker' in navigator && location.protocol!=='file:'){
  window.addEventListener('load',async()=>{
-   try{
-     const registration=await navigator.serviceWorker.register('./sw.js');
-     const banner=document.getElementById('updateBanner');
-     let alreadyControlled=Boolean(navigator.serviceWorker.controller);
-     function showUpdate(){if(registration.waiting && alreadyControlled)banner.hidden=false;}
-     if(registration.waiting)showUpdate();
-     registration.addEventListener('updatefound',()=>{const w=registration.installing;w?.addEventListener('statechange',()=>{if(w.state==='installed')showUpdate();});});
-     document.getElementById('updateButton').addEventListener('click',()=>registration.waiting?.postMessage({type:'SKIP_WAITING'}));
-     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(alreadyControlled)window.location.reload();else alreadyControlled=true;});
-   }catch(e){console.warn('Offline-Funktion derzeit nicht verfügbar:',e);}
+  try{
+   const registration=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
+   const banner=document.getElementById('updateBanner');
+   let alreadyControlled=Boolean(navigator.serviceWorker.controller);
+   let reloadScheduled=false,lastCheck=0;
+   const activateWaiting=()=>registration.waiting?.postMessage({type:'SKIP_WAITING'});
+   const showUpdate=()=>{if(registration.waiting && alreadyControlled){banner.hidden=false;}};
+   const check=async(force=false)=>{
+    if(!navigator.onLine)return;
+    const now=Date.now();if(!force&&now-lastCheck<15*60*1000)return;
+    lastCheck=now;
+    try{await registration.update();showUpdate();}catch(error){console.warn('Updateprüfung derzeit nicht möglich:',error);}
+   };
+   showUpdate();
+   registration.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed')showUpdate();});});
+   document.getElementById('updateButton')?.addEventListener('click',activateWaiting);
+   navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(alreadyControlled&&!reloadScheduled){reloadScheduled=true;window.location.reload();}
+    else alreadyControlled=true;
+   });
+   // Check once on startup and after reopening the installed app from the background.
+   await check(true);
+   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
+   window.addEventListener('online',()=>check(true));
+  }catch(error){console.warn('Offline-Funktion derzeit nicht verfügbar:',error);}
  });
 }

@@ -10,6 +10,7 @@ import {interpretQuantity} from './lagerhaus-stock.js';
 import {readPhotoIndex,coverPhoto} from './lagerhaus-photos.js';
 import {stockPositions,bookStock} from './lagerhaus-stock.js';
 import {locationChoices} from './lagerhaus-items.js';
+import {QUICK_TEMPLATES,exactNameMatches,compatibleMatches,similarMatches,recentlyUsedItems,quickBookingDefaults} from './lagerhaus-quick.js';
 import {FLOOR_MODELS,FLOOR_MAX,floorModel,floorFootprint,availableArticleStock,zoneLines,cleanFloorObject} from './lagerhaus-floor.js';
 import {DEFAULT_AREA_NAME,COMPARTMENT_KINDS,allocateCode,ensureHierarchy,getAllCodes,relocateCompartment,locationPath,defaultCompartmentLabels} from './lagerhaus-hierarchy.js';
 
@@ -45,6 +46,7 @@ let operation=Promise.resolve();
 let rooms=[];
 let areas=[];
 let itemRecords=[];
+let fastBookingOpen=null;
 let photoRecords=[];
 let inventoryFurniture=null;
 let navigatorFocus=null;
@@ -233,19 +235,62 @@ export function roomSvg(room,small=false){const empty=!(room?.furniture?.length|
  return `<svg class="lager-room-svg ${small?'is-preview':''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 315" role="img" aria-label="Schematische dreidimensionale Raumansicht"><defs><linearGradient id="floorShade" x2="1" y2="1"><stop stop-color="#253b4a"/><stop offset="1" stop-color="#344958"/></linearGradient></defs>${rear}${side}${floor}${gridEnabled?lines:''}${itemContent}${empty&&!small?`<text x="214" y="254" text-anchor="middle" font-size="15" fill="#c3d1d9">Noch keine Objekte – unten hinzufügen</text>`:''}<text x="220" y="302" text-anchor="middle" font-size="11" fill="#b6c6d0">Schematische 3D-Ansicht · nicht maßstabsgetreu</text></svg>`;
 }
 function roomCard(room){return `<a class="lager-room-card" data-room-preview="${esc(room.id)}" href="${roomLink(room.id)}" aria-label="${esc(room.name)} öffnen"><div class="lager-room-illustration">${roomSvg(room,true)}</div><div class="lager-room-card-caption"><div><strong>${esc(room.name)}</strong><small>${esc(room.code||'')} · ${esc(TYPES[room.type]||TYPES.sonstiges)} · ${esc(fmtSize(room))}</small></div><span aria-hidden="true">›</span></div></a>`;}
-function header(title,desc){return `<div class="lager-heading"><span class="eyebrow">Mein Alltag · Lagerhaus / V0.17.1</span><h1>${esc(title)}</h1><p>${esc(desc)}</p></div>`;}
+function header(title,desc){return `<div class="lager-heading"><span class="eyebrow">Mein Alltag · Lagerhaus</span><h1>${esc(title)}</h1><p>${esc(desc)}</p></div>`;}
 const options=(list,current)=>list.map(([v,label])=>`<option value="${esc(v)}" ${v===current?'selected':''}>${esc(label)}</option>`).join('');
 function createForm(room){const dims=room?.dimensions||[];const tpl=room?.preset||'ohne';return `<form id="lagerRoomForm" class="lager-form"><h2>${room?'Raum bearbeiten':'Neuen Raum erstellen'}</h2><label for="lagerName">Raumname *</label><input id="lagerName" name="name" required maxlength="55" value="${esc(room?.name||'')}" placeholder="z. B. Meine Garage" autocomplete="off"/><label for="lagerAreaSelect">Lagerbereich</label><select id="lagerAreaSelect" name="areaId">${options(areas.map(a=>[a.id,`${a.name} (${a.code})`]),room?.areaId||areas[0]?.id)}</select><label for="lagerType">Raumtyp</label><select id="lagerType" name="type">${options(Object.entries(TYPES),room?.type||'garage')}</select><label for="lagerPreset">Raumgröße</label><select id="lagerPreset" name="preset">${options([['ohne','Ohne Maße starten'],['klein','Klein – 3 × 2,5 × 2,4 m'],['mittel','Mittel – 5 × 4 × 2,5 m'],['gross','Groß – 8 × 5 × 2,8 m'],['eigen','Eigene Maße eingeben']],tpl)}</select><div id="lagerDimensions" class="lager-dims" ${tpl==='ohne'?'hidden':''}><label>Länge (m)<input name="length" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" value="${dims[0]??''}" /></label><label>Breite (m)<input name="width" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" value="${dims[1]??''}"/></label><label>Höhe (m)<input name="height" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" value="${dims[2]??''}"/></label></div><p class="lager-hint">Die 3D-Ansicht ist vorerst schematisch; Maße dienen der Dokumentation.</p><div class="lager-actions"><button type="submit" class="primary-button">${room?'Änderungen speichern':'Raum speichern'}</button><button class="secondary-button" type="button" id="lagerCancel">Abbrechen</button></div></form>`;}
 function quickPurposeOptions(){return ['Küche','Badezimmer','WC','Wohnzimmer','Schlafzimmer','Flur','Allgemein'].map(v=>`<option value="${esc(v)}">`).join('');}
 function quickLocationOptions(){return locationChoices(rooms,areas).map(x=>`<option value="${esc(x.id)}">${esc(x.label)}</option>`).join('');}
 function fastRecent(){
  const el=document.getElementById('lagerFastRecent');if(!el)return;
- const recent=[...itemRecords].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,5);
- el.innerHTML=recent.length?`<h2>Meine Artikel <span class="lager-fast-count">(${itemRecords.length})</span></h2><div class="lager-fast-recent-list">${recent.map(a=>`<div class="lager-fast-recent-item"><span><strong>${esc(a.name)}</strong><small>${a.useArea?'Für '+esc(a.useArea)+' · ':''}${esc(a.code||'Artikel')}</small></span><b>${esc(quantityLabel(a,stockTotal(a)))}</b></div>`).join('')}</div><a href="#/lagerhaus/items" class="lager-fast-all">Alle ${itemRecords.length} Artikel ansehen →</a>`:'<p class="lager-hint">Noch keine Artikel erfasst. Starte mit einem Namen und einer Menge.</p>';
+ const recent=recentlyUsedItems(itemRecords,5);
+ el.innerHTML=recent.length?`<h2>Zuletzt verwendet <span class="lager-fast-count">(${itemRecords.length} Artikel)</span></h2><div class="lager-fast-recent-list">${recent.map(a=>`<article class="lager-fast-recent-item"><div class="lager-fast-recent-main"><strong>${esc(a.name)}</strong><small>${esc(a.code||'Artikel')} · ${esc(quantityLabel(a,stockTotal(a)))}</small></div><div class="lager-fast-recent-actions"><button type="button" data-fast-stock="${esc(a.id)}" data-fast-kind="receive" class="secondary-button">+ Einlagern</button><button type="button" data-fast-stock="${esc(a.id)}" data-fast-kind="issue" class="secondary-button" ${stockTotal(a)<=0?'disabled':''}>− Entnehmen</button></div></article>`).join('')}</div><a href="#/lagerhaus/items" class="lager-fast-all">Alle Artikel ansehen →</a>`:'<p class="lager-hint">Noch keine Artikel. Lege einen Artikel an – danach kannst du ihn hier direkt einlagern und entnehmen.</p>';
+ el.querySelectorAll('[data-fast-stock]').forEach(btn=>btn.addEventListener('click',()=>openFastBooking(btn.dataset.fastStock,btn.dataset.fastKind)));
+}
+function fastBookingHtml(item,kind){
+ const def=quickBookingDefaults(item,kind),positions=stockPositions(item),places=locationChoices(rooms,areas);
+ const source=positions.map(p=>`<option value="${esc(p.locationId)}">${esc(places.find(x=>x.id===p.locationId)?.label||'Unbekannter Lagerort')} · ${esc(quantityLabel(item,p.quantity))}</option>`).join('');
+ const preferred=positions[0]?.locationId||'';
+ const target=places.map(p=>`<option value="${esc(p.id)}" ${p.id===preferred?'selected':''}>${esc(p.label)}</option>`).join('');
+ return `<form id="lagerFastBookForm" class="lager-fast-booking" aria-label="Schnelle Bestandsbuchung"><div class="lager-fast-book-head"><div><strong>${kind==='issue'?'− Entnehmen':'+ Einlagern'} · ${esc(item.name)}</strong><small>Aktueller Bestand: ${esc(quantityLabel(item,stockTotal(item)))}</small></div><button type="button" id="lagerFastBookClose" class="secondary-button" aria-label="Bestandsbuchung schließen">✕</button></div>
+  ${kind==='issue'?`<label>Entnehmen aus<select name="fromId" required>${source}</select></label>`:`<label>Einlagern bei<select name="toId">${target}</select></label>`}
+  <label>Mengeneinheit<select name="unitMode"><option value="units" ${def.mode==='units'?'selected':''}>${esc(item.unit==='stk'?'Stück':item.unit||'Einheiten')}</option>${pairEligible(item)?`<option value="pairs" ${def.mode==='pairs'?'selected':''}>Paare (2 Stück)</option>`:''}${Number(item.packSize)>1?`<option value="packs" ${def.mode==='packs'?'selected':''}>Packungen à ${esc(item.packSize)} ${esc(item.unit)}</option>`:''}</select></label>
+  <div class="lager-fast-book-quantity"><label>Menge<input name="quantity" type="number" value="${def.quantity}" min="0.001" step="1" max="1000000" inputmode="decimal" required></label></div>
+  <div class="lager-fast-chips" aria-label="Häufige Mengen">${def.chips.map(([qty,mode,label])=>`<button type="button" class="secondary-button" data-fast-qty="${qty}" data-fast-unit="${mode}">${esc(label)}</button>`).join('')}</div>
+  <button class="primary-button lager-fast-confirm" type="submit">${kind==='issue'?'Entnahme bestätigen':'Einlagerung bestätigen'}</button>
+  <p class="lager-hint">Die Menge wird erst nach „Bestätigen“ gebucht. Bereits einzeln reservierte Gebinde/Geräte bleiben geschützt.</p></form>`;
+}
+function closeFastBooking(){fastBookingOpen=null;const box=document.getElementById('lagerFastBooking');if(box)box.innerHTML='';}
+function openFastBooking(id,kind){
+ const item=itemRecords.find(i=>i.id===id),box=document.getElementById('lagerFastBooking');if(!item||!box||!['receive','issue'].includes(kind))return;
+ fastBookingOpen={id,kind};box.innerHTML=fastBookingHtml(item,kind);
+ const frm=box.querySelector('#lagerFastBookForm'),qty=frm.elements.namedItem('quantity'),unit=frm.elements.namedItem('unitMode');
+ const sync=()=>{qty.step=unit.value==='units'&&!['stk','pack','set'].includes(item.unit)?'0.001':'1';qty.min=qty.step==='1'?'1':'0.001';};
+ unit.addEventListener('change',sync);sync();
+ frm.querySelector('#lagerFastBookClose').addEventListener('click',closeFastBooking);
+ frm.querySelectorAll('[data-fast-qty]').forEach(btn=>btn.addEventListener('click',()=>{unit.value=btn.dataset.fastUnit;qty.value=btn.dataset.fastQty;sync();}));
+ frm.addEventListener('submit',async ev=>{
+  ev.preventDefault();const submit=frm.querySelector('[type="submit"]');submit.disabled=true;
+  const data=Object.fromEntries(new FormData(frm).entries());
+  try{
+   let resultMessage='';
+   await mutateModuleValues('lagerhaus',[ITEM_KEY,MOVEMENT_KEY,KEY,AREAS_KEY],values=>{
+    const latest=Array.isArray(values[ITEM_KEY])?values[ITEM_KEY]:[],index=latest.findIndex(x=>x.id===id);
+    if(index<0)throw new Error('Artikel wurde inzwischen gelöscht.');
+    const ids=new Set(locationChoices(Array.isArray(values[KEY])?values[KEY]:[],Array.isArray(values[AREAS_KEY])?values[AREAS_KEY]:[]).map(x=>x.id));
+    const booked=bookStock(latest[index],{...data,type:kind},ids,{makeId:newId});
+    const next=latest.slice();next[index]=booked.item;
+    resultMessage=`${latest[index].name}: ${quantityLabel(latest[index],booked.event.quantity)} ${kind==='issue'?'entnommen':'eingelagert'} · neu ${quantityLabel(booked.item,booked.item.quantity)}.`;
+    return [[ITEM_KEY,next],[MOVEMENT_KEY,[...(Array.isArray(values[MOVEMENT_KEY])?values[MOVEMENT_KEY]:[]),booked.event].slice(-3000)]];
+   });
+   await loadState();closeFastBooking();fastRecent();quickFeedback('✓ '+resultMessage);
+  }catch(error){quickFeedback('Buchung fehlgeschlagen: '+error.message,true);submit.disabled=false;}
+ });
+ frm.scrollIntoView({behavior:'smooth',block:'nearest'});qty.focus();
 }
 export function renderLagerhaus(){return `${header('Mein Lagerhaus','Artikel sofort eintragen – 3D-Räume und Regale sind freiwillig.')}
  <section class="lager-fast-card" aria-label="Einfacher Lagerzugang">
   <button id="lagerQuickOpen" class="primary-button lager-fast-main" type="button" aria-expanded="false">＋ Artikel hinzufügen</button>
+  <div class="lager-fast-templates" aria-label="Artikelvorlagen"><span>Mit Vorlage starten:</span><div>${QUICK_TEMPLATES.map(t=>`<button type="button" class="secondary-button" data-quick-template="${esc(t.id)}">${esc(t.title)}</button>`).join('')}</div></div>
   <p class="lager-hint">Für Handschuhe, Putzmittel, Schwämme und andere Dinge. Ein Regal muss nicht angelegt werden.</p>
   <form id="lagerQuickForm" class="lager-fast-form" hidden>
    <h2>Artikel schnell erfassen</h2>
@@ -254,12 +299,14 @@ export function renderLagerhaus(){return `${header('Mein Lagerhaus','Artikel sof
    <label>Menge erfassen als<select name="unitMode"><option value="units">Grundeinheiten</option><option value="pairs">Paare (1 Paar = 2 Stück)</option><option value="packs">Packungen (Inhalt angeben)</option></select></label>
    <label id="lagerFastPackLabel" hidden>Stück / Grundeinheiten je Packung *<input type="number" name="packSize" min="0.001" max="1000000" step="1" inputmode="decimal" placeholder="z. B. 100"></label>
    <p id="lagerFastUnitHint" class="lager-hint">Beispiel: 100 Handschuhe als 100 Stück oder als 50 Paar einlagern.</p>
+   <div id="lagerFastDuplicate" class="lager-fast-duplicate" hidden role="status" aria-live="polite"><p id="lagerFastDuplicateText"></p><label id="lagerFastDuplicateSelectWrap" hidden>Vorhandenen Artikel auswählen<select id="lagerFastDuplicateSelect" name="existingId"></select></label><div class="lager-fast-duplicate-actions"><button class="secondary-button" type="button" data-dup-choice="merge">Bestand erhöhen</button><button class="secondary-button" type="button" data-dup-choice="new">Trotzdem neuen Artikel</button></div><small id="lagerFastDuplicateDecision">Bitte zuerst entscheiden, damit nichts versehentlich doppelt angelegt wird.</small></div>
+   <input type="hidden" name="duplicateChoice" value="">
    <label>Wofür brauchst du es? <span class="lager-fast-optional">(optional)</span><input name="useArea" maxlength="40" list="lagerFastUseAreas" placeholder="z. B. Küche"><datalist id="lagerFastUseAreas">${quickPurposeOptions()}</datalist></label>
    <details class="lager-fast-more"><summary>Mehr Optionen (freiwillig)</summary><label>Art des Artikels<select name="type"><option value="verbrauch">Verbrauchsartikel / Putzmaterial</option><option value="geraet">Gerät</option><option value="einzel">Gegenstand</option></select></label><label>Wo liegt der Artikel wirklich? <span class="lager-fast-optional">(optional)</span><select id="lagerQuickLocation" name="locationId"><option value="">Ohne festen Lagerort</option></select></label><p class="lager-hint">„Für Küche“ beschreibt die Verwendung. Der tatsächliche Lagerort ist davon unabhängig.</p></details>
    <button type="submit" class="primary-button lager-fast-save">✓ Artikel speichern</button><button type="button" id="lagerQuickCancel" class="secondary-button lager-fast-cancel">Schließen</button>
   </form>
   <p id="lagerQuickFeedback" class="lager-fast-feedback" aria-live="polite" role="status"></p>
-  <div id="lagerFastRecent" class="lager-fast-recent"><p class="lager-hint">Artikel werden geladen …</p></div>
+  <div id="lagerFastRecent" class="lager-fast-recent"><p class="lager-hint">Artikel werden geladen …</p></div><div id="lagerFastBooking" aria-live="polite"></div>
  </section>
  <details id="lagerHomeAdvanced" class="lager-home-advanced"><summary>▦ 3D-Lagerräume, Regale und Einstellungen</summary>
  <p class="lager-hint">Nur wenn du deine Lagerplätze räumlich aufbauen möchtest. Für Artikel ist das nicht erforderlich.</p>
@@ -272,6 +319,24 @@ function bindQuickForm(){
  const toggle=show=>{form.hidden=!show;open.setAttribute('aria-expanded',String(show));open.textContent=show?'− Erfassung ausblenden':'＋ Artikel hinzufügen';if(show)form.elements.namedItem('name').focus();};
  open.addEventListener('click',()=>toggle(form.hidden));
  form.querySelector('#lagerQuickCancel').addEventListener('click',()=>toggle(false));
+ const applyTemplate=template=>{for(const key of ['name','unit','type','quantity','unitMode','packSize','useArea']){const field=form.elements.namedItem(key);if(field&&key in template)field.value=String(template[key]);}refreshUnits();refreshDuplicate(true);toggle(true);};
+ document.querySelectorAll('[data-quick-template]').forEach(btn=>btn.addEventListener('click',()=>{const t=QUICK_TEMPLATES.find(x=>x.id===btn.dataset.quickTemplate);if(t)applyTemplate(t);}));
+ const duplicateBox=form.querySelector('#lagerFastDuplicate'),duplicateSelect=form.querySelector('#lagerFastDuplicateSelect'),decision=form.elements.namedItem('duplicateChoice');
+ const refreshDuplicate=(reset=false)=>{
+  if(reset)decision.value='';
+  const name=form.elements.namedItem('name').value,unit=form.elements.namedItem('unit').value,type=form.elements.namedItem('type').value;
+  const exact=exactNameMatches(itemRecords,name),same=compatibleMatches(itemRecords,name,unit,type),similar=similarMatches(itemRecords,name);
+  duplicateBox.hidden=!(exact.length||similar.length);
+  if(duplicateBox.hidden)return;
+  const all=exact.length?exact:similar;
+  form.querySelector('#lagerFastDuplicateText').textContent=exact.length?`⚠ ${exact.length} Artikel mit gleichem Namen gefunden. ${same.length?'Bestand erhöhen oder bewusst neu anlegen.':'Die Einheit bzw. Artikelart unterscheidet sich – bitte prüfen.'}`:`Ähnliche Artikel: ${similar.map(x=>x.name).join(', ')}. Prüfe, ob du wirklich einen neuen Artikel brauchst.`;
+  duplicateSelect.innerHTML=same.map(x=>`<option value="${esc(x.id)}">${esc(x.code||'')} · ${esc(x.name)} · ${esc(quantityLabel(x,stockTotal(x)))}</option>`).join('');
+  form.querySelector('#lagerFastDuplicateSelectWrap').hidden=!same.length;
+  form.querySelector('[data-dup-choice="merge"]').disabled=!same.length;
+  form.querySelector('#lagerFastDuplicateDecision').textContent=decision.value==='merge'?'✓ Vorhandener Bestand wird erhöht.':decision.value==='new'?'✓ Ein neuer Artikel wird bewusst angelegt.':'Bitte zuerst entscheiden, damit nichts versehentlich doppelt angelegt wird.';
+ };
+ form.querySelectorAll('[data-dup-choice]').forEach(btn=>btn.addEventListener('click',()=>{decision.value=btn.dataset.dupChoice;refreshDuplicate();}));
+ for(const key of ['name','unit','type'])form.elements.namedItem(key).addEventListener(key==='name'?'input':'change',()=>refreshDuplicate(true));
  const refreshUnits=()=>{
   const unit=form.elements.namedItem('unit').value,mode=form.elements.namedItem('unitMode').value;
   const packField=form.querySelector('#lagerFastPackLabel'),packInput=form.elements.namedItem('packSize'),quantity=form.elements.namedItem('quantity');
@@ -282,7 +347,7 @@ function bindQuickForm(){
   form.querySelector('#lagerFastUnitHint').textContent=mode==='packs'?'Beispiel: 2 Packungen à 100 Stück ergeben 200 Stück im Lager.':mode==='pairs'?'Paare sind nur bei Handschuhen oder aktivierter Paarzählung möglich.':'Mengen in Stück/Packung/Set ganzzahlig; bei Liter, ml, kg und Meter sind Kommazahlen erlaubt.';
  };
  for(const name of ['unit','unitMode'])form.elements.namedItem(name).addEventListener('change',refreshUnits);
- refreshUnits();
+ refreshUnits();refreshDuplicate();
  form.addEventListener('submit',async e=>{
   e.preventDefault();const submit=form.querySelector('[type=submit]');submit.disabled=true;
   const v=Object.fromEntries(new FormData(form).entries());const useArea=String(v.useArea||'').trim();
@@ -299,8 +364,11 @@ function bindQuickForm(){
     const enteredPackSize=v.unitMode==='packs'?v.packSize:1;
     const draft={name,type:v.type,unit:v.unit,packSize:enteredPackSize,pairCounting:'auto'};
     const converted=interpretQuantity(draft,v.quantity,v.unitMode||'units');
-    const found=current.find(a=>a.name.toLocaleLowerCase('de-AT')===name.toLocaleLowerCase('de-AT')&&a.unit===v.unit&&a.type===v.type&&String(a.useArea||'').toLocaleLowerCase('de-AT')===useArea.toLocaleLowerCase('de-AT'));
-    if(found&&v.type==='verbrauch'){
+    const exact=exactNameMatches(current,name),same=compatibleMatches(current,name,v.unit,v.type);
+    if(exact.length&&!['merge','new'].includes(v.duplicateChoice))throw new Error('Gleichnamiger Artikel vorhanden. Bitte „Bestand erhöhen“ oder „Trotzdem neuen Artikel“ wählen.');
+    if(v.duplicateChoice==='merge'){
+     const found=same.find(a=>a.id===v.existingId);
+     if(!found)throw new Error('Vorhandenen Artikel mit passender Einheit und Artikelart auswählen.');
      const locValid=new Set(locationChoices(existingRooms,existingAreas).map(x=>x.id));
      let stockItem=found;
      if(v.unitMode==='packs'&&Number(found.packSize??1)!==Number(enteredPackSize)){
@@ -316,9 +384,9 @@ function bindQuickForm(){
     message=`${name}: ${quantityLabel(draft,converted.baseQuantity)} gespeichert${useArea?' · für '+useArea:''}.`;
     return [[ITEM_KEY,next],[ITEM_SEQ_KEY,created.sequence]];
    });
-   await loadState();fastRecent();
+   await loadState();fastRecent();refreshDuplicate(true);
    quickFeedback('✓ '+message+' Im Putzmanager als Lagerhaus-Material auswählbar.');
-   form.elements.namedItem('name').value='';form.elements.namedItem('name').focus();
+   form.elements.namedItem('name').value='';refreshDuplicate(true);form.elements.namedItem('name').focus();
   }catch(error){quickFeedback('Speichern fehlgeschlagen: '+error.message,true);}finally{submit.disabled=false;}
  });
 }

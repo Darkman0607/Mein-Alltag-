@@ -6,6 +6,7 @@ import {templatesFor,propertiesFor,templateById,detailedProperties} from './lage
 import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock,interpretQuantity} from './lagerhaus-stock.js';
 import {addContainer,updateContainer,addDevice,updateDevice,containerState,CONTAINER_STATES,DEVICE_STATES,trackedSummary} from './lagerhaus-tracking.js';
 import {pairEligible,pairsLabel,consumptionQuantity,quantityLabel} from './lagerhaus-consumption.js';
+import {compatibleMatches,exactNameMatches,quickBookingDefaults} from './lagerhaus-quick.js';
 import {CATEGORY_KEY,CATEGORY_COLORS,CATEGORY_STARTERS,cleanTags,categoryLabel,addCategory,editCategory,removeCategory,bulkAssign,toggleFavorite,migrateCategories,filterItems} from './lagerhaus-categories.js';
 import {serviceStatus,serviceReceiptKeys} from './lagerhaus-service.js';
 import {PHOTO_INDEX_KEY,PHOTO_CATEGORIES,PHOTO_STAGES,photoKey,coverPhoto,ownerPhotos,photoHistory,photoDate,suggestedComparison,comparisonPhotos,readPhotoIndex,readPhotoBlob,preparePhoto,savePhoto,changePhoto,removePhoto} from './lagerhaus-photos.js';
@@ -86,7 +87,7 @@ function stockPanel(item){
  ${stockKind!=='receive'?`<label>Von Lagerort<select name="fromId" required>${sources}</select></label>`:''}
  ${stockKind!=='issue'?`<label>${stockKind==='transfer'?'Nach Lagerort':'Einlagern bei'}<select name="toId">${destinations}</select></label>`:''}
  <label>Mengeneingabe<select name="unitMode"><option value="units">Einheiten (${esc(ITEM_UNITS[item.unit]||item.unit)})</option>${pairEligible(item)?'<option value="pairs">Paare (1 Paar = 2 Stück)</option>':''}<option value="packs">Packungen à ${esc(stockQuantity(item.packSize??1))} ${esc(ITEM_UNITS[item.unit]||item.unit)}</option></select></label>
- <label>Menge<input name="quantity" type="number" inputmode="decimal" min="0.001" step="0.001" max="1000000" required placeholder="z. B. 2"></label><p class="lager-stock-help">1 Packung wird mit der beim Artikel hinterlegten Packungsgröße multipliziert. Paare zählen als 2 Stück.</p>
+ <label>Menge<input name="quantity" type="number" inputmode="decimal" min="0.001" step="0.001" max="1000000" required value="1" placeholder="z. B. 2"></label><div class="lager-fast-chips" aria-label="Schnellmengen">${quickBookingDefaults(item,stockKind).chips.map(([qty,mode,label])=>`<button type="button" class="secondary-button" data-stock-preset="${qty}" data-stock-preset-mode="${mode}">${esc(label)}</button>`).join('')}</div><p class="lager-stock-help">1 Packung wird mit der beim Artikel hinterlegten Packungsgröße multipliziert. Paare zählen als 2 Stück.</p>
  <button class="primary-button" type="submit">${esc(STOCK_ACTIONS[stockKind])} buchen</button>
  ${stockEvents.filter(e=>e.itemId===item.id).slice(-5).reverse().length?`<div class="lager-stock-history"><strong>Letzte Buchungen</strong>${stockEvents.filter(e=>e.itemId===item.id).slice(-5).reverse().map(e=>`<div><span>${esc(STOCK_ACTIONS[e.type]||e.type)} · ${esc(new Date(e.createdAt).toLocaleDateString('de-AT'))}</span><span>${esc(stockQuantity(e.quantity))} ${esc(ITEM_UNITS[item.unit]||item.unit)}</span></div>`).join('')}</div>`:''}
  <p class="lager-stock-help">Packungsbuchungen werden automatisch in Grundeinheiten umgerechnet. Buchungen ändern nur den Bestand, nicht die Artikelnummer oder den Lagerort anderer Positionen. Maximal drei Nachkommastellen.</p></form>`;
@@ -148,6 +149,7 @@ function bindTemplates(el){
    const field=formEl.elements.namedItem(key);
    if(field && 'value' in field)field.value=String(value);
   }
+  formEl.elements.namedItem('initialUnitMode')?.dispatchEvent(new Event('change',{bubbles:true}));
   formEl.querySelector('[name="name"]')?.focus();
  });
 }
@@ -353,6 +355,7 @@ function draw(preselect=''){
  const stockFrm=el.querySelector('#lagerStockForm');
  const refreshStockUnit=()=>{if(!stockFrm)return;const s=stockFrm.elements.namedItem('unitMode').value,qty=stockFrm.elements.namedItem('quantity');qty.step=s==='units'&&!['stk','pack','set'].includes(stockSelected?.unit)?'0.001':'1';qty.min=qty.step==='1'?'1':'0.001';};
  stockFrm?.elements.namedItem('unitMode')?.addEventListener('change',refreshStockUnit);refreshStockUnit();
+ stockFrm?.querySelectorAll('[data-stock-preset]')?.forEach(btn=>btn.addEventListener('click',()=>{stockFrm.elements.namedItem('unitMode').value=btn.dataset.stockPresetMode;stockFrm.elements.namedItem('quantity').value=btn.dataset.stockPreset;refreshStockUnit();}));
  el.querySelector('#lagerStockForm')?.addEventListener('submit',async event=>{
   event.preventDefault();const frm=event.currentTarget;
   const submit=frm.querySelector('[type="submit"]');submit.disabled=true;
@@ -378,9 +381,32 @@ function draw(preselect=''){
    try{const draft={name:value.name,unit:value.unit,type:value.type,packSize:value.packSize,pairCounting:value.pairCounting};value.quantity=Number(value.quantity)===0?0:interpretQuantity(draft,value.quantity,value.initialUnitMode||'units').baseQuantity;}
    catch(e){status('Mengenprüfung: '+e.message);return;}
   }
+  const matching=!editId?compatibleMatches(items,value.name,value.unit,value.type):[];
+  const otherNames=!editId?exactNameMatches(items,value.name).filter(x=>!matching.includes(x)):[];
+  let existingTarget='';
+  if(matching.length){
+   const chosen=matching[0];
+   if(!confirm(`„${chosen.name}“ (${chosen.code}) ist bereits vorhanden.\nOK: vorhandenen Bestand erhöhen.\nAbbrechen: keine Änderung; bei Bedarf Namen unterscheiden.`))return;
+   existingTarget=chosen.id;
+  }else if(otherNames.length&&!confirm(`Ein Artikel mit diesem Namen, aber anderer Einheit/Art existiert bereits. Trotzdem neu anlegen?`))return;
   submit.disabled=true;
-  try{await modify((records,sequence,currentRooms,currentAreas)=>upsertItem(records,value,{id:editId,rooms:currentRooms,areas:currentAreas,makeId:newid,sequence}));
-   editId=null;formOpen=false;draw();status('Artikel erfolgreich gespeichert.');
+  try{await modify((records,sequence,currentRooms,currentAreas,history)=>{
+   if(existingTarget){
+    const index=records.findIndex(x=>x.id===existingTarget);
+    if(index<0||records[index].unit!==value.unit||records[index].type!==value.type)throw new Error('Vorhandener Artikel hat sich geändert. Bitte erneut prüfen.');
+    const updated=records.slice();
+    const target=records[index];
+    const incomingSize=Number(value.packSize||1),currentSize=Number(target.packSize||1);
+    if(value.initialUnitMode==='packs'&&incomingSize!==currentSize&&currentSize!==1)throw new Error('Packungsgröße stimmt nicht überein. Bitte vorhandenen Artikel öffnen.');
+    const chosenItem=value.initialUnitMode==='packs'&&currentSize===1?{...target,packSize:incomingSize}:target;
+    const booked=bookStock(chosenItem,{type:'receive',quantity:value.quantity,toId:value.locationId,unitMode:'units'},new Set(locationChoices(currentRooms,currentAreas).map(x=>x.id)),{makeId:newid});
+    updated[index]=booked.item;
+    return {items:updated,sequence,movements:[...history,booked.event].slice(-3000)};
+   }
+   if(!editId&&exactNameMatches(records,value.name).length)throw new Error('Artikel wurde inzwischen neu angelegt. Bitte Eingabe prüfen.');
+   return upsertItem(records,value,{id:editId,rooms:currentRooms,areas:currentAreas,makeId:newid,sequence});
+  });
+   editId=null;formOpen=false;draw();status(existingTarget?'Vorhandenen Artikel aufgestockt.':'Artikel erfolgreich gespeichert.');
   }catch(e){status('Speichern fehlgeschlagen: '+e.message);submit.disabled=false;}
  });
  bindTracking(el,preselect);

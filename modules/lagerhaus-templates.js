@@ -7,6 +7,10 @@ export const ARTICLE_TEMPLATES=Object.freeze({
  ],
  verbrauch:[
   {id:'verbrauch-reiniger',title:'Reinigungsmittel',values:{name:'Reinigungsmittel',category:'Reinigung',unit:'l',quantity:1,condition:'neu'}},
+  {id:'verbrauch-handschuhe',title:'Nitrilhandschuhe (100er Packung)',values:{name:'Nitrilhandschuhe M',category:'Schutzkleidung',unit:'stk',quantity:1,packSize:100,initialUnitMode:'packs',condition:'neu',pairCounting:'auto'}},
+  {id:'verbrauch-muellbeutel',title:'Müllbeutel (20er Rolle)',values:{name:'Müllbeutel',category:'Reinigung',unit:'stk',quantity:1,packSize:20,initialUnitMode:'packs',condition:'neu'}},
+  {id:'verbrauch-putztuecher',title:'Putztücher',values:{name:'Putztücher',category:'Reinigung',unit:'stk',quantity:5,condition:'neu'}},
+  {id:'verbrauch-kabel',title:'Elektrokabel',values:{name:'Elektrokabel',category:'Elektro',unit:'m',quantity:5,condition:'neu'}},
   {id:'verbrauch-schrauben',title:'Schrauben',values:{name:'Schrauben',category:'Kleinteile',unit:'stk',quantity:1,condition:'neu'}},
   {id:'verbrauch-klebeband',title:'Klebeband',values:{name:'Klebeband',category:'Material',unit:'stk',quantity:1,condition:'neu'}}
  ],

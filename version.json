@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.27.2",
-  "build": "LUX01 – Lagerhaus: Mengen, Paarzählung und Packungsgrößen",
+  "version": "0.27.3",
+  "build": "LUX02 – Schnelleinlagerung, Schnellentnahme, Duplikat-Schutz und Vorlagen",
   "release_date": "2026-11-13"
 }

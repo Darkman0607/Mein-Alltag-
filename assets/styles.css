@@ -891,3 +891,14 @@ body.home-mode .nav-item .bw-nav-svg,body.reward-mode .nav-item .bw-nav-svg{disp
 .bw-module[data-open="hausservice"] span{line-height:1.02}
 .bw-reward-logo{display:block;height:67px;line-height:67px;margin-top:-4px}
 .bw-reward-logo img{height:67px;width:106px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 8px #176eba66)}
+
+/* Lagerhaus LUX02: schnelle, gut lesbare Handybuchungen ohne 3D-Pflicht */
+.lager-fast-templates{margin:13px 0 6px}.lager-fast-templates>span{display:block;font-size:12px;font-weight:750;color:#c0dfdd;margin-bottom:8px}
+.lager-fast-templates>div{display:flex;overflow-x:auto;gap:7px;scrollbar-width:thin;padding-bottom:8px}.lager-fast-templates button{white-space:nowrap;min-height:43px;padding:8px 12px;flex-shrink:0}
+.lager-fast-recent-item{display:block}.lager-fast-recent-main strong{display:block;font-size:15px}.lager-fast-recent-main small{display:block;margin:5px 0;color:#c9d9d8;font-size:13px}
+.lager-fast-recent-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.lager-fast-recent-actions button{min-height:45px;font-weight:700;padding:8px 6px;font-size:14px}
+.lager-fast-booking{margin:13px 0;border:1px solid #79bca8;border-radius:14px;background:#0b202b;padding:14px}.lager-fast-book-head{display:flex;align-items:flex-start;justify-content:space-between;gap:9px}.lager-fast-book-head strong{display:block;font-size:17px}.lager-fast-book-head small{display:block;color:#c0d3d9;margin:5px 0 12px}.lager-fast-book-head button{min-height:40px;min-width:42px}
+.lager-fast-booking label{display:block;font-size:14px;color:#e1f0ed;font-weight:700;margin:10px 0}.lager-fast-booking select,.lager-fast-booking input{display:block;width:100%;margin-top:6px;min-height:48px;background:#102b39;border:1px solid #71959b;border-radius:10px;padding:10px;color:#f3fdfa;font-size:16px}
+.lager-fast-chips{display:flex;flex-wrap:wrap;gap:8px;margin:11px 0}.lager-fast-chips button{min-height:43px;padding:8px 13px}.lager-fast-confirm{width:100%;min-height:53px;font-size:16px}
+.lager-fast-duplicate{background:#252f2d;border:1px solid #d7b35a;border-radius:12px;padding:12px;margin:14px 0}.lager-fast-duplicate p{margin:0 0 8px;font-weight:700;color:#ffe4ad}.lager-fast-duplicate-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lager-fast-duplicate-actions button{min-height:48px;white-space:normal}.lager-fast-duplicate small{display:block;font-size:12px;color:#f5dfa9;margin:7px 0}.lager-fast-duplicate label{margin:7px 0}
+@media(max-width:355px){.lager-fast-duplicate-actions{grid-template-columns:1fr}.lager-fast-recent-actions{gap:6px}.lager-fast-recent-actions button{font-size:13px}}
