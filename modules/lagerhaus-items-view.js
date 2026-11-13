@@ -13,7 +13,7 @@ import {PHOTO_INDEX_KEY,PHOTO_CATEGORIES,PHOTO_STAGES,photoKey,coverPhoto,ownerP
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const newid=()=>globalThis.crypto?.randomUUID?.()||`item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-let items=[],rooms=[],areas=[],categories=[],categoryManagerOpen=false,categoryEditId='',categoryFilter='',itemTypeFilter='',favoriteFilter=false,itemSort='name',tagFilter='',selectedItems=new Set(),editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[],trackingItemId=null,trackingRecordId=null,trackingOperation=null,photos=[],photoOpen=false,photoType='item',photoTarget='',photoBusy=false,photoFilterCategory='',photoFilterStage='',photoFilterSearch='',photoSort='newest',comparisonBefore='',comparisonAfter='';
+let items=[],rooms=[],areas=[],categories=[],categoryManagerOpen=false,categoryEditId='',categoryFilter='',itemTypeFilter='',favoriteFilter=false,itemSort='name',tagFilter='',advancedFiltersOpen=false,selectedItems=new Set(),editId=null,formOpen=false,query='',operation=Promise.resolve(),stockItemId=null,stockKind='receive',stockEvents=[],trackingItemId=null,trackingRecordId=null,trackingOperation=null,photos=[],photoOpen=false,photoType='item',photoTarget='',photoBusy=false,photoFilterCategory='',photoFilterStage='',photoFilterSearch='',photoSort='newest',comparisonBefore='',comparisonAfter='';
 const option=(value,label,current)=>`<option value="${esc(value)}" ${value===current?'selected':''}>${esc(label)}</option>`;
 function choices(map,current){return Object.entries(map).map(([v,l])=>option(v,l,current)).join('');}
 function locationSelect(current){return locationChoices(rooms,areas).map(c=>option(c.id,c.label,current)).join('');}
@@ -94,7 +94,7 @@ function stockPanel(item){
 }
 function positionsHtml(item){
  const positions=stockPositions(item);
- return positions.length?`<div class="lager-stock-positions">${positions.map(pos=>{const location=resolveItemLocation(pos.locationId,rooms,areas),href=navigationHref(pos.locationId,rooms,areas);return `<div class="lager-l14-position"><span>${esc(location.label)}${href?`<a class="lager-l14-jump" href="${esc(href)}" aria-label="${esc(item.name)} am Lagerort ${esc(location.label)} in der 3D-Ansicht anzeigen">📍 3D anzeigen</a>`:'<small class="lager-l14-no-place">Kein 3D-Ziel</small>'}</span><strong>${esc(quantityLabel(item,pos.quantity))}</strong></div>`;}).join('')}</div>`:'<p class="lager-stock-empty">Kein Bestand auf Lager</p>';
+ return positions.length?`<div class="lager-stock-positions">${positions.map(pos=>{const location=resolveItemLocation(pos.locationId,rooms,areas),room=rooms.find(r=>r.id===pos.locationId),href=room?.locationMode==='simple'?'':navigationHref(pos.locationId,rooms,areas);return `<div class="lager-l14-position"><span>${esc(location.label)}${href?`<a class="lager-l14-jump" href="${esc(href)}" aria-label="${esc(item.name)} am Lagerort ${esc(location.label)} in der 3D-Ansicht anzeigen">📍 3D anzeigen</a>`:'<small class="lager-l14-no-place">Listenlagerort</small>'}</span><strong>${esc(quantityLabel(item,pos.quantity))}</strong></div>`;}).join('')}</div>`:'<p class="lager-stock-empty">Kein Bestand auf Lager</p>';
 }
 function templateSelect(type){
  return `<option value="">Ohne Vorlage – selbst erfassen</option>${templatesFor(type).map(t=>option(t.id,t.title,'')).join('')}`;
@@ -160,7 +160,7 @@ function card(item){
  const stock=stockAlert(item);
  const cover=coverPhoto(photos,'item',item.id),count=ownerPhotos(photos,'item',item.id).length;
  return `<article class="lager-item-card">${cover?`<img class="lager-item-cover" src="${esc(cover.thumbnail)}" alt="Hauptfoto von ${esc(item.name)}" loading="lazy">`:''}<div class="lager-item-card-top"><span class="lager-identifier">${esc(item.code)}</span><span class="lager-item-type">${esc(ITEM_TYPES[item.type]||'Sonstiges')}</span></div>
- <div class="lager-l13-title"><h3>${esc(item.name)}</h3><button type="button" aria-label="${item.favorite?'Favorit entfernen':'Als Favorit markieren'}" title="Favorit umschalten" class="lager-favorite-toggle ${item.favorite?'is-favorite':''}" data-favorite-toggle="${esc(item.id)}">${item.favorite?'★':'☆'}</button></div><p class="lager-item-path">⌖ ${stockPositions(item).length>1?'Mehrere Lagerorte':esc(loc.label)}</p>${item.useArea?`<p class="lager-fast-use">🧽 Für ${esc(item.useArea)}</p>`:''}
+ <div class="lager-l13-title"><h3>${esc(item.name)}</h3><button type="button" aria-label="${item.favorite?'Favorit entfernen':'Als Favorit markieren'}" title="Favorit umschalten" class="lager-favorite-toggle ${item.favorite?'is-favorite':''}" data-favorite-toggle="${esc(item.id)}">${item.favorite?'★':'☆'}</button></div><p class="lager-item-path">⌖ ${stockPositions(item).length>1?stockPositions(item).length+' Lagerorte – Mengen unten aufgeschlüsselt':esc(loc.label)}</p>${item.useArea?`<p class="lager-fast-use">🧽 Für ${esc(item.useArea)}</p>`:''}
  <div class="lager-item-facts"><span><strong>${esc(quantityLabel(item,stock.total))}</strong></span>${Number(item.packSize??1)>1?`<span>1 Packung = ${esc(quantityLabel(item,item.packSize))}</span>`:''}<span class="lager-l13-category-badge" style="--category-accent:${CATEGORY_COLORS[categories.find(c=>c.id===item.categoryId)?.color]||CATEGORY_COLORS.slate}">${esc(categories.find(c=>c.id===item.categoryId)?.icon||'📦')} ${esc(categories.find(c=>c.id===item.categoryId)?categoryLabel(categories.find(c=>c.id===item.categoryId),categories):item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
  ${stock.low?`<p class="lager-stock-warning">⚠ Mindestbestand erreicht (${esc(stockQuantity(stock.minimumStock))} ${esc(ITEM_UNITS[item.unit]||item.unit)})</p>`:''}
  ${positionsHtml(item)}
@@ -307,7 +307,7 @@ function bindPhotoPanel(el,preselect){
   finally{btn.disabled=false;}
  });
 }
-function currentFiltered(){return filterItems(items,{search:query,categoryId:categoryFilter,type:itemTypeFilter,favorites:favoriteFilter,sort:itemSort,tag:tagFilter},categories);}
+function currentFiltered(){return filterItems(items,{search:query,categoryId:categoryFilter,type:itemTypeFilter,favorites:favoriteFilter,sort:itemSort,tag:tagFilter},categories,item=>stockPositions(item).map(p=>resolveItemLocation(p.locationId,rooms,areas).label).join(' '));}
 function categoryOptions(selected=''){return `<option value="">Alle Kategorien</option>`+categories.map(c=>option(c.id,`${c.icon} ${categoryLabel(c,categories)}`,selected)).join('');}
 function categoryManagerHtml(){
  if(!categoryManagerOpen)return '';
@@ -320,10 +320,12 @@ function categoryManagerHtml(){
  <label>Suchbegriffe / Schreibvarianten (Komma getrennt)<input name="aliases" maxlength="350" placeholder="z. B. Handschuh, Gloves" value="${esc((edit?.aliases||[]).join(', '))}"></label><div class="lager-item-actions"><button type="submit" class="primary-button">${edit?'Kategorie speichern':'+ Kategorie erstellen'}</button>${edit?'<button id="lagerCategoryEditCancel" type="button" class="secondary-button">Abbrechen</button>':''}</div></form>
  <div class="lager-l13-category-list">${categories.length?categories.map(c=>`<article style="--category-accent:${CATEGORY_COLORS[c.color]||CATEGORY_COLORS.slate}"><span class="lager-l13-category-icon">${esc(c.icon||'📦')}</span><div><strong>${esc(categoryLabel(c,categories))}</strong><small>${items.filter(i=>i.categoryId===c.id).length} direkte Artikel ${c.aliases?.length?'· '+esc(c.aliases.join(', ')):''}</small></div><button type="button" class="secondary-button" data-cat-edit="${esc(c.id)}">Bearbeiten</button><button type="button" class="secondary-button lager-delete" data-cat-delete="${esc(c.id)}">Löschen</button></article>`).join(''):'<p>Keine Kategorien angelegt.</p>'}</div></section>`;
 }
-function filterToolbar(){return `<section class="lager-l13-toolbar" aria-label="Artikelfilter und Sammelzuordnung"><div class="lager-l13-toolhead"><strong>Finden & ordnen</strong><button type="button" class="secondary-button" id="lagerCategoryOpen">⚙ Kategorien verwalten</button></div>
- <div class="lager-l13-filter-grid"><label>Kategorie<select id="lagerFilterCategory">${categoryOptions(categoryFilter)}</select></label><label>Artikeltyp<select id="lagerFilterType"><option value="">Alle Typen</option>${choices(ITEM_TYPES,itemTypeFilter)}</select></label><label>Sortieren<select id="lagerFilterSort">${option('name','Name A–Z',itemSort)}${option('name-desc','Name Z–A',itemSort)}${option('recent','Neueste zuerst',itemSort)}${option('quantity','Kleinster Bestand zuerst',itemSort)}</select></label><label>Schlagwort<input id="lagerFilterTag" type="search" value="${esc(tagFilter)}" placeholder="z. B. Arbeitsschutz"></label></div>
- <label class="lager-l13-select"><input type="checkbox" id="lagerFilterFav" ${favoriteFilter?'checked':''}> Nur Favoriten ★</label>
- <div class="lager-l13-bulk"><span id="lagerBulkCount">${selectedItems.size} ausgewählt</span><button type="button" class="secondary-button" id="lagerBulkSelectVisible">Sichtbare auswählen</button><button type="button" class="secondary-button" id="lagerBulkClear">Auswahl löschen</button><select id="lagerBulkCategory" aria-label="Zielkategorie für ausgewählte Artikel"><option value="">Allgemein / keine Kategorie</option>${categories.map(c=>option(c.id,categoryLabel(c,categories),'' )).join('')}</select><button type="button" class="primary-button" id="lagerBulkApply">Zuordnen</button></div></section>`;}
+function filterToolbar(){return `<section class="lager-l13-toolbar lager-lux03-toolbar" aria-label="Artikelfilter">
+ <div class="lager-lux03-mainfilters"><label>Kategorie<select id="lagerFilterCategory">${categoryOptions(categoryFilter)}</select></label><label class="lager-l13-select lager-lux03-favorites"><input type="checkbox" id="lagerFilterFav" ${favoriteFilter?'checked':''}> ★ Nur Favoriten</label></div>
+ <details id="lagerMoreFilters" ${advancedFiltersOpen?'open':''}><summary>⚙ Erweiterte Filter und Sammelaktionen</summary>
+ <div class="lager-l13-filter-grid"><label>Artikeltyp<select id="lagerFilterType"><option value="">Alle Typen</option>${choices(ITEM_TYPES,itemTypeFilter)}</select></label><label>Sortieren<select id="lagerFilterSort">${option('name','Name A–Z',itemSort)}${option('name-desc','Name Z–A',itemSort)}${option('recent','Neueste zuerst',itemSort)}${option('quantity','Kleinster Bestand zuerst',itemSort)}</select></label><label>Schlagwort<input id="lagerFilterTag" type="search" value="${esc(tagFilter)}" placeholder="z. B. Arbeitsschutz"></label></div>
+ <button type="button" class="secondary-button" id="lagerCategoryOpen">⚙ Kategorien verwalten</button>
+ <div class="lager-l13-bulk"><span id="lagerBulkCount">${selectedItems.size} ausgewählt</span><button type="button" class="secondary-button" id="lagerBulkSelectVisible">Sichtbare auswählen</button><button type="button" class="secondary-button" id="lagerBulkClear">Auswahl löschen</button><select id="lagerBulkCategory" aria-label="Zielkategorie für ausgewählte Artikel"><option value="">Allgemein / keine Kategorie</option>${categories.map(c=>option(c.id,categoryLabel(c,categories),'' )).join('')}</select><button type="button" class="primary-button" id="lagerBulkApply">Zuordnen</button></div></details></section>`;}
 function draw(preselect=''){
  const el=document.getElementById('lagerItemContent');if(!el)return;
  const filtered=currentFiltered();
@@ -337,8 +339,8 @@ function draw(preselect=''){
  ${formOpen?form(selected,preselect):''}
  ${stockSelected?stockPanel(stockSelected):''}
  ${trackingSelected?trackingPanel(trackingSelected):''}
+ <label class="lager-item-search-label" for="lagerItemSearch">🔎 Artikel suchen</label><input id="lagerItemSearch" class="lager-item-search" type="search" placeholder="Name, Lagerort, Artikelnummer – Tippfehler erlaubt" value="${esc(query)}">
  ${filterToolbar()}
- <label class="lager-item-search-label" for="lagerItemSearch">Artikel durchsuchen</label><input id="lagerItemSearch" class="lager-item-search" type="search" placeholder="Name, Seriennummer, Kennung, Kategorie …" value="${esc(query)}">
  <div id="lagerItemList">${filtered.length?filtered.map(card).join(''):'<p class="lager-hint">Keine Artikel vorhanden oder keine Treffer. Mit „+ Artikel“ kannst du deinen ersten Gegenstand erfassen.</p>'}</div>`;
  el.querySelector('#lagerPhotoOpen').addEventListener('click',()=>{photoOpen=!photoOpen;photoType='item';photoTarget=items[0]?.id||'';resetPhotoSelection();draw(preselect);});
  bindPhotoPanel(el,preselect);
@@ -350,6 +352,7 @@ function draw(preselect=''){
  newItemForm?.elements.namedItem('unit')?.addEventListener('change',updateItemUnit);
  newItemForm?.elements.namedItem('initialUnitMode')?.addEventListener('change',updateItemUnit);updateItemUnit();
  bindCategoryControls(el,preselect);
+ el.querySelector('#lagerMoreFilters')?.addEventListener('toggle',e=>{advancedFiltersOpen=e.currentTarget.open;});
  el.querySelectorAll('[data-stock-mode]').forEach(b=>b.addEventListener('click',()=>{stockKind=b.dataset.stockMode;draw(preselect);}));
  el.querySelector('#lagerStockCancel')?.addEventListener('click',()=>{stockItemId=null;draw(preselect);});
  const stockFrm=el.querySelector('#lagerStockForm');
@@ -485,7 +488,7 @@ function bindTracking(el,preselect){
 }
 export function renderLagerartikel(){return `<div class="lager-heading"><span class="eyebrow">MEIN ALLTAG · LAGERHAUS</span><h1>Meine Artikel</h1><p>Artikel, Mengen und mehrere Lagerorte verwalten – lokal und offline.</p></div><div class="lager-actions"><a href="#/module/lagerhaus" class="lager-text-link">← Lagerbereiche</a><a class="secondary-button" href="#/lagerhaus/navigator">📍 Lager-Navigator</a><a class="secondary-button" href="#/lagerhaus/service">🔧 Geräte & Service</a></div><div class="lager-status" id="lagerItemStatus" role="status" aria-live="polite">Artikel werden geladen …</div><div id="lagerItemContent"></div>`;}
 export async function mountLagerartikel(preselectRoomId=''){
- editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;photoOpen=false;photoType='item';photoTarget='';resetPhotoSelection();query='';categoryManagerOpen=false;categoryEditId='';categoryFilter='';itemTypeFilter='';favoriteFilter=false;itemSort='name';tagFilter='';selectedItems.clear();try{await load();if(!document.getElementById('lagerItemContent'))return;
+ editId=null;formOpen=false;stockItemId=null;stockKind='receive';trackingItemId=null;trackingRecordId=null;trackingOperation=null;photoOpen=false;photoType='item';photoTarget='';resetPhotoSelection();query='';categoryManagerOpen=false;categoryEditId='';categoryFilter='';itemTypeFilter='';favoriteFilter=false;itemSort='name';tagFilter='';advancedFiltersOpen=false;selectedItems.clear();try{await load();if(!document.getElementById('lagerItemContent'))return;
   draw(rooms.some(r=>r.id===preselectRoomId)?preselectRoomId:'');status(`${items.length} Artikel geladen · offline gespeichert.`);
  }catch(e){status('Artikel konnten nicht geladen werden: '+e.message);}
 }

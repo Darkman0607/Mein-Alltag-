@@ -1,4 +1,5 @@
 /** L13 – independent category taxonomy, tags, favorites and deterministic searching. */
+import {matchesSmartQuery} from './lagerhaus-search.js';
 export const CATEGORY_KEY='items.categories.v1';
 export const CATEGORY_COLORS=Object.freeze({slate:'#64748b',blue:'#2563eb',teal:'#0f766e',green:'#15803d',amber:'#b45309',violet:'#7c3aed',rose:'#be185d'});
 export const CATEGORY_STARTERS=Object.freeze([
@@ -86,17 +87,16 @@ export function migrateCategories(items,existing=[],makeId){
  });
  return {items:next,categories,changed};
 }
-export function matchesItem(item,search,categories=[]){
+export function matchesItem(item,search,categories=[],locationText=''){
  const category=categories.find(c=>c.id===item.categoryId);
  const path=category?categoryAncestors(category.id,categories).join(' '):item.category;
- const terms=[item.name,item.code,item.category,path,category?.aliases?.join(' '),item.tags?.join(' '),item.brand,item.articleNumber,item.note,
+ const terms=[item.name,item.code,item.category,path,category?.aliases?.join(' '),item.tags?.join(' '),item.brand,item.articleNumber,item.note,locationText,
   ...Object.values(item.properties||{}),...(item.containers||[]).flatMap(c=>[c.code,c.label]),...(item.devices||[]).flatMap(d=>[d.code,d.label,d.serialNumber])];
- const text=searchKey(terms.join(' ')),tokens=searchKey(search).split(' ').filter(Boolean);
- return tokens.every(token=>text.includes(token));
+ return matchesSmartQuery(terms.join(' '),search);
 }
-export function filterItems(items,filters={},categories=[]){
+export function filterItems(items,filters={},categories=[],locationTextForItem=()=>''){
  const catSet=filters.categoryId?categoryAndChildren(filters.categoryId,categories):null;
- const filtered=items.filter(i=>matchesItem(i,filters.search||'',categories)
+ const filtered=items.filter(i=>matchesItem(i,filters.search||'',categories,locationTextForItem(i))
   &&(!catSet||catSet.has(i.categoryId))
   &&(!filters.type||i.type===filters.type)
   &&(!filters.favorites||i.favorite===true)

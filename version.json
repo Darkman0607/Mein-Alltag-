@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.27.3",
-  "build": "LUX02 – Schnelleinlagerung, Schnellentnahme, Duplikat-Schutz und Vorlagen",
+  "version": "0.27.4",
+  "build": "LUX03 – Sofortsuche, Tippfehler-Toleranz, Listenlagerorte, reduzierte Filter",
   "release_date": "2026-11-13"
 }
