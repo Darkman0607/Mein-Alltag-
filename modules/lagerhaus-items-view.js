@@ -7,6 +7,7 @@ import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStoc
 import {addContainer,updateContainer,addDevice,updateDevice,containerState,CONTAINER_STATES,DEVICE_STATES,trackedSummary} from './lagerhaus-tracking.js';
 import {pairEligible,pairsLabel,consumptionQuantity,quantityLabel} from './lagerhaus-consumption.js';
 import {compatibleMatches,exactNameMatches,quickBookingDefaults} from './lagerhaus-quick.js';
+import {inventoryIcon,ITEM_TYPE_DESCRIPTIONS} from './lagerhaus-ui.js';
 import {CATEGORY_KEY,CATEGORY_COLORS,CATEGORY_STARTERS,cleanTags,categoryLabel,addCategory,editCategory,removeCategory,bulkAssign,toggleFavorite,migrateCategories,filterItems} from './lagerhaus-categories.js';
 import {serviceStatus,serviceReceiptKeys} from './lagerhaus-service.js';
 import {PHOTO_INDEX_KEY,PHOTO_CATEGORIES,PHOTO_STAGES,photoKey,coverPhoto,ownerPhotos,photoHistory,photoDate,suggestedComparison,comparisonPhotos,readPhotoIndex,readPhotoBlob,preparePhoto,savePhoto,changePhoto,removePhoto} from './lagerhaus-photos.js';
@@ -108,14 +109,14 @@ function propertyFields(type,values={}){
  }).join('');
 }
 function form(item,requestedLocation=''){
- const a=item||{name:'',type:'geraet',category:'',quantity:1,unit:'stk',condition:'gut',locationId:requestedLocation,brand:'',articleNumber:'',note:'',properties:{},minimumStock:0,packSize:1};
+ const a=item||{name:'',type:'verbrauch',category:'',quantity:1,unit:'stk',condition:'gut',locationId:requestedLocation,brand:'',articleNumber:'',note:'',properties:{},minimumStock:0,packSize:1};
  const location=resolveItemLocation(a.locationId,rooms,areas);
  return `<form id="lagerItemForm" class="lager-item-form">
  <div class="lager-item-form-title"><h2>${item?'Artikel bearbeiten':'Neuen Artikel erfassen'}</h2><button type="button" class="secondary-button" id="lagerItemCancel">Abbrechen</button></div>
  ${item?`<span class="lager-identifier">${esc(item.code)}</span>`:''}
  <div class="lager-item-grid"><label>Artikeltyp<select name="type" id="lagerItemType">${choices(ITEM_TYPES,a.type)}</select></label><label>Vorlage (optional)<select id="lagerItemTemplate" aria-label="Artikelvorlage">${templateSelect(a.type)}</select></label></div>
- <p class="lager-item-quick-tip">Schnellerfassung: Name, Menge und Lagerort genügen. Weitere Angaben sind freiwillig.</p>
- <label>Artikelname *<input name="name" required maxlength="100" autocomplete="off" placeholder="z. B. Akkuschrauber" value="${esc(a.name)}"></label>
+ <p class="lager-item-quick-tip">📦 Für Reinigungsmittel oder Handschuhe: Verbrauchsmaterial wählen. Für Motorsäge oder Rasenmäher: Gerät wählen. Zusätzliche Felder bleiben freiwillig.</p>
+ <label>Artikelname *<input name="name" required maxlength="100" autocomplete="off" placeholder="z. B. Einweghandschuhe oder Akkuschrauber" value="${esc(a.name)}"></label>
  <div class="lager-item-grid"><label>${item?'Gesamtmenge (nur über Buchung änderbar)':'Anfangsbestand *'}<input name="quantity" type="number" inputmode="decimal" min="0" max="1000000" step="${['stk','pack','set'].includes(a.unit)?1:0.001}" required value="${esc(a.quantity)}" ${item?'readonly':''}></label><label>Grundeinheit<select name="unit" ${item&&stockTotal(item)>0?'disabled':''}>${choices(ITEM_UNITS,a.unit)}</select></label></div>
  ${!item?`<label>Anfangsbestand erfassen als<select name="initialUnitMode"><option value="units">Grundeinheiten</option><option value="pairs">Paare (Handschuhe / aktivierte Paarzählung)</option><option value="packs">Packungen (Inhalt je Packung angeben)</option></select></label><label>Grundeinheiten je Packung<input name="packSize" type="number" min="0.001" max="1000000" step="1" value="${esc(a.packSize??1)}"></label>`:''}
  <label>${item?'Lagerort (über Buchung ändern)':'Erster Lagerort'}<select name="locationId" ${item?'disabled':''}>${locationSelect(location.valid?a.locationId:'')}</select></label>
@@ -156,21 +157,40 @@ function bindTemplates(el){
 
 function card(item){
  const loc=resolveItemLocation(item.locationId,rooms,areas);
- const props=detailedProperties(item);
- const stock=stockAlert(item);
+ const props=detailedProperties(item),stock=stockAlert(item),positions=stockPositions(item);
  const cover=coverPhoto(photos,'item',item.id),count=ownerPhotos(photos,'item',item.id).length;
- return `<article class="lager-item-card">${cover?`<img class="lager-item-cover" src="${esc(cover.thumbnail)}" alt="Hauptfoto von ${esc(item.name)}" loading="lazy">`:''}<div class="lager-item-card-top"><span class="lager-identifier">${esc(item.code)}</span><span class="lager-item-type">${esc(ITEM_TYPES[item.type]||'Sonstiges')}</span></div>
- <div class="lager-l13-title"><h3>${esc(item.name)}</h3><button type="button" aria-label="${item.favorite?'Favorit entfernen':'Als Favorit markieren'}" title="Favorit umschalten" class="lager-favorite-toggle ${item.favorite?'is-favorite':''}" data-favorite-toggle="${esc(item.id)}">${item.favorite?'★':'☆'}</button></div><p class="lager-item-path">⌖ ${stockPositions(item).length>1?stockPositions(item).length+' Lagerorte – Mengen unten aufgeschlüsselt':esc(loc.label)}</p>${item.useArea?`<p class="lager-fast-use">🧽 Für ${esc(item.useArea)}</p>`:''}
- <div class="lager-item-facts"><span><strong>${esc(quantityLabel(item,stock.total))}</strong></span>${Number(item.packSize??1)>1?`<span>1 Packung = ${esc(quantityLabel(item,item.packSize))}</span>`:''}<span class="lager-l13-category-badge" style="--category-accent:${CATEGORY_COLORS[categories.find(c=>c.id===item.categoryId)?.color]||CATEGORY_COLORS.slate}">${esc(categories.find(c=>c.id===item.categoryId)?.icon||'📦')} ${esc(categories.find(c=>c.id===item.categoryId)?categoryLabel(categories.find(c=>c.id===item.categoryId),categories):item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
- ${stock.low?`<p class="lager-stock-warning">⚠ Mindestbestand erreicht (${esc(stockQuantity(stock.minimumStock))} ${esc(ITEM_UNITS[item.unit]||item.unit)})</p>`:''}
- ${positionsHtml(item)}
- ${(item.containers||[]).length||((item.devices||[]).length)?`<p class="lager-item-extra">${(item.containers||[]).length?`Gebinde: ${trackedSummary(item).full} voll · ${trackedSummary(item).open} angebrochen · ${trackedSummary(item).empty} leer`:''} ${(item.devices||[]).length?`Einzelgeräte: ${trackedSummary(item).devices}`:''}</p>`:''}
- ${(item.brand||item.articleNumber)?`<p class="lager-item-extra">${esc([item.brand,item.articleNumber].filter(Boolean).join(' · '))}</p>`:''}${props.length?`<dl class="lager-item-properties-list">${props.map(p=>`<div><dt>${esc(p.label)}</dt><dd>${esc(p.value)}</dd></div>`).join('')}</dl>`:''}${item.note?`<p class="lager-item-note">${esc(item.note)}</p>`:''}
- ${(item.tags||[]).length?`<div class="lager-l13-tags">${item.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
- <label class="lager-l13-select"><input type="checkbox" data-bulk-id="${esc(item.id)}" ${selectedItems.has(item.id)?'checked':''}> Für Sammelzuordnung auswählen</label>
- <div class="lager-stock-actions"><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="receive">+ Einlagern</button><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="issue" ${stock.empty?'disabled':''}>− Entnehmen</button><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="transfer" ${stock.empty?'disabled':''}>↔ Umlagern</button></div>
- ${(item.type==='geraet'||item.type==='verbrauch')?`<button type="button" class="primary-button lager-track-main-button" data-track-open="${esc(item.id)}">${item.type==='geraet'?'⚙ Einzelgeräte':'▣ Gebinde'} verwalten</button>`:''}
- <div class="lager-item-actions"><button type="button" class="secondary-button" data-photo-item="${esc(item.id)}">📷 Fotos (${count})</button><button type="button" class="secondary-button" data-item-edit="${esc(item.id)}">Bearbeiten</button><button type="button" class="secondary-button lager-delete" data-item-delete="${esc(item.id)}">Löschen</button></div></article>`;
+ const type=ITEM_TYPES[item.type]||'Artikel';
+ const where=positions.length>1?`${positions.length} Lagerorte`:(positions.length?resolveItemLocation(positions[0].locationId,rooms,areas).label:loc.label);
+ return `<article class="lager-item-card lager-lux04-card" data-item-type="${esc(item.type||'sonstiges')}">
+ <div class="lager-lux04-main">
+  <div class="lager-lux04-thumb">${cover?`<img src="${esc(cover.thumbnail)}" alt="Hauptfoto von ${esc(item.name)}" loading="lazy">`:inventoryIcon(item.type)}</div>
+  <div class="lager-lux04-mainbody"><div class="lager-lux04-subheading"><span class="lager-lux04-type">${esc(type)}</span><span class="lager-lux04-code">${esc(item.code)}</span></div>
+   <div class="lager-l13-title"><h3>${esc(item.name)}</h3><button type="button" aria-label="${item.favorite?'Favorit entfernen':'Als Favorit markieren'}" title="Favorit umschalten" class="lager-favorite-toggle ${item.favorite?'is-favorite':''}" data-favorite-toggle="${esc(item.id)}">${item.favorite?'★':'☆'}</button></div>
+   <p class="lager-lux04-quantity">${esc(quantityLabel(item,stock.total))}</p>
+   <p class="lager-lux04-location">${inventoryIcon('sonstiges')} <span>${esc(where)}</span></p>
+  </div>
+ </div>
+ ${stock.low?`<p class="lager-stock-warning" role="status">⚠ Nachkauf prüfen – Mindestbestand erreicht</p>`:''}
+ <div class="lager-lux04-primary-actions"><button type="button" class="lager-lux04-add" data-stock-open="${esc(item.id)}" data-kind="receive">+ Einlagern</button><button type="button" class="lager-lux04-remove" data-stock-open="${esc(item.id)}" data-kind="issue" ${stock.empty?'disabled':''}>− Entnehmen</button></div>
+ <details class="lager-lux04-details"><summary>Details, Fotos und weitere Aktionen</summary>
+  <div class="lager-lux04-detailbody">
+   <p class="lager-lux04-detailmeta">${esc(ITEM_TYPE_DESCRIPTIONS[item.type]||'Allgemeiner Lagerartikel')}${Number(item.packSize??1)>1?` · 1 Packung = ${esc(quantityLabel(item,item.packSize))}`:''}</p>
+   ${positionsHtml(item)}
+   <div class="lager-item-facts"><span>${esc(categories.find(c=>c.id===item.categoryId)?categoryLabel(categories.find(c=>c.id===item.categoryId),categories):item.category||'Allgemein')}</span><span>${esc(ITEM_CONDITIONS[item.condition]||'Gut')}</span></div>
+   ${(item.containers||[]).length||((item.devices||[]).length)?`<p class="lager-item-extra">${(item.containers||[]).length?`Gebinde: ${trackedSummary(item).full} voll · ${trackedSummary(item).open} angebrochen · ${trackedSummary(item).empty} leer`:''}${(item.devices||[]).length?` · Einzelgeräte: ${trackedSummary(item).devices}`:''}</p>`:''}
+   ${(item.brand||item.articleNumber)?`<p class="lager-item-extra">${esc([item.brand,item.articleNumber].filter(Boolean).join(' · '))}</p>`:''}
+   ${props.length?`<dl class="lager-item-properties-list">${props.map(p=>`<div><dt>${esc(p.label)}</dt><dd>${esc(p.value)}</dd></div>`).join('')}</dl>`:''}${item.note?`<p class="lager-item-note">${esc(item.note)}</p>`:''}
+   ${(item.tags||[]).length?`<div class="lager-l13-tags">${item.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
+   <div class="lager-lux04-secondary-actions"><button type="button" class="secondary-button" data-stock-open="${esc(item.id)}" data-kind="transfer" ${stock.empty?'disabled':''}>↔ Umlagern</button>
+    ${(item.type==='geraet'||item.type==='verbrauch')?`<button type="button" class="secondary-button" data-track-open="${esc(item.id)}">${item.type==='geraet'?'Geräteakte':'Gebinde'} verwalten</button>`:''}
+    <button type="button" class="secondary-button" data-photo-item="${esc(item.id)}">Fotos (${count})</button>
+    <button type="button" class="secondary-button" data-item-edit="${esc(item.id)}">Bearbeiten</button>
+   </div>
+   <label class="lager-l13-select"><input type="checkbox" data-bulk-id="${esc(item.id)}" ${selectedItems.has(item.id)?'checked':''}> Für Sammelzuordnung auswählen</label>
+   <button type="button" class="secondary-button lager-delete lager-lux04-delete" data-item-delete="${esc(item.id)}">Artikel löschen</button>
+  </div>
+ </details>
+ </article>`;
 }
 function photoTargets(){
  const active=photoType==='item'?items.map(i=>({id:i.id,label:`${i.code} · ${i.name}`})):locationChoices(rooms,areas).filter(x=>x.id);
