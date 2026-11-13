@@ -1,6 +1,7 @@
 /** P03 – one-tap cleaning checklist without the 3D interface. */
 import {getModuleValue} from '../assets/database.js';
 import {ITEM_KEY} from './lagerhaus-items.js';
+import {quantityLabel} from './lagerhaus-consumption.js';
 import {roomTaskGroups,taskCount,QUICK_OPTIONS,defaultQuickTypes,loadQuickTypes,saveQuickTypes,quickMaterialChoices,remainingMaterial,loadCleaningState,loadMaterialPresets,saveMaterialPreset,clearMaterialPreset,sessionElapsed,duration,materialSources,startCleaning,setTimer,setTaskDone,setGroupDone,addMaterial,removeMaterial,cancelCleaning,finishCleaning} from './putzmanager-cleaning.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=n=>String(Number(n)).replace('.',',');
@@ -16,7 +17,8 @@ function tasksHtml(groups,done,enabled,expandedGroups){
  }).join('');
 }
 
-const summarizeLine=line=>`${line.itemName}: ${n(line.quantity)} ${line.unit}`;
+const summarizeLine=line=>`${line.itemName}: ${quantityLabel({name:line.itemName,unit:line.unit,type:'verbrauch',pairCounting:line.pairCounting||'auto'},line.quantity)}`;
+const receiptLine=line=>`${summarizeLine(line)}${Number.isFinite(line.balanceAfter)?' · Danach: '+quantityLabel({name:line.itemName,unit:line.unit,type:'verbrauch',pairCounting:line.pairCounting||'auto'},line.balanceAfter):''}`;
 function quickListHtml(room,selected){
  const options=QUICK_OPTIONS[room.type];if(!options)return '';
  return `<details class="pm-quick-list" data-clean-quick-details><summary>⚡ Schnellliste anpassen <small>(${selected.length} Vorlagen ausgewählt)</small></summary>
@@ -53,7 +55,7 @@ function cleanPanel(room,active,history,sources,preset,expandedGroups,quickTypes
  <div class="pm-clean-summary"><strong>✅ Putzliste</strong><span>${completedAreas} von ${groups.length} Bereichen fertig</span></div>
  <div class="pm-clean-groups">${tasksHtml(groups,active?.doneTaskIds,Boolean(active),expandedGroups)}</div>
  ${active?materialHtml(active,sources,preset):''}
- ${recent.length?`<details class="pm-clean-history"><summary>Letzte Reinigungen (${recent.length})</summary>${recent.map(record=>`<p><strong>${esc(new Date(record.endedAt).toLocaleDateString('de-AT'))}</strong> · ${duration(record.durationMs)} · ${record.doneCount}/${record.totalCount} Aufgaben · ${record.materials.length} Materialpositionen</p>`).join('')}</details>`:''}
+ ${recent.length?`<details class="pm-clean-history"><summary>🧾 Letzte Reinigungen und Lagerabbuchungen (${recent.length})</summary>${recent.map(record=>`<div class="pm-clean-receipt"><strong>${esc(new Date(record.endedAt).toLocaleDateString('de-AT'))} · ${duration(record.durationMs)}</strong><small>${record.doneCount}/${record.totalCount} Aufgaben</small>${record.materials.length?`<ul>${record.materials.map(line=>`<li>− ${esc(receiptLine(line))}</li>`).join('')}</ul>`:'<p>Keine Lagerartikel abgebucht.</p>'}</div>`).join('')}</details>`:''}
  </section>`;
 }
 export async function mountCleaningUi({root,room,notify}){
@@ -99,7 +101,7 @@ export async function mountCleaningUi({root,room,notify}){
    let message='Gespeichert ✓';
    if(action==='start'){await startCleaning(room);message='Reinigung und Stoppuhr gestartet.';}
    else if(action==='pause'||action==='resume'){await setTimer(room.id,action);message=action==='pause'?'Stoppuhr pausiert.':'Stoppuhr läuft wieder.';}
-   else if(action==='finish'){const out=await finishCleaning(room.id);message=`✓ Reinigung abgeschlossen (${duration(out.durationMs)}). ${out.materials.length} Lagerposition(en) abgebucht.${out.reward?.awarded?` 🪙 +${out.reward.coins} Münzen, ★ +${out.reward.xp} XP.`:''}`;}
+   else if(action==='finish'){const out=await finishCleaning(room.id);message=`✓ Reinigung abgeschlossen (${duration(out.durationMs)}). ${out.materials.length?out.materials.length+' Lagerbuchungen: '+out.materials.map(receiptLine).join(' · '):'Kein Material abgebucht.'}${out.reward?.awarded?` 🪙 +${out.reward.coins} Münzen, ★ +${out.reward.xp} XP.`:''}`;}
    else if(action==='discard'){await cancelCleaning(room.id);message='Reinigung verworfen; Lager unverändert.';}
    else if(action==='quick-material'){const source=sources[Number(button.dataset.sourceIndex)];await addMaterial(room.id,source,button.dataset.quantity,button.dataset.mode);message='✓ '+source.name+' vorgemerkt; Lager bleibt bis zum Abschluss unverändert.';}
    else if(action==='remove-material'){await removeMaterial(room.id,button.dataset.lineId);message='Material aus der Vormerkliste entfernt.';}

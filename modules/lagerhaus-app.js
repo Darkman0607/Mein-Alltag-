@@ -14,6 +14,7 @@ import {QUICK_TEMPLATES,exactNameMatches,compatibleMatches,similarMatches,recent
 import {searchInventory} from './lagerhaus-search.js';
 import {addSimpleLocation} from './lagerhaus-simple-locations.js';
 import {inventoryRowsForRoom,inventoryIcon} from './lagerhaus-ui.js';
+import {recentStockActivity,restockWarnings,shoppingListText} from './lagerhaus-activity.js';
 import {FLOOR_MODELS,FLOOR_MAX,floorModel,floorFootprint,availableArticleStock,zoneLines,cleanFloorObject} from './lagerhaus-floor.js';
 import {DEFAULT_AREA_NAME,COMPARTMENT_KINDS,allocateCode,ensureHierarchy,getAllCodes,relocateCompartment,locationPath,defaultCompartmentLabels} from './lagerhaus-hierarchy.js';
 
@@ -49,6 +50,7 @@ let operation=Promise.resolve();
 let rooms=[];
 let areas=[];
 let itemRecords=[];
+let movementRecords=[];
 let fastBookingOpen=null;
 let photoRecords=[];
 let inventoryFurniture=null;
@@ -77,7 +79,7 @@ async function loadState(){
  const changed=ensureHierarchy(all,areaRecords,newId);
  if(changed)await setModuleValues('lagerhaus',[[KEY,all],[AREAS_KEY,areaRecords]]);
  rooms=all;areas=areaRecords;
- const loadedItems=await getModuleValue('lagerhaus',ITEM_KEY);itemRecords=Array.isArray(loadedItems)?loadedItems:[];
+ const [loadedItems,loadedMovements]=await Promise.all([getModuleValue('lagerhaus',ITEM_KEY),getModuleValue('lagerhaus',MOVEMENT_KEY)]);itemRecords=Array.isArray(loadedItems)?loadedItems:[];movementRecords=Array.isArray(loadedMovements)?loadedMovements:[];
  photoRecords=await readPhotoIndex();
  return {all,areaRecords};
 }
@@ -279,6 +281,16 @@ function bindSimpleLocationForm(){
  });
 }
 
+function renderStockChecks(){
+ const node=document.getElementById('lagerStockChecks');if(!node)return;
+ const warnings=restockWarnings(itemRecords),history=recentStockActivity(movementRecords,itemRecords,locationChoices(rooms,areas),15);
+ node.innerHTML=`<section class="lager-restock-panel" id="lagerRestockPanel"><div class="lager-stock-checks-head"><h2>🛒 Nachkauf prüfen</h2><strong>${warnings.length}</strong></div>
+ <p class="lager-hint">Warnungen erscheinen für Artikel, bei denen du einen Mindestbestand eingetragen hast. Einkaufsvorschläge sind unverbindlich.</p>
+ ${warnings.length?`<div class="lager-restock-items">${warnings.map(row=>`<div class="lager-restock-item"><div><strong>${esc(row.name)}</strong><small>Bestand: ${esc(row.availableLabel)} · Minimum: ${esc(row.minimumLabel)}${row.empty?' · LEER':''}</small><small>Vorschlag: ${esc(row.suggestedLabel)}</small></div><button type="button" class="secondary-button" data-restock-item="${esc(row.itemId)}">+ Einlagern</button></div>`).join('')}</div><details class="lager-shopping-copy"><summary>📝 Einkaufszettel anzeigen / kopieren</summary><textarea id="lagerShoppingText" readonly rows="${Math.min(12,2+warnings.length)}" aria-label="Einkaufszettel">${esc(shoppingListText(warnings))}</textarea><button type="button" id="lagerShoppingCopy" class="secondary-button">Einkaufszettel kopieren</button><p class="lager-hint" id="lagerShoppingStatus" role="status">Ein Kauf wird erst mit „Einlagern“ zum Bestand hinzugefügt.</p></details>`:'<p class="lager-hint">Keine Nachkaufwarnung. Mindestbestände stellst du in den Artikeldetails ein.</p>'}</section>
+ <section class="lager-activity-panel"><details><summary>📋 Letzte Lagerbuchungen (${history.length})</summary><p class="lager-hint">Auch Abbuchungen aus dem Putzmanager. Die Historie ändert selbst keine Bestände.</p>${history.length?`<ol class="lager-activity-list">${history.map(row=>`<li><strong>${esc(row.sign)} ${esc(row.quantity)} · ${esc(row.name)}</strong><small>${esc(row.date)} · ${esc(row.context)} · ${esc(row.kind)}</small><small>${esc(row.place)}${row.balanceAfter?' · Danach: '+esc(row.balanceAfter):''}</small></li>`).join('')}</ol>`:'<p class="lager-hint">Noch keine Buchungen gespeichert.</p>'}</details></section>`;
+ node.querySelectorAll('[data-restock-item]').forEach(btn=>btn.addEventListener('click',()=>openFastBooking(btn.dataset.restockItem,'receive')));
+ node.querySelector('#lagerShoppingCopy')?.addEventListener('click',async()=>{const field=node.querySelector('#lagerShoppingText'),msg=node.querySelector('#lagerShoppingStatus');try{if(!navigator.clipboard?.writeText)throw new Error('Zwischenablage nicht verfügbar');await navigator.clipboard.writeText(field.value);msg.textContent='✓ Einkaufszettel kopiert.';}catch(e){field.focus();field.select();msg.textContent='Bitte markierten Text über „Kopieren“ übernehmen.';}});
+}
 function fastRecent(){
  const el=document.getElementById('lagerFastRecent');if(!el)return;
  const recent=recentlyUsedItems(itemRecords,5);
@@ -321,7 +333,7 @@ function openFastBooking(id,kind){
     resultMessage=`${latest[index].name}: ${quantityLabel(latest[index],booked.event.quantity)} ${kind==='issue'?'entnommen':'eingelagert'} · neu ${quantityLabel(booked.item,booked.item.quantity)}.`;
     return [[ITEM_KEY,next],[MOVEMENT_KEY,[...(Array.isArray(values[MOVEMENT_KEY])?values[MOVEMENT_KEY]:[]),booked.event].slice(-3000)]];
    });
-   await loadState();closeFastBooking();fastRecent();searchResults();quickFeedback('✓ '+resultMessage);
+   await loadState();closeFastBooking();fastRecent();searchResults();renderStockChecks();quickFeedback('✓ '+resultMessage);
   }catch(error){quickFeedback('Buchung fehlgeschlagen: '+error.message,true);submit.disabled=false;}
  });
  frm.scrollIntoView({behavior:'smooth',block:'nearest'});qty.focus();
@@ -348,6 +360,7 @@ export function renderLagerhaus(){return `${header('Mein Lagerhaus','Schnell fin
   </form>
   <p id="lagerQuickFeedback" class="lager-fast-feedback" aria-live="polite" role="status"></p>
   <div id="lagerFastRecent" class="lager-fast-recent"><p class="lager-hint">Artikel werden geladen …</p></div><div id="lagerFastBooking" aria-live="polite"></div>
+  <section id="lagerStockChecks" class="lager-stock-checks" aria-label="Bestandskontrolle und Buchungsverlauf"></section>
  </section>
  <details id="lagerHomeAdvanced" class="lager-home-advanced"><summary>Erweiterte Lagerorte und 3D-Werkstatt (optional)</summary>
  <p class="lager-hint">Nur wenn du deine Lagerplätze räumlich aufbauen möchtest. Für Artikel ist das nicht erforderlich.</p>
@@ -425,7 +438,7 @@ function bindQuickForm(){
     message=`${name}: ${quantityLabel(draft,converted.baseQuantity)} gespeichert${useArea?' · für '+useArea:''}.`;
     return [[ITEM_KEY,next],[ITEM_SEQ_KEY,created.sequence]];
    });
-   await loadState();fastRecent();searchResults();refreshDuplicate(true);
+   await loadState();fastRecent();searchResults();renderStockChecks();refreshDuplicate(true);
    quickFeedback('✓ '+message+' Im Putzmanager als Lagerhaus-Material auswählbar.');
    form.elements.namedItem('name').value='';refreshDuplicate(true);form.elements.namedItem('name').focus();
   }catch(error){quickFeedback('Speichern fehlgeschlagen: '+error.message,true);}finally{submit.disabled=false;}
@@ -474,7 +487,7 @@ export async function mountLagerhaus(){
   try{await mutate((data,ar)=>{ar.push({id:newId(),code:allocateCode('B',getAllCodes(data,ar)),name:name.slice(0,55),createdAt:new Date().toISOString()});});input.value='';drawHome();setStatus('Neuer Lagerbereich erstellt.');}
   catch(err){setStatus('Bereich konnte nicht erstellt werden: '+err.message);}
  });
- try{await loadState();if(!document.getElementById('lagerHomeContent'))return;drawHome();fastRecent();refreshLocationSelect();searchResults();const names=document.getElementById('lagerSimpleAreaNames');if(names)names.innerHTML=areas.map(a=>`<option value="${esc(a.name)}">`).join('');setStatus(`${areas.length} Bereiche · ${rooms.length} Lagerorte gespeichert · offline verfügbar`);}catch(err){setStatus('Lagerdaten nicht verfügbar: '+err.message);}
+ try{await loadState();if(!document.getElementById('lagerHomeContent'))return;drawHome();fastRecent();renderStockChecks();refreshLocationSelect();searchResults();const names=document.getElementById('lagerSimpleAreaNames');if(names)names.innerHTML=areas.map(a=>`<option value="${esc(a.name)}">`).join('');setStatus(`${areas.length} Bereiche · ${rooms.length} Lagerorte gespeichert · offline verfügbar`);}catch(err){setStatus('Lagerdaten nicht verfügbar: '+err.message);}
 }
 export function renderLagerraum(){return `<div id="lagerRoomContent"><p class="lager-status">Lagerraum wird geladen …</p></div>`;}
 const FURNITURE_OPTIONS=Object.entries(FURNITURE).map(([key,v])=>[key,v.name]);

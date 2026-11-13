@@ -353,7 +353,7 @@ function draw(preselect=''){
  const stockSelected=items.find(i=>i.id===stockItemId);
  const trackingSelected=items.find(i=>i.id===trackingItemId);
  const lowCount=items.filter(i=>stockAlert(i).low).length;
- el.innerHTML=`<div class="lager-item-head"><div><strong>${items.length}</strong> Artikel gespeichert · <strong>${lowCount}</strong> Mindestbestand-Warnungen</div><div class="lager-photo-head-actions"><button type="button" id="lagerPhotoOpen" class="secondary-button">📷 Fotoarchiv</button><button type="button" id="lagerItemAdd" class="primary-button">+ Artikel</button></div></div>
+ el.innerHTML=`<div class="lager-item-head"><div><strong>${items.length}</strong> Artikel gespeichert · <strong>${lowCount}</strong> Mindestbestand-Warnungen · <a href="#/lagerhaus" class="lager-audit-link">🛒 Nachkauf &amp; Buchungen</a></div><div class="lager-photo-head-actions"><button type="button" id="lagerPhotoOpen" class="secondary-button">📷 Fotoarchiv</button><button type="button" id="lagerItemAdd" class="primary-button">+ Artikel</button></div></div>
  ${categoryManagerHtml()}
  ${photoPanel()}
  ${formOpen?form(selected,preselect):''}

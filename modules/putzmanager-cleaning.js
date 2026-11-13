@@ -238,9 +238,9 @@ export async function finishCleaning(roomId){
     result=bookStock(original,{type:'issue',quantity:qty,fromId:line.fromId,unitMode:'units'},validIds,{now:doneAt,makeId:uid});
     nextItems[index]=result.item;
    }
-   const event={...result.event,context:'putzmanager',cleaningId:s.id,roomId:s.roomId};
+   const event={...result.event,context:'putzmanager',cleaningId:s.id,roomId:s.roomId,roomName:s.roomName};
    newEvents.push(event);
-   confirmed.push({itemId:line.itemId,itemName:original.name,quantity:qty,unit:original.unit,fromId:line.fromId,containerId:line.containerId||null,eventId:event.id});
+   confirmed.push({itemId:line.itemId,itemName:original.name,quantity:qty,unit:original.unit,pairCounting:original.pairCounting||'auto',fromId:line.fromId,containerId:line.containerId||null,eventId:event.id,balanceAfter:stockTotal(nextItems.find(i=>i.id===line.itemId))});
   }
   const finished={id:s.id,roomId:s.roomId,roomName:s.roomName,startedAt:s.startedAt,endedAt:doneAt,durationMs:sessionElapsed(s),doneCount:s.doneTaskIds.length,totalCount:taskCount(s.groups),materials:confirmed};
   const reward=planCleaningReward(finished,{settings:values.belohnungswelt[REWARD_RULES_KEY],wallet:values['bw-wallet'][REWARD_WALLET_KEY],journal:values['bw-journal'][journalId]});

@@ -961,3 +961,25 @@ body.home-mode .nav-item .bw-nav-svg,body.reward-mode .nav-item .bw-nav-svg{disp
 .lager-lux04-manage-link{display:flex;text-align:center;align-items:center;justify-content:center;min-height:47px;text-decoration:none}
 #lagerRoom3dTools[hidden]{display:none!important}
 @media(max-width:400px){.lager-lux04-card{padding:12px}.lager-lux04-main{grid-template-columns:60px minmax(0,1fr);gap:9px}.lager-lux04-thumb{width:60px;height:60px}.lager-lux04-secondary-actions{gap:6px}.lager-lux04-room-row b{max-width:100px}}
+
+/* LUX05: accessible shopping list, recent stock transactions and cleaning receipts */
+.lager-stock-checks{display:grid;gap:14px;margin-top:18px}
+.lager-restock-panel,.lager-activity-panel{background:linear-gradient(150deg,#0b2632,#071b2e);border:1px solid #426375;border-radius:16px;padding:15px;color:#eefaff}
+.lager-stock-checks-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lager-stock-checks-head h2{font-size:18px;margin:0}
+.lager-stock-checks-head strong{font-size:18px;color:#ffcb73}
+.lager-restock-items{margin-top:9px}
+.lager-restock-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #34505e;padding:12px 0}
+.lager-restock-item:last-child{border-bottom:0}
+.lager-restock-item strong{display:block;font-size:15px}
+.lager-restock-item small{display:block;color:#c5dbe2;font-size:12px;margin-top:5px;overflow-wrap:anywhere}
+.lager-restock-item button{min-height:46px;min-width:104px;flex-shrink:0}
+.lager-shopping-copy,.lager-activity-panel details{margin-top:11px;border-top:1px solid #41606d;padding-top:8px}
+.lager-shopping-copy summary,.lager-activity-panel summary{font-weight:700;cursor:pointer;padding:10px 0;min-height:40px;color:#d3f4f8}
+.lager-shopping-copy textarea{display:block;width:100%;box-sizing:border-box;margin:8px 0 10px;min-height:105px;resize:vertical;background:#081521;color:#f5f9fb;border:1px solid #638693;border-radius:10px;padding:10px;font-size:14px}
+.lager-shopping-copy button{min-height:46px;width:100%}
+.lager-activity-list{padding-left:20px;margin:8px 0}.lager-activity-list li{padding:10px 0;border-bottom:1px solid #37505c;overflow-wrap:anywhere}
+.lager-activity-list li strong{display:block;color:#e9f9fb;font-size:14px}.lager-activity-list li small{display:block;color:#bcd5dc;font-size:12px;margin-top:4px}
+.lager-audit-link{color:#8ee5e8;font-size:13px;text-decoration:underline}
+.pm-clean-receipt{border-top:1px solid #37505c;padding:12px 0}.pm-clean-receipt strong,.pm-clean-receipt small{display:block}.pm-clean-receipt ul{padding-left:20px;margin:7px 0}.pm-clean-receipt li{margin:5px 0;overflow-wrap:anywhere}
+@media(max-width:360px){.lager-restock-item{align-items:flex-start;flex-direction:column}.lager-restock-item button{width:100%}}
