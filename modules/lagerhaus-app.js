@@ -352,13 +352,14 @@ export function renderLagerhaus(){return `${header('Mein Lagerhaus','Schnell fin
    <label>Menge erfassen als<select name="unitMode"><option value="units">Grundeinheiten</option><option value="pairs">Paare (1 Paar = 2 Stück)</option><option value="packs">Packungen (Inhalt angeben)</option></select></label>
    <label id="lagerFastPackLabel" hidden>Stück / Grundeinheiten je Packung *<input type="number" name="packSize" min="0.001" max="1000000" step="1" inputmode="decimal" placeholder="z. B. 100"></label>
    <p id="lagerFastUnitHint" class="lager-hint">Beispiel: 100 Handschuhe als 100 Stück oder als 50 Paar einlagern.</p>
+   <button type="button" id="lagerFastGlovePreset" class="secondary-button lager-fast-glove-preset" hidden>🧤 1 Packung mit 100 Stück übernehmen</button>
    <div id="lagerFastDuplicate" class="lager-fast-duplicate" hidden role="status" aria-live="polite"><p id="lagerFastDuplicateText"></p><label id="lagerFastDuplicateSelectWrap" hidden>Vorhandenen Artikel auswählen<select id="lagerFastDuplicateSelect" name="existingId"></select></label><div class="lager-fast-duplicate-actions"><button class="secondary-button" type="button" data-dup-choice="merge">Bestand erhöhen</button><button class="secondary-button" type="button" data-dup-choice="new">Trotzdem neuen Artikel</button></div><small id="lagerFastDuplicateDecision">Bitte zuerst entscheiden, damit nichts versehentlich doppelt angelegt wird.</small></div>
    <input type="hidden" name="duplicateChoice" value="">
    <label>Wofür brauchst du es? <span class="lager-fast-optional">(optional)</span><input name="useArea" maxlength="40" list="lagerFastUseAreas" placeholder="z. B. Küche"><datalist id="lagerFastUseAreas">${quickPurposeOptions()}</datalist></label>
    <details class="lager-fast-more"><summary>Mehr Optionen (freiwillig)</summary><label>Art des Artikels<select name="type"><option value="verbrauch">Verbrauchsartikel / Putzmaterial</option><option value="geraet">Gerät</option><option value="einzel">Gegenstand</option></select></label><p class="lager-hint">„Für Küche“ beschreibt die Verwendung. Der tatsächliche Lagerort ist davon unabhängig.</p></details><label>📍 Lagerort (optional)<select id="lagerQuickLocation" name="locationId"><option value="">Ohne festen Lagerort</option></select></label>
+   <p id="lagerQuickFeedback" class="lager-fast-feedback" aria-live="polite" role="status" aria-atomic="true"></p>
    <button type="submit" class="primary-button lager-fast-save">✓ Artikel speichern</button><button type="button" id="lagerQuickCancel" class="secondary-button lager-fast-cancel">Schließen</button>
   </form>
-  <p id="lagerQuickFeedback" class="lager-fast-feedback" aria-live="polite" role="status"></p>
   <div id="lagerFastRecent" class="lager-fast-recent"><p class="lager-hint">Artikel werden geladen …</p></div><div id="lagerFastBooking" aria-live="polite"></div>
   <section id="lagerStockChecks" class="lager-stock-checks" aria-label="Bestandskontrolle und Buchungsverlauf"></section>
  </section>
@@ -373,7 +374,7 @@ function bindQuickForm(){
  const toggle=show=>{form.hidden=!show;open.setAttribute('aria-expanded',String(show));open.textContent=show?'− Erfassung ausblenden':'＋ Artikel hinzufügen';if(show)form.elements.namedItem('name').focus();};
  open.addEventListener('click',()=>toggle(form.hidden));
  form.querySelector('#lagerQuickCancel').addEventListener('click',()=>toggle(false));
- const applyTemplate=template=>{for(const key of ['name','unit','type','quantity','unitMode','packSize','useArea']){const field=form.elements.namedItem(key);if(field&&key in template)field.value=String(template[key]);}refreshUnits();refreshDuplicate(true);toggle(true);};
+ const applyTemplate=template=>{for(const key of ['name','unit','type','quantity','unitMode','packSize','useArea']){const field=form.elements.namedItem(key);if(field&&key in template)field.value=String(template[key]);}refreshUnits();refreshDuplicate(true);quickFeedback('');toggle(true);};
  document.querySelectorAll('[data-quick-template]').forEach(btn=>btn.addEventListener('click',()=>{const t=QUICK_TEMPLATES.find(x=>x.id===btn.dataset.quickTemplate);if(t)applyTemplate(t);}));
  const duplicateBox=form.querySelector('#lagerFastDuplicate'),duplicateSelect=form.querySelector('#lagerFastDuplicateSelect'),decision=form.elements.namedItem('duplicateChoice');
  const refreshDuplicate=(reset=false)=>{
@@ -391,6 +392,8 @@ function bindQuickForm(){
  };
  form.querySelectorAll('[data-dup-choice]').forEach(btn=>btn.addEventListener('click',()=>{decision.value=btn.dataset.dupChoice;refreshDuplicate();}));
  for(const key of ['name','unit','type'])form.elements.namedItem(key).addEventListener(key==='name'?'input':'change',()=>refreshDuplicate(true));
+ const glovePreset=form.querySelector('#lagerFastGlovePreset');
+ const isGloveName=()=>/handschuh|gloves?|nitril|latex/i.test(form.elements.namedItem('name').value);
  const refreshUnits=()=>{
   const unit=form.elements.namedItem('unit').value,mode=form.elements.namedItem('unitMode').value;
   const packField=form.querySelector('#lagerFastPackLabel'),packInput=form.elements.namedItem('packSize'),quantity=form.elements.namedItem('quantity');
@@ -398,14 +401,38 @@ function bindQuickForm(){
   quantity.step=(mode!=='units'||['stk','pack','set'].includes(unit))?'1':'0.001';
   quantity.min=quantity.step==='1'?'1':'0.001';
   packInput.step=['stk','pack','set'].includes(unit)?'1':'0.001';
-  form.querySelector('#lagerFastUnitHint').textContent=mode==='packs'?'Beispiel: 2 Packungen à 100 Stück ergeben 200 Stück im Lager.':mode==='pairs'?'Paare sind nur bei Handschuhen oder aktivierter Paarzählung möglich.':'Mengen in Stück/Packung/Set ganzzahlig; bei Liter, ml, kg und Meter sind Kommazahlen erlaubt.';
+  packInput.min=packInput.step==='1'?'1':'0.001';
+  glovePreset.hidden=!isGloveName();
+  const invalidGloves=isGloveName()&&unit==='pack';
+  const invalidPairs=mode==='pairs'&&unit!=='stk';
+  form.querySelector('#lagerFastUnitHint').textContent=invalidGloves?'⚠ Für Handschuhe ist die Grundeinheit „Stück“. Für eine Schachtel bitte „Packungen (Inhalt angeben)“ wählen.':invalidPairs?'⚠ Paare benötigen die Grundeinheit „Stück“.':mode==='packs'?'Beispiel: 1 Packung à 100 Stück ergibt 100 Stück = 50 Paar.':mode==='pairs'?'1 Paar = 2 Stück. Für eine Schachtel mit 100 Stück bitte Packungen wählen.':'Mengen in Stück/Packung/Set ganzzahlig; bei Liter, ml, kg und Meter sind Kommazahlen erlaubt.';
  };
- for(const name of ['unit','unitMode'])form.elements.namedItem(name).addEventListener('change',refreshUnits);
+ glovePreset.addEventListener('click',()=>{
+  form.elements.namedItem('quantity').value='1';
+  form.elements.namedItem('unit').value='stk';
+  form.elements.namedItem('unitMode').value='packs';
+  form.elements.namedItem('packSize').value='100';
+  refreshUnits();refreshDuplicate(true);
+  quickFeedback('✓ Eingabe vorbereitet: 1 Packung mit 100 Stück = 50 Paar. Jetzt „Artikel speichern“ drücken.');
+ });
+ form.elements.namedItem('name').addEventListener('input',refreshUnits);
+ for(const name of ['unit','unitMode'])form.elements.namedItem(name).addEventListener('change',()=>{refreshUnits();quickFeedback('');});
+ form.addEventListener('invalid',event=>{
+  quickFeedback(`Bitte das Feld „${event.target.closest('label')?.childNodes[0]?.textContent?.trim()||event.target.name}“ überprüfen.`,true);
+ },true);
  refreshUnits();refreshDuplicate();
  form.addEventListener('submit',async e=>{
   e.preventDefault();const submit=form.querySelector('[type=submit]');submit.disabled=true;
   const v=Object.fromEntries(new FormData(form).entries());const useArea=String(v.useArea||'').trim();
   if(v.quantity===''||Number(v.quantity)<=0){quickFeedback('Bitte eine Menge größer als null angeben.',true);submit.disabled=false;return;}
+  if(isGloveName()&&v.unit==='pack'){
+   quickFeedback('⚠ Handschuhe brauchen „Stück“ als Grundeinheit. Tippe auf „1 Packung mit 100 Stück übernehmen“ oder wähle Stück und Packungen selbst.',true);
+   submit.disabled=false;return;
+  }
+  if(v.unitMode==='pairs'&&v.unit!=='stk'){
+   quickFeedback('⚠ Paare können nur mit Grundeinheit „Stück“ gespeichert werden.',true);
+   submit.disabled=false;return;
+  }
   try{
    let message='Artikel gespeichert.';
    await mutateModuleValues('lagerhaus',[ITEM_KEY,ITEM_SEQ_KEY,KEY,AREAS_KEY,MOVEMENT_KEY],values=>{
@@ -414,7 +441,6 @@ function bindQuickForm(){
     const existingAreas=Array.isArray(values[AREAS_KEY])?values[AREAS_KEY]:[];
     const id=String(v.locationId||'');
     const name=String(v.name||'').trim();
-    if(/handschuh|gloves?|nitril|latex/i.test(name)&&v.unit==='pack')throw new Error('Handschuhe bitte mit Grundeinheit „Stück“ und Eingabe „Packungen“ erfassen. Sonst fehlt die Stückzahl.');
     const enteredPackSize=v.unitMode==='packs'?v.packSize:1;
     const draft={name,type:v.type,unit:v.unit,packSize:enteredPackSize,pairCounting:'auto'};
     const converted=interpretQuantity(draft,v.quantity,v.unitMode||'units');
