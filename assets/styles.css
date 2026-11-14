@@ -983,3 +983,10 @@ body.home-mode .nav-item .bw-nav-svg,body.reward-mode .nav-item .bw-nav-svg{disp
 .lager-audit-link{color:#8ee5e8;font-size:13px;text-decoration:underline}
 .pm-clean-receipt{border-top:1px solid #37505c;padding:12px 0}.pm-clean-receipt strong,.pm-clean-receipt small{display:block}.pm-clean-receipt ul{padding-left:20px;margin:7px 0}.pm-clean-receipt li{margin:5px 0;overflow-wrap:anywhere}
 @media(max-width:360px){.lager-restock-item{align-items:flex-start;flex-direction:column}.lager-restock-item button{width:100%}}
+
+/* LUX06-HF01: mobile-first visible quick-save feedback and gloves pack preset. */
+.lager-fast-glove-preset{display:block;width:100%;min-height:44px;margin:8px 0 6px;border-color:#7fbdc1;color:#e4fff4;white-space:normal;text-align:center}
+.lager-fast-glove-preset[hidden]{display:none!important}
+.lager-fast-form .lager-fast-feedback{min-height:0;margin:12px 0 4px;padding:8px 10px;border-radius:9px;background:rgba(46,158,116,.12)}
+.lager-fast-form .lager-fast-feedback:empty{display:none}
+.lager-fast-form .lager-fast-feedback.is-error{background:rgba(201,66,66,.19);border:1px solid rgba(255,165,144,.45);color:#ffd0c7}
