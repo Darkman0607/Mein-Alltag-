@@ -1,6 +1,7 @@
 /** L05–L07 – touch-oriented cards, quick entry, templates and dynamic properties. */
 import {getModuleValue,mutateModuleValuesWithDeletes,mutateModuleValues} from '../assets/database.js';
-import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoices,resolveItemLocation,upsertItem,deleteItem} from './lagerhaus-items.js';
+import {ITEM_KEY,ITEM_SEQ_KEY,ITEM_TYPES,ITEM_CONDITIONS,ITEM_UNITS,locationChoices,resolveItemLocation,upsertItem} from './lagerhaus-items.js';
+import {deleteLagerArticlePermanently} from './lagerhaus-delete.js';
 import {navigationHref} from './lagerhaus-navigator.js';
 import {templatesFor,propertiesFor,templateById,detailedProperties} from './lagerhaus-templates.js';
 import {MOVEMENT_KEY,STOCK_ACTIONS,stockPositions,stockTotal,stockAlert,bookStock,interpretQuantity} from './lagerhaus-stock.js';
@@ -467,9 +468,9 @@ function bindCards(el){
  el?.querySelectorAll('[data-item-edit]').forEach(btn=>btn.addEventListener('click',()=>{trackingItemId=null;stockItemId=null;editId=btn.dataset.itemEdit;formOpen=true;draw();document.getElementById('lagerItemForm')?.scrollIntoView({block:'start',behavior:'smooth'});}));
  el?.querySelectorAll('[data-item-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
   const id=btn.dataset.itemDelete,item=items.find(i=>i.id===id);if(!item)return;
-  if(!confirm(`Artikel „${item.name}“ endgültig löschen?`))return;
+  if(!confirm(`Artikel „${item.name}“ endgültig löschen?\n\nAlle Bestände, Fotos und Lagerbuchungen dieses Artikels werden unwiderruflich entfernt.`))return;
   btn.disabled=true;
-  try{await modify((records,sequence)=>({items:deleteItem(records,id),sequence}));if(editId===id){editId=null;formOpen=false;}if(stockItemId===id)stockItemId=null;selectedItems.delete(id);draw();status('Artikel gelöscht.');}
+  try{await deleteLagerArticlePermanently(id);await load();if(editId===id){editId=null;formOpen=false;}if(stockItemId===id)stockItemId=null;selectedItems.delete(id);draw();status('Artikel und zugehörige Fotos, Lagerbuchungen und Belege gelöscht.');}
   catch(e){status('Löschen fehlgeschlagen: '+e.message);btn.disabled=false;}
  }));
 }

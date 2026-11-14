@@ -7,7 +7,8 @@ import {fachCards,matchFach,fachBooking} from './lagerhaus-fach.js';
 import {shelfLines,roomUnassigned,shelfPackagesSvg,formatAmount} from './lagerhaus-shelf.js';
 import {pairEligible,pairsLabel,quantityLabel} from './lagerhaus-consumption.js';
 import {interpretQuantity} from './lagerhaus-stock.js';
-import {readPhotoIndex,coverPhoto} from './lagerhaus-photos.js';
+import {readPhotoIndex,coverPhoto,preparePhoto,savePhoto,readPhotoBlob} from './lagerhaus-photos.js';
+import {deleteLagerArticlePermanently} from './lagerhaus-delete.js';
 import {stockPositions,bookStock} from './lagerhaus-stock.js';
 import {locationChoices} from './lagerhaus-items.js';
 import {QUICK_TEMPLATES,exactNameMatches,compatibleMatches,similarMatches,recentlyUsedItems,quickBookingDefaults} from './lagerhaus-quick.js';
@@ -294,8 +295,56 @@ function renderStockChecks(){
 function fastRecent(){
  const el=document.getElementById('lagerFastRecent');if(!el)return;
  const recent=recentlyUsedItems(itemRecords,5);
- el.innerHTML=recent.length?`<h2>Zuletzt verwendet <span class="lager-fast-count">(${itemRecords.length} Artikel)</span></h2><div class="lager-fast-recent-list">${recent.map(a=>`<article class="lager-fast-recent-item"><div class="lager-fast-recent-main"><strong>${esc(a.name)}</strong><small>${esc(a.code||'Artikel')} · ${esc(quantityLabel(a,stockTotal(a)))}</small></div><div class="lager-fast-recent-actions"><button type="button" data-fast-stock="${esc(a.id)}" data-fast-kind="receive" class="secondary-button">+ Einlagern</button><button type="button" data-fast-stock="${esc(a.id)}" data-fast-kind="issue" class="secondary-button" ${stockTotal(a)<=0?'disabled':''}>− Entnehmen</button></div></article>`).join('')}</div><a href="#/lagerhaus/items" class="lager-fast-all">Alle Artikel ansehen →</a>`:'<p class="lager-hint">Noch keine Artikel. Lege einen Artikel an – danach kannst du ihn hier direkt einlagern und entnehmen.</p>';
+ const photoMarkup=item=>{
+  const cover=coverPhoto(photoRecords,'item',item.id);
+  const thumbnail=cover?.thumbnail||'';
+  const valid=/^data:image\/(?:png|jpeg|webp|avif);base64,[A-Za-z0-9+/=]+$/.test(thumbnail);
+  return `<button type="button" class="lager-lux07-photo" data-fast-preview="${esc(item.id)}" aria-label="${valid?'Foto von '+item.name+' groß ansehen':'Noch kein Foto für '+item.name}" ${valid?'':'disabled'}>${valid?`<img alt="Foto von ${esc(item.name)}" src="${thumbnail}" loading="lazy">`:'<span aria-hidden="true">📦</span>'}</button>`;
+ };
+ el.innerHTML=recent.length?`<h2>Zuletzt verwendet <span class="lager-fast-count">(${itemRecords.length} Artikel)</span></h2><p class="lager-lux07-note">📷 Foto antippen, um es groß anzusehen. Ohne Bild: „Foto hinzufügen“.</p><p class="lager-lux07-feedback" id="lagerLux07Feedback" role="status" aria-live="polite"></p><div class="lager-fast-recent-list">${recent.map(a=>`<article class="lager-fast-recent-item lager-lux07-item" data-item-id="${esc(a.id)}"><div class="lager-lux07-overview">${photoMarkup(a)}<div class="lager-fast-recent-main"><strong>${esc(a.name)}</strong><small>${esc(a.code||'Artikel')} · ${esc(quantityLabel(a,stockTotal(a)))}</small></div></div><div class="lager-fast-recent-actions"><button type="button" data-fast-stock="${esc(a.id)}" data-fast-kind="receive" class="secondary-button">+ Einlagern</button><button type="button" data-fast-stock="${esc(a.id)}" data-fast-kind="issue" class="secondary-button" ${stockTotal(a)<=0?'disabled':''}>− Entnehmen</button></div><div class="lager-lux07-secondary"><button type="button" class="secondary-button lager-lux07-addphoto" data-fast-addphoto="${esc(a.id)}">📷 Foto hinzufügen</button><button type="button" class="secondary-button lager-lux07-delete" data-fast-delete="${esc(a.id)}">🗑 Artikel löschen</button></div><input class="lager-lux07-file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" data-fast-photo-file="${esc(a.id)}" aria-label="Foto für ${esc(a.name)} auswählen" hidden></article>`).join('')}</div><dialog class="lager-lux07-dialog" id="lagerFastPhotoDialog" aria-label="Artikelbild"><button type="button" class="secondary-button" id="lagerFastPhotoClose">Schließen ✕</button><img id="lagerFastPhotoImage" alt="Artikelbild in voller Größe"></dialog>`:'<p class="lager-hint">Noch keine Artikel. Lege einen Artikel an – danach kannst du ihn hier direkt einlagern und entnehmen.</p>';
+ const feedback=(msg,error=false)=>{const node=document.getElementById('lagerLux07Feedback');if(node){node.textContent=msg;node.classList.toggle('is-error',error);}};
  el.querySelectorAll('[data-fast-stock]').forEach(btn=>btn.addEventListener('click',()=>openFastBooking(btn.dataset.fastStock,btn.dataset.fastKind)));
+ el.querySelectorAll('[data-fast-addphoto]').forEach(btn=>btn.addEventListener('click',()=>btn.closest('article').querySelector('[data-fast-photo-file]')?.click()));
+ el.querySelectorAll('[data-fast-photo-file]').forEach(input=>input.addEventListener('change',async()=>{
+  const file=input.files?.[0];if(!file)return;
+  const id=input.dataset.fastPhotoFile;
+  const article=itemRecords.find(a=>a.id===id);if(!article)return;
+  const btn=input.closest('article')?.querySelector('[data-fast-addphoto]');if(btn)btn.disabled=true;
+  try{
+   feedback('Foto wird nur auf diesem Gerät gespeichert …');
+   const prepared=await preparePhoto(file);
+   await savePhoto({ownerType:'item',ownerId:id,category:'artikel',stage:'bestand',description:'',series:'',takenOn:''},prepared);
+   photoRecords=await readPhotoIndex();fastRecent();const notice=document.getElementById('lagerLux07Feedback');if(notice)notice.textContent='✓ Foto für „'+article.name+'“ gespeichert.';
+  }catch(error){feedback('Foto konnte nicht gespeichert werden: '+error.message,true);if(btn)btn.disabled=false;}
+  finally{input.value='';}
+ }));
+ el.querySelectorAll('[data-fast-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const id=btn.dataset.fastDelete,item=itemRecords.find(a=>a.id===id);if(!item)return;
+  const message=`Artikel „${item.name}“ (${item.code||'ohne Nummer'}) endgültig löschen?
+
+Bestand: ${quantityLabel(item,stockTotal(item))}.
+Artikel, Bilder und zugehörige Lagerbuchungen werden gelöscht. Dies kann nicht rückgängig gemacht werden.`;
+  if(!confirm(message))return;
+  btn.disabled=true;
+  try{
+   const removed=await deleteLagerArticlePermanently(id);
+   await loadState();if(fastBookingOpen?.id===id)closeFastBooking();fastRecent();searchResults();renderStockChecks();
+   const notice=document.getElementById('lagerLux07Feedback');if(notice)notice.textContent=`✓ „${removed.name}“ vollständig aus dem Lagerhaus gelöscht (${removed.photos} Fotos, ${removed.bookings} Buchungen).`;
+  }catch(error){feedback('Löschen fehlgeschlagen: '+error.message,true);btn.disabled=false;}
+ }));
+ const dialog=el.querySelector('#lagerFastPhotoDialog');let previewUrl=null;
+ const clearPreview=()=>{if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}};
+ dialog?.addEventListener('close',clearPreview);
+ dialog?.querySelector('#lagerFastPhotoClose')?.addEventListener('click',()=>dialog.close());
+ el.querySelectorAll('[data-fast-preview]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const id=btn.dataset.fastPreview,photo=coverPhoto(photoRecords,'item',id);if(!photo)return;
+  btn.disabled=true;
+  try{
+   const blob=await readPhotoBlob(photo.id);clearPreview();previewUrl=URL.createObjectURL(blob);
+   dialog.querySelector('#lagerFastPhotoImage').src=previewUrl;dialog.showModal();
+  }catch(error){clearPreview();feedback('Bildvorschau fehlgeschlagen: '+error.message,true);}
+  finally{btn.disabled=false;}
+ }));
 }
 function fastBookingHtml(item,kind){
  const def=quickBookingDefaults(item,kind),positions=stockPositions(item),places=locationChoices(rooms,areas);

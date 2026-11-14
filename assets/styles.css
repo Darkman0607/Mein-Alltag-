@@ -990,3 +990,30 @@ body.home-mode .nav-item .bw-nav-svg,body.reward-mode .nav-item .bw-nav-svg{disp
 .lager-fast-form .lager-fast-feedback{min-height:0;margin:12px 0 4px;padding:8px 10px;border-radius:9px;background:rgba(46,158,116,.12)}
 .lager-fast-form .lager-fast-feedback:empty{display:none}
 .lager-fast-form .lager-fast-feedback.is-error{background:rgba(201,66,66,.19);border:1px solid rgba(255,165,144,.45);color:#ffd0c7}
+
+
+/* LUX07: picture-first accessible inventory cards, touch-friendly destructive action. */
+.lager-lux07-item{padding:14px 12px!important;background:#142c3a!important;border:1px solid #5b8091!important;border-radius:16px!important}
+.lager-lux07-overview{display:grid;grid-template-columns:74px minmax(0,1fr);gap:13px;align-items:center;min-height:75px}
+.lager-lux07-photo{display:grid;place-items:center;border:1px solid #779aa9;background:#233f4f;color:#eefcff;border-radius:12px;width:74px;height:74px;padding:0;overflow:hidden;cursor:pointer}
+.lager-lux07-photo:disabled{opacity:1;cursor:default}
+.lager-lux07-photo img{height:100%;width:100%;object-fit:cover;display:block}
+.lager-lux07-photo span{font-size:31px}
+.lager-lux07-item .lager-fast-recent-main strong{font-size:19px!important;line-height:1.35;color:#ffffff!important;font-weight:800;letter-spacing:.01em;overflow-wrap:anywhere}
+.lager-lux07-item .lager-fast-recent-main small{font-size:15px!important;line-height:1.45;color:#e5f2f8!important;font-weight:600}
+.lager-lux07-item .lager-fast-recent-actions button{font-size:16px;min-height:49px}
+.lager-lux07-secondary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.lager-lux07-secondary button{font-size:14px;line-height:1.3;min-height:48px;padding:8px 5px;white-space:normal}
+.lager-lux07-delete{background:#422c35!important;border:1px solid #ce7c82!important;color:#ffe9ed!important}
+.lager-lux07-delete:focus-visible,.lager-lux07-photo:focus-visible,.lager-lux07-addphoto:focus-visible{outline:3px solid #ffe6ad;outline-offset:3px}
+.lager-lux07-note{font-size:13px;color:#d7e7ef;line-height:1.45;margin:2px 0 12px}
+.lager-lux07-dialog{max-width:min(92vw,700px);max-height:85dvh;overflow:auto;background:#102431;color:#fff;border:1px solid #7bafb9;border-radius:16px;padding:12px}
+.lager-lux07-dialog::backdrop{background:#000b}
+.lager-lux07-dialog button{min-height:44px;margin-bottom:12px}
+.lager-lux07-dialog img{display:block;max-width:100%;max-height:70dvh;object-fit:contain;margin:auto}
+@media(max-width:350px){.lager-lux07-overview{grid-template-columns:62px minmax(0,1fr);gap:9px}.lager-lux07-photo{width:62px;height:62px}.lager-lux07-secondary{gap:5px}.lager-lux07-secondary button{font-size:12px}}
+
+.lager-lux07-item .lager-fast-recent-main{font-family:system-ui,-apple-system,Roboto,"Segoe UI",sans-serif}
+.lager-lux07-feedback{color:#ddfff5;font-size:14px;line-height:1.45;margin:5px 0;font-weight:650}
+.lager-lux07-feedback:empty{display:none}
+.lager-lux07-feedback.is-error{color:#ffd0d0}
