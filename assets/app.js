@@ -23,7 +23,7 @@ import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveCo
 import {renderResetPanel,mountResetPanel} from './reset-data.js';
 import {auditInventory,inspectBackupSnapshot} from './data-integrity.js';
 
-export const APP_VERSION='0.27.8';
+export const APP_VERSION='0.27.9';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
