@@ -64,7 +64,7 @@ export function renderResetPanel(){
     <div class="test-reset-heading"><span aria-hidden="true">🧹</span><h2>Testdaten zurücksetzen</h2></div>
     <p>Alle bisherigen Eingaben der gewählten Bereiche löschen – ohne die App neu zu installieren. <strong>Das lässt sich nicht rückgängig machen.</strong></p>
     <p class="test-reset-warning"><strong>Vorher sichern:</strong> Weiter unten unter „Verschlüsseltes Gesamtbackup“ kannst du eine Sicherungsdatei herunterladen. Ein Backup wird hier <strong>nicht automatisch</strong> erstellt.</p>
-    <div class="test-reset-controls"><button type="button" id="resetSelectAll" class="secondary-button">Alle 6 auswählen</button><button type="button" id="resetSelectNone" class="secondary-button">Auswahl aufheben</button></div>
+    <div class="test-reset-controls"><button type="button" id="resetSelectCleaning" class="secondary-button">Lagerhaus + Putzmanager wählen</button><button type="button" id="resetSelectAll" class="secondary-button">Alle 6 auswählen</button><button type="button" id="resetSelectNone" class="secondary-button">Auswahl aufheben</button></div>
     <fieldset class="test-reset-options"><legend>Welche Bereiche möchtest du löschen?</legend>
       ${AREAS.map(a=>`<label class="test-reset-option"><input type="checkbox" data-reset-module="${a.id}"/><span class="test-reset-icon" aria-hidden="true">${a.icon}</span><span class="test-reset-label">${a.label}</span><small id="resetCount-${a.id}">Prüfe …</small></label>`).join('')}
     </fieldset>
@@ -99,6 +99,7 @@ export function mountResetPanel(){
   for(const cb of checks)cb.addEventListener('change',()=>{feedback.textContent='';update();});
   phrase.addEventListener('input',update);
   understand.addEventListener('change',update);
+  root.querySelector('#resetSelectCleaning').addEventListener('click',()=>{for(const cb of checks)cb.checked=['lagerhaus','putzmanager'].includes(cb.dataset.resetModule);feedback.textContent='';update();});
   root.querySelector('#resetSelectAll').addEventListener('click',()=>{for(const cb of checks)cb.checked=true;feedback.textContent='';update();});
   root.querySelector('#resetSelectNone').addEventListener('click',()=>{for(const cb of checks)cb.checked=false;feedback.textContent='';update();});
   readResetCounts().then(result=>{

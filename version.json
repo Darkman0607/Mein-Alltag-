@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.27.6",
-  "build": "LUX05 – Putzmanager-Belege, Lagerbuchungen und Nachkaufzettel",
-  "release_date": "2026-11-13"
+  "version": "0.27.7",
+  "build": "LUX06 – Backup-Verifikation, Datenprüfung, Testdaten-Reset und Leistungstests",
+  "release_date": "2026-11-14"
 }

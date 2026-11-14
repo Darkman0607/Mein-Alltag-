@@ -107,7 +107,14 @@ export async function restoreSnapshot(snapshot){
  });
  return count;
 }
-export async function createEncryptedBackup(password){return encryptSnapshot(await captureSnapshot(),password);}
+export async function createEncryptedBackup(password){
+ const snapshot=await captureSnapshot();
+ const envelope=await encryptSnapshot(snapshot,password);
+ // Confirm the generated encrypted payload actually decrypts before offering download/upload.
+ const verified=await decryptBackup(envelope,password);
+ if(JSON.stringify(verified)!==JSON.stringify(snapshot))throw Error('Sicherung nicht vollständig verifiziert. Bitte erneut versuchen.');
+ return envelope;
+}
 export function triggerBackupDownload(data){
  const date=new Date().toISOString().slice(0,10),name=`Mein_Alltag_Backup_${date}.meinalltag`;
  const blob=new Blob([JSON.stringify(data)],{type:'application/octet-stream'});

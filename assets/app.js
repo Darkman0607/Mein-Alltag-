@@ -21,8 +21,9 @@ import {renderRewardCards,mountRewardCards} from './reward-cards-ui.js';
 import {renderPremiumSettings,mountPremiumSettings} from './reward-premium.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 import {renderResetPanel,mountResetPanel} from './reset-data.js';
+import {auditInventory,inspectBackupSnapshot} from './data-integrity.js';
 
-export const APP_VERSION='0.27.6';
+export const APP_VERSION='0.27.7';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -189,6 +190,7 @@ function renderSearch(){return `${section('Suche','Finde deine fünf Bereiche.')
 function searchResults(q){const x=q.trim().toLocaleLowerCase('de-AT');const items=MODULES.filter(m=>`${m.name} ${m.subtitle} ${m.description}`.toLocaleLowerCase('de-AT').includes(x));return items.length?items.map(m=>`<button type="button" class="row-link" data-open="${m.id}"><span>${esc(m.name)}<small style="display:block;color:#9aaab8;font-size:11px;margin-top:3px">${esc(m.subtitle)}</small></span><span>›</span></button>`).join(''):'<p class="empty-state">Kein passender Bereich gefunden.</p>';}
 function renderMore(){return `${section('Mehr & Einstellungen','Lokaler Speicher und sichere Backups.')}<div class="glass-card"><h2>App-Version</h2><p>Mein Alltag · Beta V${APP_VERSION}</p><p>Die fünf Alltagsmodule und die Belohnungswelt speichern Daten lokal. Google Drive überträgt Daten ausschließlich beim manuellen Sichern oder Wiederherstellen.</p></div><div class="glass-card"><h2>Lokaler Datenspeicher</h2><div id="storageStatus" role="status"><p>Prüfe Datenbank …</p></div></div>
 ${renderResetPanel()}
+<div class="glass-card" id="lagerDataCheck"><h2>🛡️ Lagerhaus-Datenprüfung</h2><p>Prüft Artikel-IDs, Mengen, Mindestbestände und Lagerorte. Diese Kontrolle verändert keine Einträge.</p><button type="button" class="primary-button" id="runWarehouseAudit">Lagerhaus jetzt prüfen</button><p id="warehouseAuditResult" role="status" aria-live="polite">Noch nicht geprüft.</p></div>
 <div class="glass-card backup-card" id="backupManager"><h2>🔐 Verschlüsseltes Gesamtbackup</h2><p>Alle sechs Bereiche, Fotos und Belege werden vor dem Speichern mit <strong>AES-256-GCM</strong> verschlüsselt. Kein automatischer Cloud-Abgleich.</p><p><strong>Wichtig:</strong> Das Passwort wird nicht gespeichert. Ohne Passwort kann das Backup nicht wiederhergestellt werden. Die lokalen Daten auf diesem Gerät sind weiterhin nicht separat verschlüsselt.</p>
 <label class="field-label" for="backupPassword">Backup-Passwort (mindestens 12 Zeichen)</label><input class="search-input" id="backupPassword" type="password" autocomplete="new-password" minlength="12" placeholder="Eigenes sicheres Backup-Passwort"/>
 <label class="field-label" for="backupPasswordConfirm">Passwort für neue Sicherung wiederholen</label><input class="search-input" id="backupPasswordConfirm" type="password" autocomplete="new-password" minlength="12" placeholder="Passwort erneut eingeben"/>
@@ -203,7 +205,7 @@ ${renderResetPanel()}
 <button class="primary-button backup-main backup-import" type="button" id="driveRestore" disabled>Aus Google Drive wiederherstellen</button>
 <hr><h3>Offline-Alternative: Backup-Datei</h3>
 <button class="primary-button backup-main drive-secondary" id="backupExport" type="button">Verschlüsseltes Backup herunterladen</button>
-<label class="field-label" for="backupFile">Lokale Sicherungsdatei (.meinalltag)</label><input class="backup-file" id="backupFile" type="file" accept=".meinalltag,application/octet-stream,application/json"/>
+<label class="field-label" for="backupFile">Lokale Sicherungsdatei (.meinalltag)</label><input class="backup-file" id="backupFile" type="file" accept=".meinalltag,application/octet-stream,application/json"/><button class="primary-button backup-main drive-secondary" id="backupVerify" type="button">Sicherungsdatei prüfen – ohne Datenänderung</button>
 <button class="primary-button backup-main backup-import" id="backupImport" type="button">Backup-Datei mit Passwort importieren</button>
 <p class="backup-result" role="status" aria-live="polite" id="backupResult"></p></div>
 <div class="glass-card"><h2>App installieren</h2><p id="installStatus">Installation prüfen …</p><button type="button" class="primary-button" id="installAction">App installieren – Anleitung</button><p id="installHelp" aria-live="polite" class="install-help"></p><p>Alternativ: Chrome-Menü ⋮ → Zum Startbildschirm hinzufügen. Der Android-Browser entscheidet, ob eine App oder eine Verknüpfung erstellt wird.</p></div><button type="button" class="row-link" id="checkUpdate"><span>Auf Updates prüfen</span><span>↻</span></button><p id="moreMessage" class="module-privacy" role="status"></p>`;}
@@ -236,7 +238,7 @@ function bindView(route){
    field.addEventListener('input',update);update();
  }
  if(route.page==='more'){
-   loadStorage();bindBackup();mountResetPanel();document.getElementById('checkUpdate').addEventListener('click',async()=>{
+   loadStorage();bindBackup();mountResetPanel();mountWarehouseAudit();document.getElementById('checkUpdate').addEventListener('click',async()=>{
      const message=document.getElementById('moreMessage');
      if(!('serviceWorker' in navigator)){message.textContent='Updateprüfung wird hier nicht unterstützt.';return;}
      try{
@@ -257,9 +259,24 @@ function bindView(route){
    });
  }
 }
+async function mountWarehouseAudit(){
+ const button=document.getElementById('runWarehouseAudit'),out=document.getElementById('warehouseAuditResult');if(!button||!out)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;out.textContent='Prüfe lokale Lagerdaten …';
+  try{
+   const [items,rooms,areas,movements]=await Promise.all(['items.v1','rooms.v1','areas.v1','items.movements.v1'].map(key=>getModuleValue('lagerhaus',key)));
+   const result=auditInventory({items,rooms,areas,movements});
+   out.replaceChildren();const summary=document.createElement('strong');summary.textContent=`${result.ok?'✓ Keine Inkonsistenzen gefunden':'⚠ '+result.findings.length+' Prüfhinweise'} · ${result.items} Artikel · ${result.rooms} Lagerräume · ${result.movements} Buchungen`;out.append(summary);
+   if(result.findings.length){const ul=document.createElement('ul');for(const finding of result.findings.slice(0,12)){const li=document.createElement('li');li.textContent=finding.message;ul.append(li);}out.append(ul);
+    if(result.findings.length>12){const note=document.createElement('p');note.textContent='Weitere Hinweise vorhanden. Vor einer Datenkorrektur unbedingt ein Backup erstellen.';out.append(note);}}
+   const explain=document.createElement('p');explain.textContent='Die Prüfung ersetzt keinen echten Restore-Test und verändert keine Daten.';out.append(explain);
+  }catch(e){out.textContent='Prüfung nicht abgeschlossen: '+e.message;}
+  finally{button.disabled=false;}
+ });
+}
 function bindBackup(){
  const status=document.getElementById('backupResult'),password=document.getElementById('backupPassword'),confirmPass=document.getElementById('backupPasswordConfirm');
- const exportButton=document.getElementById('backupExport'),importButton=document.getElementById('backupImport');
+ const exportButton=document.getElementById('backupExport'),importButton=document.getElementById('backupImport'),verifyButton=document.getElementById('backupVerify');
  const login=document.getElementById('googleLogin'),logout=document.getElementById('googleLogout'),save=document.getElementById('driveSave');
  const refresh=document.getElementById('driveRefresh'),restore=document.getElementById('driveRestore');
  const list=document.getElementById('driveBackupList'),connection=document.getElementById('googleConnection');
@@ -291,7 +308,7 @@ function bindBackup(){
   restore.disabled=!connected||busyNow||!list.value;
   list.disabled=!connected||busyNow;
  }
- function busy(active){busyNow=active;exportButton.disabled=active;importButton.disabled=active;document.getElementById('googleSaveClientId').disabled=active;connectedUI();}
+ function busy(active){busyNow=active;exportButton.disabled=active;importButton.disabled=active;verifyButton.disabled=active;document.getElementById('googleSaveClientId').disabled=active;connectedUI();}
  function validNewPassword(){
   if(password.value.length<12){announce('Für ein neues Backup mindestens 12 Zeichen als Passwort eingeben.','error');return false;}
   if(password.value!==confirmPass.value){announce('Passwort und Bestätigung stimmen nicht überein.','error');return false;}
@@ -343,9 +360,9 @@ function bindBackup(){
  async function importEnvelope(data){
   if(!document.getElementById('backupUnderstand').checked)throw Error('Bitte zuerst bestätigen, dass bestehende Daten ersetzt werden dürfen.');
   if(!password.value)throw Error('Backup-Passwort fehlt.');
-  const snapshot=await decryptBackup(data,password.value),info=validateSnapshot(snapshot);
+  const snapshot=await decryptBackup(data,password.value),report=inspectBackupSnapshot(snapshot),info=report;
   const detail=info.legacy?'ALT-BACKUP (5 Module): Die fünf alten Module und Metadaten werden ersetzt. Deine bereits gespeicherten Belohnungswelt-Daten bleiben erhalten.':'AKTUELLES BACKUP (6 Bereiche): Alle sechs Bereiche einschließlich Belohnungswelt werden ersetzt.';
-  if(!window.confirm(`Verschlüsseltes Backup geprüft: ${info.count} Datenbankeinträge.\n${detail}\nFortfahren?`))return null;
+  if(!window.confirm(`Verschlüsseltes Backup geprüft: ${info.count} Datenbankeinträge, darunter ${info.audit.items} Lagerartikel. ${info.audit.findings.length} Datenprüfhinweise.\n${detail}\nFortfahren?`))return null;
   const count=await restoreSnapshot(snapshot);password.value='';confirmPass.value='';
   setTimeout(()=>location.reload(),950);return count;
  }
@@ -364,6 +381,18 @@ function bindBackup(){
   busy(true);announce('Erstelle und verschlüssele lokale Sicherungsdatei …','progress');
   try{const data=await createEncryptedBackup(password.value);const file=triggerBackupDownload(data);confirmPass.value='';announce(`✓ Verschlüsselte Datei heruntergeladen: ${file}.`,'success');}
   catch(e){announce('Sicherung fehlgeschlagen: '+e.message,'error');}
+  finally{busy(false);}
+ });
+ verifyButton.addEventListener('click',async()=>{
+  const file=document.getElementById('backupFile').files[0];
+  if(!file){announce('Bitte zuerst eine .meinalltag-Datei auswählen.','error');return;}
+  if(file.size>180*1024*1024){announce('Backup-Datei zu groß (maximal 180 MB).','error');return;}
+  if(!password.value){announce('Zum Prüfen das Backup-Passwort eingeben.','error');return;}
+  busy(true);announce('Entschlüssele und überprüfe Sicherungsdatei – ohne Daten zu ersetzen …','progress');
+  try{
+   const envelope=JSON.parse(await file.text()),snapshot=await decryptBackup(envelope,password.value),info=inspectBackupSnapshot(snapshot);
+   announce(`✓ Sicherungsdatei entschlüsselt und geprüft: ${info.count} Datenbankeinträge, ${info.audit.items} Lagerartikel, ${info.audit.findings.length} Bestands-Prüfhinweise. Keine lokalen Daten geändert.`,'success');
+  }catch(e){announce('Sicherungsprüfung fehlgeschlagen: '+e.message+' Es wurden keine Daten verändert.','error');}
   finally{busy(false);}
  });
  importButton.addEventListener('click',async()=>{
