@@ -23,7 +23,7 @@ import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveCo
 import {renderResetPanel,mountResetPanel} from './reset-data.js';
 import {auditInventory,inspectBackupSnapshot} from './data-integrity.js';
 
-export const APP_VERSION='0.28.0';
+export const APP_VERSION='0.28.1';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -423,6 +423,7 @@ export function render(){
  appTitle.textContent=title;appSubtitle.textContent=sub;
  backButton.hidden=route.page==='home';
  view.innerHTML=route.page==='home'?renderHome():route.page==='reward'?renderReward(route):route.page==='overview'?renderOverview():route.page==='messages'?renderMessages():route.page==='module'?(route.id==='lagerhaus'?renderLagerhaus():route.id==='frauengesundheit'?renderHealth():route.id==='putzmanager'?renderPutzmanager():renderModule(byId[route.id])):route.page==='lagerartikel'?renderLagerartikel():route.page==='lagerraum'?renderLagerraum():route.page==='lagernavigator'?renderLagerNavigator():route.page==='lagerservice'?renderLagerService():route.page==='calendar'?renderCalendar():route.page==='search'?renderSearch():renderMore();
+ if(!(route.page==='module'&&route.id==='putzmanager'))document.body.classList.remove('pm-light-mode');
  document.body.classList.toggle('health-mode',route.page==='module'&&route.id==='frauengesundheit');
  document.body.classList.toggle('home-mode',route.page==='home');
  document.body.classList.toggle('reward-mode',route.page==='reward');

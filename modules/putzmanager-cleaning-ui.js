@@ -1,19 +1,26 @@
 /** P03 – one-tap cleaning checklist without the 3D interface. */
 import {getModuleValue} from '../assets/database.js';
+import {groupStatus,loadSchedule,saveSchedule,intervalLabel} from './putzmanager-schedule.js';
 import {ITEM_KEY} from './lagerhaus-items.js';
 import {quantityLabel} from './lagerhaus-consumption.js';
 import {roomTaskGroups,taskCount,QUICK_OPTIONS,defaultQuickTypes,loadQuickTypes,saveQuickTypes,quickMaterialChoices,remainingMaterial,loadCleaningState,loadMaterialPresets,saveMaterialPreset,clearMaterialPreset,sessionElapsed,duration,materialSources,startCleaning,setTimer,setTaskDone,setGroupDone,addMaterial,removeMaterial,cancelCleaning,finishCleaning} from './putzmanager-cleaning.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=n=>String(Number(n)).replace('.',',');
-function tasksHtml(groups,done,enabled,expandedGroups){
+function tasksHtml(groups,done,enabled,expandedGroups,history,roomId,roomSchedules){
  const completed=new Set(done||[]);
  return groups.map(group=>{
   const count=group.steps.filter(step=>completed.has(step.id)).length;
   const ready=count===group.steps.length;
+  const status=groupStatus(history,roomId,group,roomSchedules?.[group.id]);
   const id=esc(group.id),name=esc(group.name);
-  const control='<label class="pm-clean-area"><input type="checkbox" data-clean-area="'+id+'" '+(ready?'checked':'')+' '+(enabled?'':'disabled')+'><span class="pm-clean-area-label">'+name+'</span><small>'+(ready?'✓ Fertig':count?count+' / '+group.steps.length+' Schritte':'Noch offen')+'</small></label>';
-  const steps=group.steps.map(step=>'<label class="pm-clean-task '+(completed.has(step.id)?'pm-clean-done':'')+'"><input type="checkbox" data-clean-task="'+esc(step.id)+'" '+(completed.has(step.id)?'checked':'')+' '+(enabled?'':'disabled')+'><span>'+esc(step.title)+'</span></label>').join('');
-  return '<div class="pm-clean-group '+(ready?'pm-area-done':'')+'">'+control+'<details data-clean-group="'+id+'" '+(expandedGroups.has(group.id)?'open':'')+'><summary class="pm-area-details">Einzelschritte '+count+'/'+group.steps.length+' anzeigen</summary><div class="pm-clean-task-list">'+steps+'</div></details></div>';
+  const statusText=enabled?(ready?'✓ Jetzt fertig':count?`${count}/${group.steps.length} Schritte`:'Noch offen'):status.state==='done'?'✓ Nicht fällig':status.state==='overdue'?'● Überfällig':status.state==='optional'?'Bei Bedarf':'● Fällig';
+  const desc=enabled?'Diese Reinigung läuft':status.label;
+  const options=[['daily','Täglich'],['days:2','Alle 2 Tage'],['days:3','Alle 3 Tage'],['weekly','Wöchentlich'],['days:14','Alle 14 Tage'],['monthly','Monatlich'],['off','Nur bei Bedarf'],['custom','Eigene Tagezahl']];
+  const chosen=status.interval.kind==='days'?( [2,3,14].includes(status.interval.every)?`days:${status.interval.every}`:'custom'):status.interval.kind;
+  const select=`<details class="pm-schedule-setting"><summary>⚙ Rhythmus: ${esc(intervalLabel(status.interval))}</summary><label>Wie oft reinigen?<select data-clean-interval="${id}" aria-label="Rhythmus für ${name}">${options.map(([v,t])=>`<option value="${v}" ${chosen===v?'selected':''}>${t}</option>`).join('')}</select></label><div class="pm-custom-schedule"><label>Eigener Abstand in Tagen<input type="number" inputmode="numeric" min="1" max="365" data-clean-days="${id}" value="${status.interval.kind==='days'?status.interval.every:7}"></label><button type="button" data-clean-action="save-days" data-group-id="${id}">Speichern</button></div></details>`;
+  const control=`<label class="pm-clean-area"><input type="checkbox" data-clean-area="${id}" ${ready?'checked':''} ${enabled?'':'disabled'}><span class="pm-clean-area-label">${name}<em>${esc(desc)}</em></span><small class="pm-state-${status.state}">${statusText}</small></label>`;
+  const steps=group.steps.map(step=>`<label class="pm-clean-task ${completed.has(step.id)?'pm-clean-done':''}"><input type="checkbox" data-clean-task="${esc(step.id)}" ${completed.has(step.id)?'checked':''} ${enabled?'':'disabled'}><span>${esc(step.title)}</span></label>`).join('');
+  return `<div class="pm-clean-group ${ready&&enabled?'pm-area-done':''}">${control}${select}<details data-clean-group="${id}" ${expandedGroups.has(group.id)?'open':''}><summary class="pm-area-details">Einzelschritte ${count}/${group.steps.length} anzeigen</summary><div class="pm-clean-task-list">${steps}</div></details></div>`;
  }).join('');
 }
 
@@ -35,7 +42,7 @@ function materialHtml(active,sources,preset){
  <div class="pm-material-basket"><h4>Für diese Reinigung vorgemerkt</h4>${active.materials.length?`<ul class="pm-clean-basket">${active.materials.map(line=>`<li><span>${esc(summarizeLine(line))}</span><button type="button" data-clean-action="remove-material" data-line-id="${esc(line.id)}" aria-label="${esc(line.itemName)} entfernen">×</button></li>`).join('')}</ul>`:'<p class="pm-hint">Noch keine Lagerabbuchung vorgemerkt.</p>'}</div>
  ${active.materials.length?'<button class="secondary-button pm-full" type="button" data-clean-action="save-preset">🔁 Diese Materialauswahl für den Raum merken</button>':''}${preset?.length?'<button class="pm-clean-discard" type="button" data-clean-action="clear-preset">Gespeicherte Materialvorlage löschen</button>':''}</div>`;
 }
-function cleanPanel(room,active,history,sources,preset,expandedGroups,quickTypes){
+function cleanPanel(room,active,history,sources,preset,expandedGroups,quickTypes,roomSchedules){
  const groups=active?.groups||roomTaskGroups(room,quickTypes),total=taskCount(groups),done=active?.doneTaskIds?.length||0;
  const recent=history.filter(h=>h.roomId===room.id).slice(0,5);
  const completedAreas=groups.filter(g=>g.steps.every(step=>active?.doneTaskIds?.includes(step.id))).length;
@@ -53,30 +60,35 @@ function cleanPanel(room,active,history,sources,preset,expandedGroups,quickTypes
  `<button type="button" class="primary-button pm-accent pm-full" data-clean-action="start">▶ ${esc(room.name)} jetzt reinigen</button>`}</div>
  ${!active?quickListHtml(room,quickTypes):''}
  <div class="pm-clean-summary"><strong>✅ Putzliste</strong><span>${completedAreas} von ${groups.length} Bereichen fertig</span></div>
- <div class="pm-clean-groups">${tasksHtml(groups,active?.doneTaskIds,Boolean(active),expandedGroups)}</div>
+ <div class="pm-clean-groups">${tasksHtml(groups,active?.doneTaskIds,Boolean(active),expandedGroups,history,room.id,roomSchedules)}</div>
  ${active?materialHtml(active,sources,preset):''}
- ${recent.length?`<details class="pm-clean-history"><summary>🧾 Letzte Reinigungen und Lagerabbuchungen (${recent.length})</summary>${recent.map(record=>`<div class="pm-clean-receipt"><strong>${esc(new Date(record.endedAt).toLocaleDateString('de-AT'))} · ${duration(record.durationMs)}</strong><small>${record.doneCount}/${record.totalCount} Aufgaben</small>${record.materials.length?`<ul>${record.materials.map(line=>`<li>− ${esc(receiptLine(line))}</li>`).join('')}</ul>`:'<p>Keine Lagerartikel abgebucht.</p>'}</div>`).join('')}</details>`:''}
+ <details class="pm-clean-history"><summary>📋 Vollständige Reinigungshistorie (${history.filter(h=>h.roomId===room.id).length})</summary>
+ ${history.filter(h=>h.roomId===room.id).length?history.filter(h=>h.roomId===room.id).map(record=>`<div class="pm-clean-receipt"><strong>${esc(new Date(record.endedAt).toLocaleString('de-AT'))} · ${duration(record.durationMs)}</strong><small>${record.doneCount}/${record.totalCount} Einzelschritte</small>${Array.isArray(record.completedTasks)?`<details><summary>✓ ${record.completedGroups?.length||0} Bereiche vollständig · ${record.completedTasks.length} Schritte</summary><ul>${record.completedTasks.map(step=>`<li>${esc(step.groupName)}: ${esc(step.title)}</li>`).join('')}</ul></details>`:'<p>Älterer Eintrag: Welche Aufgaben erledigt wurden, wurde damals nicht gespeichert. Der Status wird nicht geschätzt.</p>'}${record.materials?.length?`<ul>${record.materials.map(line=>`<li>− ${esc(receiptLine(line))}</li>`).join('')}</ul>`:'<p>Kein Material abgebucht.</p>'}</div>`).join(''):'<p>Noch keine abgeschlossene Reinigung.</p>'}</details>
  </section>`;
 }
 export async function mountCleaningUi({root,room,notify}){
  const stage=root.querySelector('#pmCleaningStage');if(!stage)return ()=>{};
- let stop=false,timer=0,locked=false,state=null,sources=[],presets={},quickPrefs={},renderedOnce=false;
+ let stop=false,timer=0,locked=false,state=null,sources=[],presets={},quickPrefs={},roomSchedules={},renderedOnce=false;
  const expandedGroups=new Set();
  async function refresh(){
-  const [loaded,items,warehouseRooms,areas,presetData,quickData]=await Promise.all([loadCleaningState(),getModuleValue('lagerhaus',ITEM_KEY),getModuleValue('lagerhaus','rooms.v1'),getModuleValue('lagerhaus','areas.v1'),loadMaterialPresets(),loadQuickTypes()]);
+  const [loaded,items,warehouseRooms,areas,presetData,quickData,scheduleData]=await Promise.all([loadCleaningState(),getModuleValue('lagerhaus',ITEM_KEY),getModuleValue('lagerhaus','rooms.v1'),getModuleValue('lagerhaus','areas.v1'),loadMaterialPresets(),loadQuickTypes(),loadSchedule()]);
   if(stop||!stage.isConnected)return;
-  state=loaded;presets=presetData;quickPrefs=quickData;
+  state=loaded;presets=presetData;quickPrefs=quickData;roomSchedules=scheduleData[room.id]||{};
   try{sources=materialSources(Array.isArray(items)?items:[],Array.isArray(warehouseRooms)?warehouseRooms:[],Array.isArray(areas)?areas:[]);}catch(e){sources=[];notify('Lagerwarnung: '+e.message,true);}
   const manualOpen=Boolean(stage.querySelector('[data-material-details][open]'));
   const quickOpen=Boolean(stage.querySelector('[data-clean-quick-details][open]'));
+  const openSchedule=[...stage.querySelectorAll('.pm-schedule-setting[open]')].map(el=>el.closest('.pm-clean-group')?.querySelector('[data-clean-interval]')?.dataset.cleanInterval).filter(Boolean);
+  const historyOpen=Boolean(stage.querySelector('.pm-clean-history[open]'));
   // The task list is redrawn after every checkmark. Keep whatever groups the user opened.
   if(renderedOnce){
    expandedGroups.clear();
    stage.querySelectorAll('details[data-clean-group][open]').forEach(group=>expandedGroups.add(group.dataset.cleanGroup));
   }
-  stage.innerHTML=cleanPanel(room,state.active[room.id],state.history,sources,presets[room.id],expandedGroups,Array.isArray(quickPrefs[room.id])?quickPrefs[room.id]:defaultQuickTypes(room.type));
+  stage.innerHTML=cleanPanel(room,state.active[room.id],state.history,sources,presets[room.id],expandedGroups,Array.isArray(quickPrefs[room.id])?quickPrefs[room.id]:defaultQuickTypes(room.type),roomSchedules);
   if(manualOpen&&stage.querySelector('[data-material-details]'))stage.querySelector('[data-material-details]').open=true;
   if(quickOpen&&stage.querySelector('[data-clean-quick-details]'))stage.querySelector('[data-clean-quick-details]').open=true;
+  if(historyOpen)stage.querySelector('.pm-clean-history').open=true;
+  for(const id of openSchedule){const el=[...stage.querySelectorAll('[data-clean-interval]')].find(x=>x.dataset.cleanInterval===id);if(el)el.closest('.pm-schedule-setting').open=true;}
   renderedOnce=true;
   const material=stage.querySelector('#pmCleanMaterial');
   if(material){material.querySelector('[name="mode"]').disabled=!sources[0]?.pairs;material.querySelector('[name="quantity"]').step=sources[0]?.unit==='stk'?'1':'0.001';}
@@ -107,11 +119,18 @@ export async function mountCleaningUi({root,room,notify}){
    else if(action==='remove-material'){await removeMaterial(room.id,button.dataset.lineId);message='Material aus der Vormerkliste entfernt.';}
    else if(action==='save-preset'){await saveMaterialPreset(room.id);message='Materialauswahl gespeichert und beim nächsten Reinigungsstart automatisch vorgemerkt.';}
    else if(action==='clear-preset'){await clearMaterialPreset(room.id);message='Gespeicherte Materialvorlage gelöscht.';}
+   else if(action==='save-days'){const id=button.dataset.groupId,input=[...stage.querySelectorAll('[data-clean-days]')].find(el=>el.dataset.cleanDays===id);const n=Number(input?.value);if(!Number.isInteger(n)||n<1||n>365)throw Error('Bitte eine Zahl zwischen 1 und 365 Tagen wählen.');await saveSchedule(room.id,id,{kind:'days',every:n});message='Eigener Reinigungsrhythmus gespeichert.';}
    else return;
    await refresh();notify(message);
   }catch(error){notify(error?.message||'Aktion fehlgeschlagen.',true);}finally{locked=false;}
  });
  stage.addEventListener('change',async e=>{
+  if(e.target.matches('[data-clean-interval]')){
+   if(e.target.value==='custom'){e.target.closest('.pm-schedule-setting').querySelector('[data-clean-days]').focus();return;}
+   if(locked)return;locked=true;
+   try{const x=e.target.value,kind=x.startsWith('days:')?'days':x,every=kind==='days'?Number(x.split(':')[1]):1;await saveSchedule(room.id,e.target.dataset.cleanInterval,{kind,every});await refresh();notify('Reinigungsrhythmus gespeichert.');}
+   catch(error){notify(error.message,true);await refresh();}finally{locked=false;}return;
+  }
   if(e.target.matches('[data-clean-quick]')){
    if(locked)return;
    locked=true;

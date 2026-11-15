@@ -242,7 +242,9 @@ export async function finishCleaning(roomId){
    newEvents.push(event);
    confirmed.push({itemId:line.itemId,itemName:original.name,quantity:qty,unit:original.unit,pairCounting:original.pairCounting||'auto',fromId:line.fromId,containerId:line.containerId||null,eventId:event.id,balanceAfter:stockTotal(nextItems.find(i=>i.id===line.itemId))});
   }
-  const finished={id:s.id,roomId:s.roomId,roomName:s.roomName,startedAt:s.startedAt,endedAt:doneAt,durationMs:sessionElapsed(s),doneCount:s.doneTaskIds.length,totalCount:taskCount(s.groups),materials:confirmed};
+  const completedTasks=s.groups.flatMap(g=>g.steps.filter(step=>s.doneTaskIds.includes(step.id)).map(step=>({id:step.id,groupId:g.id,groupName:g.name,title:step.title})));
+  const completedGroups=s.groups.filter(g=>g.steps.length&&g.steps.every(step=>s.doneTaskIds.includes(step.id))).map(g=>({id:g.id,name:g.name,type:g.type}));
+  const finished={id:s.id,roomId:s.roomId,roomName:s.roomName,startedAt:s.startedAt,endedAt:doneAt,durationMs:sessionElapsed(s),doneCount:s.doneTaskIds.length,totalCount:taskCount(s.groups),completedTasks,completedGroups,materials:confirmed};
   const reward=planCleaningReward(finished,{settings:values.belohnungswelt[REWARD_RULES_KEY],wallet:values['bw-wallet'][REWARD_WALLET_KEY],journal:values['bw-journal'][journalId]});
   finished.reward=reward.result;
   delete state.active[roomId];state.history=[finished,...state.history].slice(0,LIMIT);
