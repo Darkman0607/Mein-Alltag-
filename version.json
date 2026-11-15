@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.28.1",
-  "build": "P05 – Putzmanager Hell/Dunkel, Intervalle, Raumkarten + LUX07 Lagerhaus-Funktionen erhalten",
+  "version": "0.28.2",
+  "build": "P05-HF01 – Einzelne Aufgaben sofort gespeichert, Hauptübersicht synchron, LUX07 bleibt erhalten",
   "release_date": "2026-11-15"
 }

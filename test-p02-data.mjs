@@ -41,7 +41,7 @@ const room=(await listRooms())[0],groups=roomTaskGroups(room);
 assert.equal(room.sketch3d.objects.length,15);
 assert.equal(groups.length,19,'15 objects + floor + window + door + missing default kitchen fixture');
 assert(groups.some(g=>g.name==='Boden'));
-assert(groups.find(g=>g.name.includes('Geschirrspüler')).steps.some(t=>t.title.includes('Sieb')));
+assert(groups.find(g=>g.name.includes('Geschirrspüler')).steps.some(t=>t.title.includes('ausräumen')),'Dishwasher daily duty is one action; optional maintenance is separate');
 const originalItems=[
  {id:'gloves',code:'A-0001',name:'Nitrilhandschuhe',type:'verbrauch',unit:'stk',pairCounting:'auto',stockLocations:[{locationId:'',quantity:14}],quantity:14,locationId:'',minimumStock:4,packSize:100},
  {id:'cleaner',code:'A-0002',name:'Reiniger',type:'verbrauch',unit:'ml',stockLocations:[{locationId:'',quantity:500}],quantity:500,locationId:'',minimumStock:100,packSize:500},

@@ -248,3 +248,14 @@ body.pm-light-mode .pm-status:not(:empty){background:#ebf8ef;color:#27613f;borde
 body.pm-light-mode .pm-status.pm-error{background:#fff0eb;color:#a12f20;border-color:#edac9c}
 body.pm-light-mode .pm-private,body.pm-light-mode .pm-detail-heading .pm-private{color:#4c7568}
 body.pm-light-mode .pm-quick-list,body.pm-light-mode .pm-quick-choice,body.pm-light-mode .pm-material-basket{color:#28333a}
+
+/* P05 HF01: immediate completion history under the main dashboard */
+.pm-root .pm-today-done{margin:14px 0 24px;padding:14px 16px;border:1px solid rgba(113,213,181,.38);background:rgba(26,74,67,.32);border-radius:18px}
+.pm-root .pm-today-done h2{font-size:17px;margin:0 0 9px}
+.pm-root .pm-today-done ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.pm-root .pm-today-done li{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px}
+.pm-root .pm-today-done li strong{overflow-wrap:anywhere}
+.pm-root .pm-today-done li small{font-size:12px;white-space:nowrap;opacity:.75}
+.pm-root .pm-clean-event{font-size:14px;border-bottom:1px solid rgba(122,185,167,.23);padding:7px 0}
+body.pm-light-mode .pm-root .pm-today-done{background:#edf9f2;color:#263d37;border-color:#a6cab8}
+@media(max-width:350px){.pm-root .pm-today-done li{align-items:flex-start;flex-direction:column;gap:3px}}

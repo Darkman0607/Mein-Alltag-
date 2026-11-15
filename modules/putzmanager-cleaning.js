@@ -33,7 +33,8 @@ const STEPS={
  regal:['Staub entfernen','Oberflächen abwischen'],
  unterschrank:['Front und Griffe abwischen','Sockel und Kanten reinigen'],
  oberschrank:['Front und Griffe abwischen','Oberflächen abstauben'],
- geschirrspueler:['Geschirr einräumen oder ausräumen','Front und Griff reinigen','Sieb bei Bedarf prüfen'],
+ geschirrspueler:['Geschirr einräumen oder ausräumen'],
+ geschirrspuelerpflege:['Front und Griff reinigen','Sieb bei Bedarf prüfen'],
  backofen:['Front und Griff abwischen','Innenraum bei Bedarf reinigen'],
  stuhl:['Sitzfläche abwischen','Lehne und Beine reinigen'],
  heizkoerper:['Staub entfernen','Oberfläche abwischen'],
@@ -46,7 +47,7 @@ export const QUICK_KEY='cleaning.quick-types.v1';
 export const QUICK_OPTIONS=Object.freeze({
  bad:[['waschbecken','Waschbecken'],['spiegel','Spiegel'],['dusche','Dusche'],['wanne','Badewanne'],['wc','WC'],['schrank','Schränke'],['muelleimer','Mistkübel']],
  wc:[['wc','WC-Schüssel'],['waschbecken','Handwaschbecken'],['spiegel','Spiegel'],['muelleimer','Mistkübel']],
- kueche:[['arbeitsplatte','Arbeitsplatte'],['spuele','Spüle'],['herd','Herd'],['kuehlschrank','Kühlschrank'],['geschirrspueler','Geschirrspüler'],['muelleimer','Mistkübel'],['tisch','Tisch'],['dunstabzug','Dunstabzug']]
+ kueche:[['arbeitsplatte','Arbeitsplatte'],['spuele','Spüle'],['herd','Herd'],['kuehlschrank','Kühlschrank'],['geschirrspueler','Geschirrspüler'],['geschirrspuelerpflege','Geschirrspüler pflegen'],['muelleimer','Mistkübel'],['tisch','Tisch'],['dunstabzug','Dunstabzug']]
 });
 const QUICK_DEFAULTS=Object.freeze({
  bad:['waschbecken','spiegel','dusche','wc','muelleimer'],
@@ -81,7 +82,65 @@ export function roomTaskGroups(room,quickTypes=defaultQuickTypes(room?.type)){
 }
 export const taskCount=groups=>groups.reduce((total,g)=>total+g.steps.length,0);
 const initial=()=>({active:{},history:[]});
-const normalize=v=>({active:v?.active&&typeof v.active==='object'?v.active:{},history:Array.isArray(v?.history)?v.history:[]});
+const normalize=v=>({
+ active:v?.active&&typeof v.active==='object'?v.active:{},
+ history:Array.isArray(v?.history)?v.history:[],
+ taskEvents:Array.isArray(v?.taskEvents)?v.taskEvents:[],
+ quickSteps:v?.quickSteps&&typeof v.quickSteps==='object'&&!Array.isArray(v.quickSteps)?v.quickSteps:{}
+});
+const sameDay=(a,b)=>new Date(a).toDateString()===new Date(b).toDateString();
+const EVENT_LIMIT=1500;
+function recordGroup(state,roomId,group,sourceSessionId=null){
+ if(!group?.steps?.length)throw Error('Reinigungsbereich enthält keine Aufgabe.');
+ const now=iso();
+ if(state.taskEvents.some(x=>x.roomId===roomId&&x.groupId===group.id&&sameDay(x.endedAt,now)))return;
+ state.taskEvents=[{id:uid(),roomId,groupId:group.id,groupName:group.name,endedAt:now,sourceSessionId,completedTasks:group.steps.map(x=>({id:x.id,title:x.title}))},...state.taskEvents].slice(0,EVENT_LIMIT);
+}
+function undoGroup(state,roomId,groupId){
+ const idx=state.taskEvents.findIndex(x=>x.roomId===roomId&&x.groupId===groupId&&sameDay(x.endedAt,iso()));
+ if(idx!==-1)state.taskEvents.splice(idx,1);
+}
+function quickGroupState(state,roomId,group){
+ const record=state.quickSteps?.[roomId]?.[group.id];
+ return record&&sameDay(record.updatedAt,iso())?new Set(record.stepIds):new Set();
+}
+function updateQuickSteps(state,roomId,group,ids){
+ if(!state.quickSteps[roomId])state.quickSteps[roomId]={};
+ if(ids.size)state.quickSteps[roomId][group.id]={updatedAt:iso(),stepIds:[...ids]};
+ else delete state.quickSteps[roomId][group.id];
+}
+/** Persist every individual tap; room finishing is only for timer/materials. */
+export async function markGroupNow(roomId,group,done){
+ if(!group?.id||!Array.isArray(group.steps))throw Error('Unbekannter Reinigungsbereich.');
+ await mutateSession(roomId,(state,s)=>{
+  const actual=s?.groups?.find(g=>g.id===group.id)||group;
+  if(s){
+   const next=new Set(s.doneTaskIds||[]);
+   for(const step of actual.steps){if(done)next.add(step.id);else next.delete(step.id);}
+   s.doneTaskIds=[...next];
+  }
+  if(done)recordGroup(state,roomId,actual,s?.id||null);
+  else undoGroup(state,roomId,actual.id);
+  updateQuickSteps(state,roomId,actual,new Set());
+ });
+}
+/** Partial substeps also survive navigation and reload before a room session starts. */
+export async function markStepNow(roomId,group,taskId,done){
+ if(!group?.steps?.some(step=>step.id===taskId))throw Error('Unbekannter Einzelschritt.');
+ await mutateSession(roomId,(state,s)=>{
+  const actual=s?.groups?.find(g=>g.id===group.id)||group;
+  const ids=s?new Set(s.doneTaskIds||[]):quickGroupState(state,roomId,actual);
+  // If the whole area was ticked earlier today, unchecking one substep must
+  // leave the other substeps intact rather than silently clearing all of them.
+  if(!ids.size&&state.taskEvents.some(x=>x.roomId===roomId&&x.groupId===actual.id&&sameDay(x.endedAt,iso())))for(const step of actual.steps)ids.add(step.id);
+  if(done)ids.add(taskId);else ids.delete(taskId);
+  if(s)s.doneTaskIds=[...ids];
+  else updateQuickSteps(state,roomId,actual,ids);
+  const ready=actual.steps.length>0&&actual.steps.every(step=>ids.has(step.id));
+  if(ready){recordGroup(state,roomId,actual,s?.id||null);updateQuickSteps(state,roomId,actual,new Set());}
+  else undoGroup(state,roomId,actual.id);
+ });
+}
 export async function loadCleaningState(){return normalize(await getModuleValue('putzmanager',CLEAN_KEY));}
 export async function loadMaterialPresets(){const raw=await getModuleValue('putzmanager',PRESET_KEY);return raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};}
 export function sessionElapsed(s,now=Date.now()){
@@ -135,23 +194,18 @@ export async function setTimer(roomId,mode){
  });
 }
 export async function setTaskDone(roomId,taskId,done){
- await mutateSession(roomId,(_,s)=>{
-  if(!s)throw Error('Bitte zuerst Reinigung starten.');
-  const ids=new Set(s.groups.flatMap(g=>g.steps.map(step=>step.id)));
-  if(!ids.has(taskId))throw Error('Aufgabe nicht mehr vorhanden.');
-  const next=new Set(s.doneTaskIds||[]);if(done)next.add(taskId);else next.delete(taskId);s.doneTaskIds=[...next];
- });
+ const state=await loadCleaningState(),s=state.active[roomId];
+ if(!s)throw Error('Bitte zuerst Reinigung starten.');
+ const group=s.groups.find(g=>g.steps.some(step=>step.id===taskId));
+ if(!group)throw Error('Aufgabe nicht mehr vorhanden.');
+ return markStepNow(roomId,group,taskId,done);
 }
-/** P03 – Ein ganzes Reinigungsobjekt mit nur einem Häkchen erledigen. */
 export async function setGroupDone(roomId,groupId,done){
- await mutateSession(roomId,(_,session)=>{
-  if(!session)throw Error('Bitte zuerst Reinigung starten.');
-  const group=session.groups.find(g=>g.id===groupId);
-  if(!group)throw Error('Reinigungsbereich nicht mehr vorhanden.');
-  const next=new Set(session.doneTaskIds||[]);
-  for(const step of group.steps){if(done)next.add(step.id);else next.delete(step.id);}
-  session.doneTaskIds=[...next];
- });
+ const state=await loadCleaningState(),s=state.active[roomId];
+ if(!s)throw Error('Bitte zuerst Reinigung starten.');
+ const group=s.groups.find(g=>g.id===groupId);
+ if(!group)throw Error('Reinigungsbereich nicht mehr vorhanden.');
+ return markGroupNow(roomId,group,done);
 }
 export function materialSources(items,rooms,areas){
  const choices=locationChoices(rooms,areas),locName=id=>choices.find(c=>c.id===id)?.label||'Unbekannter Ort',useLabel=item=>item.useArea?' · für '+item.useArea:'';
