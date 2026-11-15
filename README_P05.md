@@ -21,7 +21,7 @@
 - Neue Einstellungen unter `putzmanager/cleaning.schedule.v1`. Einzelabschlüsse unter `putzmanager/cleaning.sessions.v1` im bestehenden Store.
 - Der Farbmodus wird als lokale Geräte-Einstellung in `localStorage` unter `pm.ui.theme.v1` gespeichert.
 - PWA-Cache: `mein-alltag-v0-28-1-p05-lux07` und neue Moduldatei im Offline-Paket enthalten.
-- Wichtig: Die Fortschrittsanzeige bezieht sich auf aktuell nicht fällige Bereiche; „Heute erledigt“ zählt heute abgeschlossene vollständige Bereiche. Bereits teilweise erledigte Schritte zählen nicht als ganze Bereiche.
+- Wichtig: Die Fortschrittsanzeige zeigt den Anteil aktuell nicht fälliger Bereiche; „Heute erledigt“ zählt heute abgeschlossene vollständige Bereiche. Bereits teilweise erledigte Schritte zählen nicht als ganze Bereiche.
 
 ## Prüfumfang / Einschränkungen
 - JS-Syntax und P05-Datenlogik geprüft; P03/P04-Datenregressionen bestanden.
