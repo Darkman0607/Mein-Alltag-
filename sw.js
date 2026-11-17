@@ -1,12 +1,12 @@
-/* Mein Alltag v0.28.5 · Update-Hotfix HF01
+/* Mein Alltag v0.28.6 · Layout-Umschaltung LAYOUT01
    Aktivierung erfordert nur eine kleine Startdatei (früher ~90 gleichzeitige Requests).
    Offline-Dateien werden nach Aktivierung in kleinen Batches geladen.
    Alte statische Caches bleiben als Offline-Rückfall erhalten. Nutzerdaten/IndexedDB sind unberührt.
 */
-const CACHE='mein-alltag-v0-28-5-update-hf01';
-const SW_VERSION='0.28.5';
+const CACHE='mein-alltag-v0-28-6-layout01';
+const SW_VERSION='0.28.6';
 const ASSETS=[
- './','./index.html','./version.json','./manifest.webmanifest','./assets/styles.css','./assets/frauendesign.css','./assets/putzmanager.css','./assets/reset-data.css','./assets/reward-album.css','./assets/reward-economy.css','./assets/reward-shop.css','./assets/reward-cards.css','./assets/reward-premium.css','./assets/reward-pack-effects.css','./assets/reward-missions.css','./assets/reward-calendar.css',
+ './','./index.html','./version.json','./manifest.webmanifest','./assets/styles.css','./assets/display-layout.css','./assets/display-layout.js','./assets/frauendesign.css','./assets/putzmanager.css','./assets/reset-data.css','./assets/reward-album.css','./assets/reward-economy.css','./assets/reward-shop.css','./assets/reward-cards.css','./assets/reward-premium.css','./assets/reward-pack-effects.css','./assets/reward-missions.css','./assets/reward-calendar.css',
  './assets/bw00/mountains.svg','./assets/bw00/lagerhaus.webp','./assets/bw00/frauengesundheit.webp','./assets/bw00/familienplaner.webp','./assets/bw00/putzmanager.webp','./assets/bw00/hausservice.webp','./assets/bw00/belohnungswelt.webp','./assets/bw00/hero_dragon.webp','./assets/home-art/header.webp','./assets/home-art/lagerhaus.webp','./assets/home-art/frauengesundheit.webp','./assets/home-art/familienplaner.webp','./assets/home-art/putzmanager.webp','./assets/home-art/hausservice.webp','./assets/home-art/belohnungswelt.webp','./assets/app.js','./assets/reset-data.js','./assets/database.js','./assets/reward-data.js','./assets/reward-album.js','./assets/reward-album-ui.js','./assets/reward-economy.js','./assets/reward-economy-ui.js','./assets/reward-shop.js','./assets/reward-shop-ui.js','./assets/reward-opening.js','./assets/reward-series.js','./assets/reward-series-data.js','./assets/reward-cards.js','./assets/reward-cards-ui.js','./assets/reward-premium.js','./assets/reward-pack-stage.js','./assets/reward-missions.js','./assets/reward-missions-ui.js','./assets/reward-calendar.js','./assets/reward-calendar-ui.js','./assets/cross-module.js','./assets/backup.js','./assets/data-integrity.js','./assets/google-drive.js',
  './assets/icons/app-192.png','./assets/icons/app-512.png',
  './assets/health-icons/zyklus.png','./assets/health-icons/periode.png','./assets/health-icons/ausfluss.png','./assets/health-icons/sex.png','./assets/health-icons/schwangerschaft.png','./assets/health-icons/lernzentrum.png','./assets/health-icons/tagebuch.png','./assets/health-icons/untersuchungen.png','./assets/health-icons/blume.png',
