@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="./assets/reward-cards.css" />
   <link rel="stylesheet" href="./assets/reward-premium.css" />
   <link rel="stylesheet" href="./assets/reward-pack-effects.css" />
+  <link rel="stylesheet" href="./assets/display-layout.css" />
   <title>Mein Alltag</title>
 </head>
 <body>
@@ -40,6 +41,15 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.1 14 4l1.9-.4 1.9 2.1-.5 1.9.9 2 1.8 1v2.8l-1.8 1-.9 2 .5 1.9-1.9 2.1-1.9-.4-2 .9-2-.9-1.9.4-1.9-2.1.5-1.9-.9-2-1.8-1v-2.8l1.8-1 .9-2-.5-1.9 1.9-2.1L10 4Z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
     </header>
+
+    <div class="layout-mode-bar" id="layoutSwitch" role="group" aria-label="Bildschirmansicht auswählen">
+      <span class="layout-label">Ansicht</span>
+      <div class="layout-options">
+        <button type="button" data-layout-mode="auto" aria-pressed="true" title="Automatisch an Bildschirm anpassen">Automatisch</button>
+        <button type="button" data-layout-mode="mobile" aria-pressed="false" title="Handyansicht verwenden">📱 Handy</button>
+        <button type="button" data-layout-mode="desktop" aria-pressed="false" title="PC-Ansicht verwenden">💻 PC</button>
+      </div>
+    </div>
 
     <main id="view" tabindex="-1" aria-live="polite"></main>
 
