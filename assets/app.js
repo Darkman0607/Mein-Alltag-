@@ -22,8 +22,9 @@ import {renderPremiumSettings,mountPremiumSettings} from './reward-premium.js';
 import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveConnected,getGoogleClientId,saveGoogleClientId,validateGoogleClientId,listDriveBackups,uploadDriveBackup,downloadDriveBackup} from './google-drive.js';
 import {renderResetPanel,mountResetPanel} from './reset-data.js';
 import {auditInventory,inspectBackupSnapshot} from './data-integrity.js';
+import {initDisplayLayout} from './display-layout.js';
 
-export const APP_VERSION='0.28.5';
+export const APP_VERSION='0.28.6';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -485,6 +486,7 @@ window.addEventListener('hashchange',()=>{
 });
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('#lagerShelfPanel[open]')&&!backButton.hidden){if(history.length>1)history.back();else navigate('home');}});
 if(!location.hash)history.replaceState(null,'','#/home');
+initDisplayLayout();
 render();
 openDatabase().catch(err=>console.warn('IndexedDB nicht verfügbar:',err));
 
