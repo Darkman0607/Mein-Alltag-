@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.28.5",
-  "build": "P05-HF02 / FG09-HF01 – Zuverlässiger PWA-Updateprozess; Versionsanzeige korrigiert",
+  "version": "0.28.6",
+  "build": "LAYOUT01 – automatisch oder manuell zwischen PC und Handy umschaltbar",
   "release_date": "2026-11-17"
 }
