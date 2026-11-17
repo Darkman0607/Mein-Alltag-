@@ -23,7 +23,7 @@ import {prepareGoogleIdentity,connectGoogleDrive,disconnectGoogleDrive,isDriveCo
 import {renderResetPanel,mountResetPanel} from './reset-data.js';
 import {auditInventory,inspectBackupSnapshot} from './data-integrity.js';
 
-export const APP_VERSION='0.28.2';
+export const APP_VERSION='0.28.5';
 export const MODULES=Object.freeze([lagerhaus,frauengesundheit,familienplaner,putzmanager,hausservice]);
 const byId=Object.fromEntries(MODULES.map(m=>[m.id,m]));
 const view=document.getElementById('view');
@@ -208,7 +208,7 @@ ${renderResetPanel()}
 <label class="field-label" for="backupFile">Lokale Sicherungsdatei (.meinalltag)</label><input class="backup-file" id="backupFile" type="file" accept=".meinalltag,application/octet-stream,application/json"/><button class="primary-button backup-main drive-secondary" id="backupVerify" type="button">Sicherungsdatei prüfen – ohne Datenänderung</button>
 <button class="primary-button backup-main backup-import" id="backupImport" type="button">Backup-Datei mit Passwort importieren</button>
 <p class="backup-result" role="status" aria-live="polite" id="backupResult"></p></div>
-<div class="glass-card"><h2>App installieren</h2><p id="installStatus">Installation prüfen …</p><button type="button" class="primary-button" id="installAction">App installieren – Anleitung</button><p id="installHelp" aria-live="polite" class="install-help"></p><p>Alternativ: Chrome-Menü ⋮ → Zum Startbildschirm hinzufügen. Der Android-Browser entscheidet, ob eine App oder eine Verknüpfung erstellt wird.</p></div><button type="button" class="row-link" id="checkUpdate"><span>Auf Updates prüfen</span><span>↻</span></button><p id="moreMessage" class="module-privacy" role="status"></p>`;}
+<div class="glass-card"><h2>App installieren</h2><p id="installStatus">Installation prüfen …</p><button type="button" class="primary-button" id="installAction">App installieren – Anleitung</button><p id="installHelp" aria-live="polite" class="install-help"></p><p>Alternativ: Chrome-Menü ⋮ → Zum Startbildschirm hinzufügen. Der Android-Browser entscheidet, ob eine App oder eine Verknüpfung erstellt wird.</p></div><button type="button" class="row-link" id="checkUpdate"><span>Auf Updates prüfen</span><span>↻</span></button><button type="button" class="primary-button" id="applyUpdateNow" hidden>Aktualisierung jetzt aktivieren</button><p id="moreMessage" class="module-privacy" role="status" aria-live="polite"></p><p class="module-privacy">Updates verändern keine gespeicherten Einträge. Vor einem App-Update empfehlen wir trotzdem ein verschlüsseltes Backup. Keine App-Daten löschen.</p>`;}
 async function loadStorage(){const node=document.getElementById('storageStatus');if(!node)return;try{const names=await getStoreNames();const sizes=await Promise.all(MODULE_STORES.map(getModuleCount));if(!node.isConnected)return;node.innerHTML=`<div class="storage-line"><span>Datenbank</span><strong>${esc(DB_NAME)} · v${DB_VERSION}</strong></div>${[...MODULES,{name:'Belohnungswelt'}].map((m,i)=>`<div class="storage-line"><span>${esc(m.name)}</span><strong>${sizes[i]} Eintrag${sizes[i]===1?'':'e'}</strong></div>`).join('')}<p style="margin-top:13px">Getrennte Speicherbereiche: ${names.length} (6 Bereiche + 7 Belohnungs-Speicher + Metadaten)</p>`;}catch(e){if(node.isConnected)node.textContent=`Speicher nicht verfügbar: ${e.message}`;}}
 async function loadNote(id){const field=document.getElementById('moduleNote');if(!field)return;try{const data=await getModuleValue(id,'startNote');if(field.isConnected)field.value=typeof data==='string'?data:'';}catch(e){const msg=document.getElementById('saveMessage');if(msg)msg.textContent=`Speicherfehler: ${e.message}`;}}
 async function saveNote(id){const field=document.getElementById('moduleNote');const msg=document.getElementById('saveMessage');if(!field||!msg)return;const value=field.value;try{await setModuleValue(id,'startNote',value);if(msg.isConnected)msg.textContent='Gespeichert ✓';}catch(e){if(msg.isConnected)msg.textContent=`Fehler: ${e.message}`;}}
@@ -238,24 +238,60 @@ function bindView(route){
    field.addEventListener('input',update);update();
  }
  if(route.page==='more'){
-   loadStorage();bindBackup();mountResetPanel();mountWarehouseAudit();document.getElementById('checkUpdate').addEventListener('click',async()=>{
-     const message=document.getElementById('moreMessage');
-     if(!('serviceWorker' in navigator)){message.textContent='Updateprüfung wird hier nicht unterstützt.';return;}
+   loadStorage();bindBackup();mountResetPanel();mountWarehouseAudit();
+   const button=document.getElementById('checkUpdate');
+   const apply=document.getElementById('applyUpdateNow');
+   const message=document.getElementById('moreMessage');
+   let onlineVersion='';
+   const latest=async()=>{
+     const url=new URL('../version.json',import.meta.url);
+     url.searchParams.set('_',String(Date.now()));
+     const response=await fetch(url,{cache:'no-store'});
+     if(!response.ok)throw new Error(`Versionsabfrage HTTP ${response.status}`);
+     const release=await response.json();
+     if(!/^\d+\.\d+\.\d+$/.test(release.version||''))throw new Error('Ungültige Versionsnummer');
+     return release.version;
+   };
+   const check=async()=>{
+     if(!('serviceWorker' in navigator)){message.textContent='Dieser Browser unterstützt keine App-Updates.';return;}
+     button.disabled=true;message.textContent='Prüfe Online-Version und installierten Programmstand …';
      try{
-       message.textContent='Prüfe die veröffentlichte Version …';
-       // Bypass the offline cache; this tells us what is actually published online.
-       const url=new URL('../version.json',import.meta.url);
-       url.searchParams.set('_',String(Date.now()));
-       const response=await fetch(url,{cache:'no-store'});
-       if(!response.ok)throw new Error(`Serverstatus ${response.status}`);
-       const release=await response.json();
-       if(typeof release.version!=='string')throw new Error('Ungültige Versionsdatei');
+       onlineVersion=await latest();
        const registration=await navigator.serviceWorker.getRegistration();
        if(registration)await registration.update();
-       message.textContent=release.version===APP_VERSION
-         ?`Du verwendest Beta V${APP_VERSION}. Der Server bietet dieselbe Version an.`
-         :`Auf GitHub liegt Beta V${release.version}, installiert ist V${APP_VERSION}. Die Aktualisierung wird vorbereitet. Falls kein Banner erscheint, App vollständig schließen und wieder öffnen.`;
-     }catch(e){message.textContent=`Online-Version derzeit nicht prüfbar: ${e.message}. Lokale App V${APP_VERSION} funktioniert offline weiter.`;}
+       const workerInfo=await readServiceWorkerStatus(registration?.active);
+       if(onlineVersion===APP_VERSION){
+         apply.hidden=true;
+         message.textContent=`Aktuell: Beta V${APP_VERSION}. Online ebenfalls V${onlineVersion}. Offline-Dateien: ${workerInfo?.ready?'bereit':'werden im Hintergrund vorbereitet'}.`;
+       }else{
+         apply.hidden=false;
+         message.textContent=`Geladene Oberfläche: V${APP_VERSION}; veröffentlicht: V${onlineVersion}. ${registration?.waiting?'Das Update steht zur Aktivierung bereit.':'Tippe auf „Aktualisierung jetzt aktivieren“. Das Gerät lädt die neue Version; deine Daten bleiben gespeichert.'}`;
+       }
+     }catch(e){message.textContent=`Versionsprüfung fehlgeschlagen: ${e.message}. Die bisherigen Daten bleiben unverändert.`;}
+     finally{button.disabled=false;}
+   };
+   button.addEventListener('click',check);
+   apply.addEventListener('click',async()=>{
+     if(!('serviceWorker' in navigator))return;
+     apply.disabled=true;
+     message.textContent='Aktualisierung anfordern …';
+     try{
+       const registration=await navigator.serviceWorker.getRegistration();
+       if(!registration)throw new Error('Kein registrierter Service Worker');
+       await registration.update();
+       if(registration.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'});
+       // If a new worker has already taken control, a page reload loads the newest files.
+       const info=await readServiceWorkerStatus(registration.active);
+       if(info?.version===onlineVersion&&navigator.serviceWorker.controller){
+         message.textContent='Neuer Programmstand aktiv. Seite wird aktualisiert …';
+         window.location.reload();
+         return;
+       }
+       message.textContent=registration.installing
+         ?'Das Update wird installiert. Die App lädt nach der Aktivierung automatisch neu. Falls dies nicht geschieht: App vollständig schließen und wieder öffnen.'
+         :'Update angefordert. Falls nichts passiert: Internetverbindung prüfen, App vollständig schließen und erneut öffnen.';
+     }catch(e){message.textContent=`Aktualisierung nicht möglich: ${e.message}. Daten wurden nicht gelöscht.`;}
+     finally{apply.disabled=false;}
    });
  }
 }
@@ -452,6 +488,17 @@ if(!location.hash)history.replaceState(null,'','#/home');
 render();
 openDatabase().catch(err=>console.warn('IndexedDB nicht verfügbar:',err));
 
+// HF01: Ask the activated worker for its real version, rather than assuming a stale UI label.
+function readServiceWorkerStatus(worker){
+ if(!worker||typeof MessageChannel==='undefined')return Promise.resolve(null);
+ return new Promise(resolve=>{
+   const channel=new MessageChannel();
+   const timeout=setTimeout(()=>{channel.port1.close();resolve(null);},2000);
+   channel.port1.onmessage=event=>{clearTimeout(timeout);channel.port1.close();resolve(event.data||null);};
+   try{worker.postMessage({type:'GET_STATUS'},[channel.port2]);}
+   catch(e){clearTimeout(timeout);resolve(null);}
+ });
+}
 // LUX02: Keep an installed Android PWA current without touching IndexedDB or user files.
 if('serviceWorker' in navigator && location.protocol!=='file:'){
  window.addEventListener('load',async()=>{
@@ -462,6 +509,7 @@ if('serviceWorker' in navigator && location.protocol!=='file:'){
    let reloadScheduled=false,lastCheck=0;
    const activateWaiting=()=>registration.waiting?.postMessage({type:'SKIP_WAITING'});
    const showUpdate=()=>{if(registration.waiting && alreadyControlled){banner.hidden=false;}};
+   const warmOffline=()=>registration.active?.postMessage({type:'WARM_OFFLINE'});
    const check=async(force=false)=>{
     if(!navigator.onLine)return;
     const now=Date.now();if(!force&&now-lastCheck<15*60*1000)return;
@@ -477,7 +525,8 @@ if('serviceWorker' in navigator && location.protocol!=='file:'){
    });
    // Check once on startup and after reopening the installed app from the background.
    await check(true);
-   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
+   warmOffline();
+   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){check();warmOffline();}});
    window.addEventListener('online',()=>check(true));
   }catch(error){console.warn('Offline-Funktion derzeit nicht verfügbar:',error);}
  });

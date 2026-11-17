@@ -1,6 +1,6 @@
 {
   "app": "Mein Alltag",
-  "version": "0.28.4",
-  "build": "FG09 – Kinderwunsch: Basaltemperaturkurve, LH, Zervixschleim, Kalenderhinweise (offline)",
+  "version": "0.28.5",
+  "build": "P05-HF02 / FG09-HF01 – Zuverlässiger PWA-Updateprozess; Versionsanzeige korrigiert",
   "release_date": "2026-11-17"
 }

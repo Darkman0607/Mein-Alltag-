@@ -1,5 +1,10 @@
-/* Mein Alltag – offline shell cache; increment version when updating assets. */
-const CACHE='mein-alltag-v0-28-4-fg09-kinderwunsch';
+/* Mein Alltag v0.28.5 · Update-Hotfix HF01
+   Aktivierung erfordert nur eine kleine Startdatei (früher ~90 gleichzeitige Requests).
+   Offline-Dateien werden nach Aktivierung in kleinen Batches geladen.
+   Alte statische Caches bleiben als Offline-Rückfall erhalten. Nutzerdaten/IndexedDB sind unberührt.
+*/
+const CACHE='mein-alltag-v0-28-5-update-hf01';
+const SW_VERSION='0.28.5';
 const ASSETS=[
  './','./index.html','./version.json','./manifest.webmanifest','./assets/styles.css','./assets/frauendesign.css','./assets/putzmanager.css','./assets/reset-data.css','./assets/reward-album.css','./assets/reward-economy.css','./assets/reward-shop.css','./assets/reward-cards.css','./assets/reward-premium.css','./assets/reward-pack-effects.css','./assets/reward-missions.css','./assets/reward-calendar.css',
  './assets/bw00/mountains.svg','./assets/bw00/lagerhaus.webp','./assets/bw00/frauengesundheit.webp','./assets/bw00/familienplaner.webp','./assets/bw00/putzmanager.webp','./assets/bw00/hausservice.webp','./assets/bw00/belohnungswelt.webp','./assets/bw00/hero_dragon.webp','./assets/home-art/header.webp','./assets/home-art/lagerhaus.webp','./assets/home-art/frauengesundheit.webp','./assets/home-art/familienplaner.webp','./assets/home-art/putzmanager.webp','./assets/home-art/hausservice.webp','./assets/home-art/belohnungswelt.webp','./assets/app.js','./assets/reset-data.js','./assets/database.js','./assets/reward-data.js','./assets/reward-album.js','./assets/reward-album-ui.js','./assets/reward-economy.js','./assets/reward-economy-ui.js','./assets/reward-shop.js','./assets/reward-shop-ui.js','./assets/reward-opening.js','./assets/reward-series.js','./assets/reward-series-data.js','./assets/reward-cards.js','./assets/reward-cards-ui.js','./assets/reward-premium.js','./assets/reward-pack-stage.js','./assets/reward-missions.js','./assets/reward-missions-ui.js','./assets/reward-calendar.js','./assets/reward-calendar-ui.js','./assets/cross-module.js','./assets/backup.js','./assets/data-integrity.js','./assets/google-drive.js',
@@ -10,42 +15,78 @@ const ASSETS=[
  ,
 './assets/card-art/anime-frauen/001.webp','./assets/card-art/anime-frauen/002.webp','./assets/card-art/anime-frauen/003.webp','./assets/card-art/anime-frauen/004.webp','./assets/card-art/anime-frauen/005.webp','./assets/card-art/anime-frauen/006.webp','./assets/card-art/anime-frauen/007.webp','./assets/card-art/anime-frauen/008.webp','./assets/card-art/anime-frauen/009.webp','./assets/card-art/anime-frauen/010.webp','./assets/card-art/anime-frauen/011.webp','./assets/card-art/anime-frauen/012.webp','./assets/card-art/anime-frauen/013.webp','./assets/card-art/anime-frauen/014.webp','./assets/card-art/anime-frauen/015.webp','./assets/card-art/anime-frauen/016.webp','./assets/card-art/anime-frauen/017.webp','./assets/card-art/anime-frauen/018.webp','./assets/card-art/anime-frauen/019.webp','./assets/card-art/anime-frauen/020.webp','./assets/card-art/anime-frauen/021.webp','./assets/card-art/anime-frauen/022.webp','./assets/card-art/anime-frauen/023.webp','./assets/card-art/anime-frauen/024.webp','./assets/card-art/anime-frauen/025.webp','./assets/card-art/anime-frauen/001.svg','./assets/card-art/anime-frauen/002.svg','./assets/card-art/anime-frauen/003.svg','./assets/card-art/anime-frauen/004.svg','./assets/card-art/anime-frauen/005.svg','./assets/card-art/anime-frauen/006.svg','./assets/card-art/anime-frauen/007.svg','./assets/card-art/anime-frauen/008.svg','./assets/card-art/anime-frauen/009.svg','./assets/card-art/anime-frauen/010.svg','./assets/card-art/anime-frauen/011.svg','./assets/card-art/anime-frauen/012.svg','./assets/card-art/anime-frauen/013.svg','./assets/card-art/anime-frauen/014.svg','./assets/card-art/anime-frauen/015.svg','./assets/card-art/anime-frauen/016.svg','./assets/card-art/anime-frauen/017.svg','./assets/card-art/anime-frauen/018.svg','./assets/card-art/anime-frauen/019.svg','./assets/card-art/anime-frauen/020.svg','./assets/card-art/anime-frauen/021.svg','./assets/card-art/anime-frauen/022.svg','./assets/card-art/anime-frauen/023.svg','./assets/card-art/anime-frauen/024.svg','./assets/card-art/anime-frauen/025.svg','./assets/card-art/anime-tiere/001.svg','./assets/card-art/anime-tiere/002.svg','./assets/card-art/anime-tiere/003.svg','./assets/card-art/anime-tiere/004.svg','./assets/card-art/anime-tiere/005.svg','./assets/card-art/anime-tiere/006.svg','./assets/card-art/anime-tiere/007.svg','./assets/card-art/anime-tiere/008.svg','./assets/card-art/anime-tiere/009.svg','./assets/card-art/anime-tiere/010.svg','./assets/card-art/anime-tiere/011.svg','./assets/card-art/anime-tiere/012.svg','./assets/card-art/anime-tiere/013.svg','./assets/card-art/anime-tiere/014.svg','./assets/card-art/anime-tiere/015.svg','./assets/card-art/anime-tiere/016.svg','./assets/card-art/anime-tiere/017.svg','./assets/card-art/anime-tiere/018.svg','./assets/card-art/anime-tiere/019.svg','./assets/card-art/anime-tiere/020.svg','./assets/card-art/anime-tiere/021.svg','./assets/card-art/anime-tiere/022.svg','./assets/card-art/anime-tiere/023.svg','./assets/card-art/anime-tiere/024.svg','./assets/card-art/anime-tiere/025.svg','./assets/card-art/maschinen/001.svg','./assets/card-art/maschinen/002.svg','./assets/card-art/maschinen/003.svg','./assets/card-art/maschinen/004.svg','./assets/card-art/maschinen/005.svg','./assets/card-art/maschinen/006.svg','./assets/card-art/maschinen/007.svg','./assets/card-art/maschinen/008.svg','./assets/card-art/maschinen/009.svg','./assets/card-art/maschinen/010.svg','./assets/card-art/maschinen/011.svg','./assets/card-art/maschinen/012.svg','./assets/card-art/maschinen/013.svg','./assets/card-art/maschinen/014.svg','./assets/card-art/maschinen/015.svg','./assets/card-art/maschinen/016.svg','./assets/card-art/maschinen/017.svg','./assets/card-art/maschinen/018.svg','./assets/card-art/maschinen/019.svg','./assets/card-art/maschinen/020.svg','./assets/card-art/maschinen/021.svg','./assets/card-art/maschinen/022.svg','./assets/card-art/maschinen/023.svg','./assets/card-art/maschinen/024.svg','./assets/card-art/maschinen/025.svg','./assets/card-art/monster/001.svg','./assets/card-art/monster/002.svg','./assets/card-art/monster/003.svg','./assets/card-art/monster/004.svg','./assets/card-art/monster/005.svg','./assets/card-art/monster/006.svg','./assets/card-art/monster/007.svg','./assets/card-art/monster/008.svg','./assets/card-art/monster/009.svg','./assets/card-art/monster/010.svg','./assets/card-art/monster/011.svg','./assets/card-art/monster/012.svg','./assets/card-art/monster/013.svg','./assets/card-art/monster/014.svg','./assets/card-art/monster/015.svg','./assets/card-art/monster/016.svg','./assets/card-art/monster/017.svg','./assets/card-art/monster/018.svg','./assets/card-art/monster/019.svg','./assets/card-art/monster/020.svg','./assets/card-art/monster/021.svg','./assets/card-art/monster/022.svg','./assets/card-art/monster/023.svg','./assets/card-art/monster/024.svg','./assets/card-art/monster/025.svg'
 ];
-// LUX02: Previous install used addAll(227 files). One failed media request aborted the WHOLE update.
-// App shell, modules, styles and the six dashboard icons must be cached together;
-// optional gallery artwork is cached on demand, never blocking an update.
 const REQUIRED=ASSETS.filter(path=>/\.(?:html|json|js|css|webmanifest)$/.test(path)||path==='./'||path.startsWith('./assets/home-art/')||path.startsWith('./assets/icons/app-'));
+let warming=null;
+async function warmRequired(){
+ if(warming)return warming;
+ warming=(async()=>{
+  const cache=await caches.open(CACHE);
+  const failures=[];
+  for(let start=0;start<REQUIRED.length;start+=5){
+   const chunk=REQUIRED.slice(start,start+5);
+   await Promise.all(chunk.map(async path=>{
+    if(await cache.match(path))return;
+    try{
+     const response=await fetch(path,{cache:'no-cache'});
+     if(!response.ok||response.type==='opaque')throw new Error(String(response.status));
+     await cache.put(path,response);
+    }catch(error){failures.push(path);}
+   }));
+  }
+  return {ready:failures.length===0,failed:failures.length,total:REQUIRED.length};
+ })();
+ try{return await warming;}finally{warming=null;}
+}
 self.addEventListener('install',event=>event.waitUntil((async()=>{
+ // A single small HTML request is enough to install. All modules are fetched normally
+ // when online and warmed into the new cache without blocking the update.
  const cache=await caches.open(CACHE);
- await cache.addAll(REQUIRED);
+ const response=await fetch('./index.html',{cache:'reload'});
+ if(!response.ok)throw new Error('Startdatei konnte nicht geladen werden');
+ await cache.put('./index.html',response);
  await self.skipWaiting();
 })()));
-self.addEventListener('activate',event=>event.waitUntil((async()=>{
- await Promise.all([
-   caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('mein-alltag-')&&k!==CACHE).map(k=>caches.delete(k)))),
-   self.clients.claim()
- ]);
-})()));
-self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});
+self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
+self.addEventListener('message',event=>{
+ if(event.data?.type==='SKIP_WAITING'){event.waitUntil(self.skipWaiting());return;}
+ if(event.data?.type==='WARM_OFFLINE'){event.waitUntil(warmRequired());return;}
+ if(event.data?.type==='GET_STATUS'){
+  event.waitUntil((async()=>{
+   const cache=await caches.open(CACHE);
+   const matched=await Promise.all(REQUIRED.map(path=>cache.match(path)));
+   event.ports?.[0]?.postMessage({version:SW_VERSION,ready:matched.every(Boolean),cached:matched.filter(Boolean).length,total:REQUIRED.length});
+  })());
+ }
+});
+async function cachedOrNetwork(request,preferNetwork){
+ const cache=await caches.open(CACHE);
+ const network=async()=>{
+  const response=await fetch(request,preferNetwork?{cache:'no-cache'}:undefined);
+  if(response.ok){try{await cache.put(request,response.clone());}catch(e){/* storage limits must not break the app */}}
+  return response;
+ };
+ if(preferNetwork){
+  try{return await network();}catch(error){
+   return (await cache.match(request))||(await caches.match(request))||Response.error();
+  }
+ }
+ return (await cache.match(request))||(await caches.match(request))||(await network());
+}
 self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);
- if(request.method!=='GET'||url.origin!==location.origin)return;
+ if(request.method!=='GET'||url.origin!==self.location.origin)return;
+ // Network-first for application code and version files ensures old cached code cannot
+ // keep displaying a fake version after service-worker activation. Offline uses the cache.
  if(request.mode==='navigate'){
-  event.respondWith(fetch(request).then(async response=>{
+  event.respondWith((async()=>{
+   try{
+    const response=await fetch(request,{cache:'no-cache'});
     if(response.ok){const cache=await caches.open(CACHE);await cache.put('./index.html',response.clone());}
     return response;
-  }).catch(()=>caches.match('./index.html')));
-  return;
+   }catch(e){return (await caches.open(CACHE).then(c=>c.match('./index.html')))||(await caches.match('./index.html'))||Response.error();}
+  })());return;
  }
- // Version checks must never return the stale manifest from the old offline shell.
- if(url.pathname.endsWith('/version.json')){
-  event.respondWith(fetch(request,{cache:'no-store'}).then(async response=>{
-   if(response.ok){const cache=await caches.open(CACHE);await cache.put('./version.json',response.clone());}
-   return response;
-  }).catch(()=>caches.match('./version.json')));
-  return;
- }
- event.respondWith(caches.match(request).then(cached=>cached||fetch(request).then(async response=>{
-   if(response.ok){const cache=await caches.open(CACHE);await cache.put(request,response.clone());}
-   return response;
- })));
+ if(url.pathname.endsWith('/sw.js'))return;
+ const fresh=/\.(?:js|css|json|webmanifest|html)$/.test(url.pathname);
+ event.respondWith(cachedOrNetwork(request,fresh));
 });
