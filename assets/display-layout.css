@@ -1,0 +1,52 @@
+/* LAYOUT01: responsiver Desktop/Handy-Wechsel; Speicherung ausschließlich der Ansicht. */
+.layout-mode-bar{position:relative;z-index:25;flex:none;display:flex;align-items:center;justify-content:flex-end;gap:8px;min-height:47px;padding:6px 17px;border-bottom:1px solid #ffffff22;background:#111a23;color:#dce4e9;font:650 12px/1.2 Inter,system-ui,sans-serif}
+.layout-mode-bar .layout-label{margin-right:auto;white-space:nowrap;opacity:.85}
+.layout-mode-bar .layout-options{display:flex;gap:3px;padding:3px;border-radius:13px;background:#ffffff15}
+.layout-mode-bar button{white-space:nowrap;min-height:34px;padding:7px 11px;border:1px solid transparent;border-radius:10px;background:transparent;color:inherit;font:700 12px/1.2 Inter,system-ui,sans-serif}
+.layout-mode-bar button[aria-pressed='true']{background:#f0cf92;border-color:#fff0c5;color:#181b20;box-shadow:0 2px 6px #0002}
+.layout-mode-bar button:focus-visible{outline:3px solid #ffcc73;outline-offset:2px}
+body.health-mode .layout-mode-bar{background:#f9e6eb;border-color:#e1c1ce;color:#6d3551}
+body.health-mode .layout-mode-bar .layout-options{background:#ead4de}
+body.health-mode .layout-mode-bar button[aria-pressed='true']{background:#8f4266;border-color:#8f4266;color:white}
+body.layout-mobile .app-shell{width:100%;max-width:600px}
+body.layout-desktop .app-shell{width:100%;max-width:1380px;box-shadow:0 0 50px #0002}
+body.layout-desktop main#view{padding:20px 28px 30px}
+body.layout-desktop .module-grid{max-width:1100px;grid-template-columns:repeat(3,minmax(0,1fr))}
+body.layout-desktop .glass-card{padding:22px 26px}
+body.layout-desktop .section-heading h1{font-size:33px}
+body.layout-desktop .bw-home{max-width:1200px;margin:auto}
+body.layout-desktop .bw-home-modules{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:205px;gap:13px;padding:13px 28px}
+body.layout-desktop .bw-module{min-height:185px;border:1px solid #ffffff1c;background:#ffffff09}
+body.layout-desktop .bw-module img{width:100%;height:158px;max-height:158px;object-fit:contain}
+body.layout-desktop .bw-module span{font-size:17px}
+body.layout-desktop .pm-root{max-width:1200px;margin-inline:auto}
+body.layout-desktop .pm-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.layout-desktop .pm-room-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* Frauengesundheit: Karten werden auf dem PC in zwei echten Spalten verteilt. */
+body.layout-desktop.health-mode main#view{padding:0!important}
+body.layout-desktop .health-app{width:100%;max-width:1300px;margin:0 auto;padding:18px 26px 0}
+body.layout-desktop .health-heading{padding:14px 8px 22px}
+body.layout-desktop .health-heading h1{font-size:39px}
+body.layout-desktop .health-content:has(> .health-dashboard-kicker){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;align-items:start}
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>*{min-width:0}
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>.health-dashboard-kicker{grid-column:1/-1;text-align:left;margin:0;font-size:15px}
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>.health-dashboard-cycle{grid-column:1;min-height:170px;align-self:stretch}
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>.health-dashboard-actions{grid-column:2;align-self:stretch;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+body.layout-desktop .health-dashboard-actions button{min-width:0;min-height:110px;border-radius:17px;flex-direction:column;font-size:14px}
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>.health-dashboard-appointment{grid-column:1/-1;margin:0}
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>.health-design-section,
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>.study-home,
+body.layout-desktop .health-content:has(> .health-dashboard-kicker)>.fertility-home{margin:0;align-self:stretch}
+body.layout-desktop .health-design-band{font-size:20px}
+body.layout-desktop .health-design-tile{min-height:100px}
+body.layout-desktop .health-design-tile .health-tile-text strong{font-size:18px}
+body.layout-desktop .study-home-chip{min-height:38px;font-size:12px}
+body.layout-desktop .health-content:not(:has(> .health-dashboard-kicker)){width:100%;max-width:1050px;margin:0 auto}
+body.layout-desktop .health-nav{margin:18px -26px 0;border-radius:20px 20px 0 0}
+body.layout-desktop .study-topic-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+body.layout-desktop .fertility-overview-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+body.layout-desktop .health-app .ls-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* Erzwingt jemand die PC-Sicht auf dem Handy, wird seitlich gescrollt statt Text verkleinert. */
+@media(max-width:919px){body.layout-desktop{overflow-x:auto;overscroll-behavior-x:auto}body.layout-desktop .app-shell{width:1020px;max-width:none;margin:0;overflow:hidden}body.layout-desktop .layout-mode-bar{position:sticky;left:0;max-width:100vw}body.layout-desktop .health-app{padding-left:24px;padding-right:24px}}
+@media(max-width:440px){.layout-mode-bar{min-height:43px;gap:3px;padding:4px 7px;font-size:10px}.layout-mode-bar button{font-size:11px;min-height:32px;padding:6px 8px}.layout-mode-bar .layout-options{gap:0}}
+@media(prefers-reduced-motion:reduce){.layout-mode-bar button{transition:none}}
